@@ -18,7 +18,7 @@ an appropriate software pipeline. Once the `makeflow` instructions file has been
 generated, the `makeflow` program itself is used to execute the steps in the
 pipeline.
 
-There are generally XX steps required to "build a pipeline":
+There are generally 5 steps required to "build a pipeline":
 
 1. Write *task scripts* that will be executed by `makeflow` for a given stage in
 the pipeline. These scripts should generally be as atomic as possible, and
@@ -28,12 +28,12 @@ call several supporting scripts or commands).
 completed. This configuration file defines the logical flow of the pipeline, as
 well as prerequisites for each task. It also allows for defining compute and
 memory requirements, for systems that support resource management.
-3. Use the provided *build_makeflow_from_config.py* script to build a `makeflow`
+3. Use the provided `build_makeflow_from_config.py` script to build a `makeflow`
 instruction file that specifies the pipeline tasks applied to the data files.
-4. Use the provided *launch_makeflow_cluster.py* or *launch_makeflow_local.py*
+4. Use the provided `launch_makeflow_cluster.py` or `launch_makeflow_local.py`
 to execute the pipeline in either a cluster/batch schedule environment, or on a
 local machine, respectively.
-5. (Optional) Use the provided *clean_up_makeflow.py* to clean up the work
+5. (Optional) Use the provided `clean_up_makeflow.py` to clean up the work
 directory for makeflow. This will remove the wrapper scripts and output files,
 and generate a single log file for all jobs in the makeflow.
 
@@ -42,7 +42,7 @@ and generate a single log file for all jobs in the makeflow.
 As mentioned above, `hera_op` uses `makeflow` as the backing pipeline management
 software. As such, `makeflow` must be installed. To install `makeflow` in your
 home directory:
-```
+```bash
 git clone https://github.com/cooperative-computing-lab/cctools.git
 cd cctools
 ./configure --prefix=${HOME}/cctools
@@ -61,6 +61,6 @@ python setup.py install
 # Task Scripts and Config Files
 
 For documentation on building task scripts, see [the task scipts docs
-page](add_link_here). For documentation on config files, see [the config file
-docs page](add_link_here).
+page](docs/task_scripts.md). For documentation on config files, see [the config
+file docs page](docs/config_files.md).
 
