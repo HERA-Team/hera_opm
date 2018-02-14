@@ -100,6 +100,21 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
     '''
     Construct a makeflow file from a config file.
 
+    Args:
+    ====================
+    obsids (str) -- path to obsids/filenames for processing
+    config_file (str) -- path to configuration file
+    mf_name (str) -- name of makeflow file. Note that this is just the prefix, as the full
+        makeflow filename also includes the name of the config file,a nd the proper suffix
+
+    Returns:
+    ====================
+    None
+
+
+    Notes:
+    ====================
+
     Config file structure:
 
     [STAGENAME]
@@ -124,7 +139,9 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
         # make a dummy list of length 1, to ensure we perform actions later
         pol_list = ['']
     path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')[0]
-    parent_dirs = get_config_entry(config, 'Options', 'parent_dirs')[0]
+    conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
+    if conda_env == []:
+        conda_env = None
 
     # open file for writing
     cf = os.path.basename(config_file)
@@ -137,6 +154,11 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
     # write makeflow file
     with open(fn, "w") as f:
         for obsid in obsids:
+            # get parent directory
+            abspath = os.path.abspath(obsid)
+            parent_dir = os.path.dirname(obsid)
+
+            # loop over actions for this obsid
             for ia, action in enumerate(workflow):
                 # start list of input files
                 infiles = []
@@ -179,7 +201,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
                 # make rules
                 for pol, outfile in zip(pol_list, outfiles):
                     # replace '{basename}' with actual filename
-                    # replace polarization string
+                    # also replace polarization string
                     prepped_args = prep_args(args, obsid, pol)
 
                     # make logfile name
@@ -192,9 +214,10 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
                     wrapper_script = "wrapper_{}".format(wrapper_script)
                     with open(wrapper_script, "w") as f2:
                         print("#!/bin/bash", file=f2)
-                        print("source activate hera", file=f2)
+                        if conda_env is not None:
+                            print("source activate {}".format(conda_env), file=f2)
                         print("date", file=f2)
-                        print("cd {}".format(parent_dirs), file=f2)
+                        print("cd {}".format(parent_dir), file=f2)
                         print("{0} {1}".format(command, prepped_args), file=f2)
                         print("if [ $? -eq 0 ]; then", file=f2)
                         print("  cd {}".format(cwd), file=f2)
@@ -234,7 +257,7 @@ def clean_wrapper_scripts(work_dir):
     """
     # list files in work directory
     files = os.listdir(work_dir)
-    wrapper_files = [fn for fn in files if fn[:8] == "wrapper_"]
+    wrapper_files = [fn for fn in files if fn[:8] == "wrapper_" or fn[-8:] == ".wrapper"]
 
     # remove files; assumes individual files (and not directories)
     for fn in wrapper_files:
