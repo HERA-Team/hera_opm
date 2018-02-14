@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) 2018 The HERA Collaboration
+
 # This command is makeflow_nrao.sh
 # Use this to run makeflow on the NRAO cluster environment
 # Several options are set for the execution on the cluster
