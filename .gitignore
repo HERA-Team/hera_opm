@@ -1,0 +1,23 @@
+# Distribution and Packaging
+*.pyc
+*.DS_Store
+build/
+dist/
+*.coverage
+*.egg-info/
+hera_op/GIT_INFO
+
+# Sphinx documentation
+docs/_build
+docs/_static
+docs/_templates
+
+# Data files
+hera_op/data/test_output/*
+
+# Test notebooks
+hera_op/notebooks
+hera_op/.ipynb_checkpoints/
+
+# Backup Files
+*~
