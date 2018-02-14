@@ -1,0 +1,5 @@
+Wed Nov 29 15:25:30 MST 2017
+ant_metrics_run.py -p xx,yy,xy,yx --crossCut=5 --deadCut=5 --extension=.ant_metrics.json --vis_format=miriad zen.2458085.12551.xx.HH.uv zen.2458085.12551.yy.HH.uv zen.2458085.12551.xy.HH.uv zen.2458085.12551.yx.HH.uv
+On iteration 0 we flag (50, 'x')
+On iteration 1 we flag (139, 'x')
+Wed Nov 29 15:43:06 MST 2017
