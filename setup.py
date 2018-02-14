@@ -1,9 +1,10 @@
 from setuptools import setup
+from glob import glob
 import os
 from hera_op import version
 import json
 
-data = [version.git_origin, version.git_hash, version.git_desription, version.git_branch]
+data = [version.git_origin, version.git_hash, version.git_description, version.git_branch]
 with open(os.path.join('hera_op', 'GIT_INFO'), 'w') as outfile:
     json.dump(data, outfile)
 
@@ -28,7 +29,7 @@ setup_args = {
     'package_dir': {'hera_op': 'hera_op'},
     'packages': ['hera_op'],
     'include_package_data': True,
-    'scripts': ['scripts/*.py', 'scripts/*.sh'],
+    'scripts': glob('scripts/*.py') + glob('scripts/*.sh'),
     'version': version.version,
     'package_data': {'hera_op': data_files},
     'zip_safe': False,
