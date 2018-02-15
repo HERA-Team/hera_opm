@@ -96,7 +96,7 @@ def prep_args(args, obsid, pol):
     return re.sub(r'\{basename\}', basename, args)
 
 
-def build_makeflow_from_config(obsids, config_file, mf_name=None):
+def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None):
     '''
     Construct a makeflow file from a config file.
 
@@ -105,7 +105,10 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
     obsids (str) -- path to obsids/filenames for processing
     config_file (str) -- path to configuration file
     mf_name (str) -- name of makeflow file. Note that this is just the prefix, as the full
-        makeflow filename also includes the name of the config file,a nd the proper suffix
+        makeflow filename also includes the name of the config file, and the proper suffix.
+        Defaults to current UNIX time, to avoid naming conflicts.
+    work_dir (str) -- path to the "work directory" where all of the wrapper scripts and log
+        files will be made. Defaults to the current directory.
 
     Returns:
     ====================
@@ -151,8 +154,15 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
         t = str(int(time.time()))
         fn = "{0}.{1}.mf".format(t, cf)
 
+    # get the work directory
+    if work_dir is None:
+        work_dir = os.getcwd()
+    else:
+        work_dir = os.path.abspath(work_dir)
+    makeflowfile = os.path.join(work_dir, fn)
+
     # write makeflow file
-    with open(fn, "w") as f:
+    with open(makeflowfile, "w") as f:
         for obsid in obsids:
             # get parent directory
             abspath = os.path.abspath(obsid)
@@ -195,9 +205,6 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
                 # make outfile name
                 outfiles = make_outfile_name(obsid, action, pol_list)
 
-                # get directory where makeflow file is (since makeflow looks here for output files)
-                cwd = os.getcwd()
-
                 # make rules
                 for pol, outfile in zip(pol_list, outfiles):
                     # replace '{basename}' with actual filename
@@ -207,11 +214,13 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
                     # make logfile name
                     # logfile will capture stdout and stderr
                     logfile = re.sub('\.out', '.log', outfile)
+                    logfile = os.path.join(work_dir, logfile)
 
                     # make a small wrapper script that will run the actual command
                     # can't embed if; then statements in makeflow script
                     wrapper_script = re.sub('\.out', '.sh', outfile)
                     wrapper_script = "wrapper_{}".format(wrapper_script)
+                    wrapper_script = os.path.join(work_dir, wrapper_script)
                     with open(wrapper_script, "w") as f2:
                         print("#!/bin/bash", file=f2)
                         if conda_env is not None:
@@ -220,7 +229,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
                         print("cd {}".format(parent_dir), file=f2)
                         print("{0} {1}".format(command, prepped_args), file=f2)
                         print("if [ $? -eq 0 ]; then", file=f2)
-                        print("  cd {}".format(cwd), file=f2)
+                        print("  cd {}".format(work_dir), file=f2)
                         print("  touch {}".format(outfile), file=f2)
                         print("fi", file=f2)
                         print("date", file=f2)
@@ -230,7 +239,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None):
                     # first line lists target file to make (dummy output file), and requirements
                     # second line is "build rule", which runs the shell script and makes the output file
                     line1 = "{0}: {1}".format(outfile, infiles)
-                    line2 = "\t./{0} > {1} 2>&1\n".format(wrapper_script, logfile)
+                    line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
                     print(line1, file=f)
                     print(line2, file=f)
 
@@ -245,6 +254,8 @@ def clean_wrapper_scripts(work_dir):
 
     This script removes any files in the specified directory that begin with "wrapper_",
     which is how the scripts are named in the 'build_makeflow_from_config' function above.
+    It also removes files that end in ".wrapper", which is how makeflow labels wrapper
+    scripts for batch processing.
 
     Arguments:
     ====================

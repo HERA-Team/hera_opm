@@ -11,10 +11,10 @@ from configparser import ConfigParser, ExtendedInterpolation
 
 class TestMethods(object):
     def setUp(self):
-        self.config_file = os.path.join(DATA_PATH, 'sample_config.cfg')
-        self.obsids_pol = ['zen.2458000.12345.xx.uv', 'zen.2458000.12345.xy.uv',
-                           'zen.2458000.12345.yx.uv', 'zen.2458000.12345.yy.uv']
-        self.obsids_nopol = ['zen.2458000.12345.uv']
+        self.config_file = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp.cfg')
+        self.obsids_pol = ['zen.2457698.40355.xx.HH.uvcA', 'zen.2457698.40355.xy.HH.uvcA',
+                           'zen.2457698.40355.yx.HH.uvcA', 'zen.2457698.40355.yy.HH.uvcA']
+        self.obsids_nopol = ['zen.2457698.40355.HH.uvcA']
         self.pols = ['xx', 'xy', 'yx', 'yy']
         return
 
@@ -42,13 +42,13 @@ class TestMethods(object):
         obsid = self.obsids_pol[0]
         action = 'OMNICAL'
         pols = self.pols
-        outfiles = set(['zen.2458000.12345.xx.uv.OMNICAL.xx.out', 'zen.2458000.12345.xx.uv.OMNICAL.xy.out',
-                        'zen.2458000.12345.xx.uv.OMNICAL.yx.out', 'zen.2458000.12345.xx.uv.OMNICAL.yy.out'])
+        outfiles = set(['zen.2457698.40355.xx.HH.uvcA.OMNICAL.xx.out', 'zen.2457698.40355.xx.HH.uvcA.OMNICAL.xy.out',
+                        'zen.2457698.40355.xx.HH.uvcA.OMNICAL.yx.out', 'zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out'])
         nt.assert_equal(outfiles, set(mt.make_outfile_name(obsid, action, pols)))
 
         # run for no polarizations
         pols = []
-        outfiles = ['zen.2458000.12345.xx.uv.OMNICAL.out']
+        outfiles = ['zen.2457698.40355.xx.HH.uvcA.OMNICAL.out']
         nt.assert_equal(outfiles, mt.make_outfile_name(obsid, action, pols))
         return
 
@@ -57,8 +57,39 @@ class TestMethods(object):
         obsid = self.obsids_pol[0]
         args = '{basename}'
         pol = self.pols[3]
-        output = 'zen.2458000.12345.yy.uv'
+        output = 'zen.2457698.40355.yy.uvcA'
         nt.assert_equal(output, mt.prep_args(args, obsid, pol))
+        return
+
+    def test_build_makeflow_from_config(self):
+        # define args
+        obsids = self.obsids_pol
+        config_file = self.config_file
+        mf_name = "test"
+        work_dir = os.path.join(DATA_PATH, 'test_output')
+
+        mf_output = mf_name + '.' + os.path.basename(config_file) + '.mf'
+        outfile = os.path.join(work_dir, mf_output)
+        if os.path.exists(outfile):
+            os.remove(outfile)
+        mt.build_makeflow_from_config(obsids, config_file, mf_name, work_dir)
+
+        # make sure the output files we expected appeared
+        nt.assert_true(os.path.exists(outfile))
+
+        # also make sure the wrapper scripts were made
+        actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
+                   'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
+        pols = self.pols
+        for obsid in obsids:
+            for action in actions:
+                for pol in pols:
+                    wrapper_fn = 'wrapper_' + obsid + '.' + action + '.' + pol + '.sh'
+                    wrapper_fn = os.path.join(work_dir, wrapper_fn)
+                    nt.assert_true(os.path.exists(wrapper_fn))
+
+        # clean up after ourselves
+        mt.clean_wrapper_scripts(work_dir)
         return
 
     def test_clean_wrapper_scripts(self):

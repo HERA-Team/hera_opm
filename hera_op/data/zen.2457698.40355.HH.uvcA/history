@@ -1,0 +1,11 @@
+CORR-DACQ: created file.
+/home/obs/src/RTP/scripts/hera/correct_hsa19.py zen.2457698.40355.xx.uv
+PULL ANTPOLS:/home/obs/src/RTP/scripts/hera/pull_antpols_simple.py -p xx -a 9,10,20,22,31,43,53,64,65,72,80,81,88,89,96,97,104,105,112 zen.2457698.40355.xx.uvc
+  Read/written with pyuvdata version: 1.1.  Downselected to specific times, frequencies using pyuvdata.
+  Read/written with pyuvdata version: 1.1.  Git origin: https://github.com/HERA-Team/pyuvdata.git.  Git hash: f0ce5e984235ad274ece7b55032b679864f799f0.  Git branch: master.  Git description: v1.1-507-gf0ce5e9.
+  Read/written with pyuvdata version: 1.2.1.  Git origin: https://github.com/HERA-Team/pyuvdata.git.  Git hash: 2325220979539b351990bb5916e7dfd7246843c9.  Git branch: master.  Git description: v1.2-54-g2325220. Combined data along polarization axis using pyuvdata. zen.2457698.40355.yy.uv
+PULL yy zen.2457698.40355.yy.uvc
+ Combined data along polarization axis using pyuvdata. zen.2457698.40355.xy.uv
+PULL xy zen.2457698.40355.xy.uvc
+ Combined data along polarization axis using pyuvdata. zen.2457698.40355.yx.uv
+PULL yx zen.2457698.40355.yx.uvc
