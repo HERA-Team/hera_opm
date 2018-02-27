@@ -9,9 +9,9 @@ from hera_op import utils
 
 a = utils.get_makeflow_ArgumentParser()
 args = a.parse_args()
-obsids = args.obsids
-config = args.config_file
-output = args.mf_file
+obsids = args.files
+config = args.config
+output = args.output
 
 obsid_list = ' '.join(obsids)
 print("Generating {0} makeflow file from config file {1} for obsids {2}".format(output, config, obsid_list))
