@@ -1,8 +1,8 @@
 """Tests for utils.py"""
 import nose.tools as nt
 import os
-from hera_op.data import DATA_PATH
-import hera_op.utils as utils
+from hera_opm.data import DATA_PATH
+import hera_opm.utils as utils
 
 def test_get_makeflow_ArgumentParser():
     # get an argument parser and make sure it behaves as expected

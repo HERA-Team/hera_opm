@@ -4,8 +4,8 @@ import nose.tools as nt
 import os
 import shutil
 import gzip
-from hera_op.data import DATA_PATH
-import hera_op.mf_tools as mt
+from hera_opm.data import DATA_PATH
+import hera_opm.mf_tools as mt
 import ConfigParser as configparser
 from configparser import ConfigParser, ExtendedInterpolation
 
