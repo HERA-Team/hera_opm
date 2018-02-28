@@ -33,9 +33,9 @@ well as prerequisites for each task. It also allows for defining compute and
 memory requirements, for systems that support resource management.
 3. Use the provided `build_makeflow_from_config.py` script to build a `makeflow`
 instruction file that specifies the pipeline tasks applied to the data files.
-4. Use the provided `launch_makeflow_cluster.py` or `launch_makeflow_local.py`
-to execute the pipeline in either a cluster/batch schedule environment, or on a
-local machine, respectively.
+4. Use the provided `makeflow_nrao.sh` or `makeflow_local.sh` to execute the
+pipeline in either the NRAO batch scheduler environment, or on a local machine,
+respectively.
 5. (Optional) Use the provided `clean_up_makeflow.py` to clean up the work
 directory for makeflow. This will remove the wrapper scripts and output files,
 and generate a single log file for all jobs in the makeflow.
