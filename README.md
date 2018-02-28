@@ -1,5 +1,8 @@
 # hera_opm
 
+[![Build Status](https://travis-ci.org/HERA-Team/hera_opm.svg?branch=master)](https://travis-ci.org/HERA-Team/hera_opm)
+[![Coverage Status](https://coveralls.io/repos/github/HERA-Team/hera_opm/badge.svg?branch=master)](https://coveralls.io/github/HERA-Team/hera_opm?branch=master)
+
 `hera_opm` provides a convenient and flexible framework for developing data
 analysis pipelines for operating on HERA data. It facilitates "offline
 processing", and is portable enough to operate on computer clusters with
