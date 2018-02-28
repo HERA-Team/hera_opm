@@ -23,7 +23,7 @@ install:
   - conda info -a
 
   # create environment and install dependencies
-  - conda install nose pip
+  - conda install nose pip configparser
   - conda install -c conda-forge pycodestyle coveralls
   - conda list
 script:

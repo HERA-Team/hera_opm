@@ -5,6 +5,7 @@ from __future__ import print_function, division, absolute_import
 import argparse
 import os
 
+
 # argument-generating functions for scripts
 def get_makeflow_ArgumentParser():
     """
@@ -30,6 +31,7 @@ def get_makeflow_ArgumentParser():
                    help="Files to apply the pipeline to. Typically raw miriad files.")
 
     return a
+
 
 def get_cleaner_ArgumentParser(clean_func):
     """
@@ -73,6 +75,5 @@ def get_cleaner_ArgumentParser(clean_func):
                        help="Save original log files once combined in output.")
         a.add_argument('-z', '--zip', action='store_true', default=False,
                        help="Option to zip resulting output file.")
-
 
     return a

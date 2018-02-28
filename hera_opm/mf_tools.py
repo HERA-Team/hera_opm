@@ -26,7 +26,7 @@ def get_config_entry(config, header, item, required=True):
 
     Returns:
     ====================
-    entries -- a list of entries contained in the config file. If item is not present, and 
+    entries -- a list of entries contained in the config file. If item is not present, and
         required is False, an empty list is returned.
     '''
     if config.has_option(header, item):
@@ -56,7 +56,7 @@ def make_outfile_name(obsid, action, pol_list=[]):
     ====================
     outfiles -- a list of files that represent output produced for `action`
         corresponding to `obsid`. For multiple polarizations, contains one string
-        per polarization. For one or no polarizations, just a list with a single 
+        per polarization. For one or no polarizations, just a list with a single
         entry is returned.
     '''
     outfiles = []
@@ -133,7 +133,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     '''
     # read in config file
     config = ConfigParser(interpolation=ExtendedInterpolation())
-    config.read(config_file) 
+    config.read(config_file)
     workflow = get_config_entry(config, 'WorkFlow', 'actions')
 
     # get general options
@@ -250,6 +250,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
 
     return
 
+
 def clean_wrapper_scripts(work_dir):
     """
     Clean up wrapper scripts from work directory.
@@ -279,6 +280,7 @@ def clean_wrapper_scripts(work_dir):
 
     return
 
+
 def clean_output_files(work_dir):
     """
     Clean up output files from work directory.
@@ -306,6 +308,7 @@ def clean_output_files(work_dir):
         os.remove(abspath)
 
     return
+
 
 def consolidate_logs(work_dir, output_fn, overwrite=False, remove_original=True,
                      zip_file=False):
@@ -373,4 +376,3 @@ def consolidate_logs(work_dir, output_fn, overwrite=False, remove_original=True,
         os.remove(output_fn)
 
     return
-
