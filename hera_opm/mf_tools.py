@@ -169,6 +169,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
             # get parent directory
             abspath = os.path.abspath(obsid)
             parent_dir = os.path.dirname(abspath)
+            filename = os.path.basename(abspath)
 
             # loop over actions for this obsid
             for ia, action in enumerate(workflow):
@@ -184,7 +185,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                         except ValueError:
                             raise ValueError("Prereq \"{0}\" for action \"{1}\" not found in main "
                                              "workflow".format(prereq, action))
-                        outfiles = make_outfile_name(obsid, prereq, pol_list)
+                        outfiles = make_outfile_name(filename, prereq, pol_list)
                         for of in outfiles:
                             infiles.append(of)
 
@@ -205,13 +206,13 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                 args = ' '.join(args)
 
                 # make outfile name
-                outfiles = make_outfile_name(obsid, action, pol_list)
+                outfiles = make_outfile_name(filename, action, pol_list)
 
                 # make rules
                 for pol, outfile in zip(pol_list, outfiles):
                     # replace '{basename}' with actual filename
                     # also replace polarization string
-                    prepped_args = prep_args(args, obsid, pol)
+                    prepped_args = prep_args(args, filename, pol)
 
                     # make logfile name
                     # logfile will capture stdout and stderr
