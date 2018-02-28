@@ -15,7 +15,7 @@ perform housekeeping (such as removing files once uploaded to the librarian, and
 no longer needed locally) using shell builtins. Note that these bash scripts
 typically run in new environments, and any commonly-used custom functions must
 be loaded as part of the script. Anaconda environments must also be loaded,
-though the `hera_op` package provides support for this, and so writing this into
+though the `hera_opm` package provides support for this, and so writing this into
 the task scripts is not necessary.
 
 ## Naming Convention
@@ -40,9 +40,9 @@ processing has been completed.
 
 ## Polarization
 
-A significant design requirement for the `hera_op` module is to provide support
+A significant design requirement for the `hera_opm` module is to provide support
 for the fact that not all 4 polarizations of the raw data are contained in a
-single file. `hera_op` is polarization-aware, in the sense that the user can
+single file. `hera_opm` is polarization-aware, in the sense that the user can
 pass in a list of polarizations to apply the analysis steps to. However, the
 user is still responsible for writing the task scripts in a way that handles the
 polarization.

@@ -4,8 +4,8 @@
 
 from __future__ import print_function, division, absolute_import
 import os
-from hera_op import mf_tools as mt
-from hera_op import utils
+from hera_opm import mf_tools as mt
+from hera_opm import utils
 
 a = utils.get_cleaner_ArgumentParser('logs')
 # change program name to reflect script

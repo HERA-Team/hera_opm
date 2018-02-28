@@ -1,11 +1,11 @@
 from setuptools import setup
 from glob import glob
 import os
-from hera_op import version
+from hera_opm import version
 import json
 
 data = [version.git_origin, version.git_hash, version.git_description, version.git_branch]
-with open(os.path.join('hera_op', 'GIT_INFO'), 'w') as outfile:
+with open(os.path.join('hera_opm', 'GIT_INFO'), 'w') as outfile:
     json.dump(data, outfile)
 
 def package_files(package_dir, subdirectory):
@@ -18,20 +18,20 @@ def package_files(package_dir, subdirectory):
             path = path.replace(package_dir + '/', '')
             paths.append(os.path.join(path, filename))
     return paths
-data_files = package_files('hera_op', 'data')
+data_files = package_files('hera_opm', 'data')
 
 setup_args = {
-    'name': 'hera_op',
+    'name': 'hera_opm',
     'author': 'HERA Team',
-    'url': 'https://github.com/HERA-Team/hera_op',
+    'url': 'https://github.com/HERA-Team/hera_opm',
     'license': 'BSD',
     'description': 'offline-processing and pipeline managment for HERA data analysis',
-    'package_dir': {'hera_op': 'hera_op'},
-    'packages': ['hera_op'],
+    'package_dir': {'hera_opm': 'hera_opm'},
+    'packages': ['hera_opm'],
     'include_package_data': True,
     'scripts': glob('scripts/*.py') + glob('scripts/*.sh'),
     'version': version.version,
-    'package_data': {'hera_op': data_files},
+    'package_data': {'hera_opm': data_files},
     'zip_safe': False,
 }
 

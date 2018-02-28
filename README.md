@@ -1,16 +1,16 @@
-# hera_op
+# hera_opm
 
-`hera_op` provides a convenient and flexible framework for developing data
+`hera_opm` provides a convenient and flexible framework for developing data
 analysis pipelines for operating on HERA data. It facilitates "offline
 processing", and is portable enough to operate on computer clusters with
 batch submission systems or on local machines.
 
 # How It Works
 
-The `hera_op` package uses the `makeflow` system, which is a part of the
+The `hera_opm` package uses the `makeflow` system, which is a part of the
 [Cooperative Computing Tools
 package](https://github.com/cooperative-computing-lab/cctools) developed by the
-[Cooperative Computing Lab](http://ccl.cse.nd.edu). The `hera_op` package
+[Cooperative Computing Lab](http://ccl.cse.nd.edu). The `hera_opm` package
 essentially converts a pipeline defined in a configuration file into a format
 that can be parsed by `makeflow`. This process is also aware of aspects specific
 to HERA data, such as the polarization features of the data, in order to build
@@ -39,7 +39,7 @@ and generate a single log file for all jobs in the makeflow.
 
 # Installation
 
-As mentioned above, `hera_op` uses `makeflow` as the backing pipeline management
+As mentioned above, `hera_opm` uses `makeflow` as the backing pipeline management
 software. As such, `makeflow` must be installed. To install `makeflow` in your
 home directory:
 ```bash
@@ -53,7 +53,7 @@ export PATH=${PATH}:${HOME}/cctools/bin
 For convenience, it is helpful to add the `export` statement to your `.bashrc`
 file, so that the `makeflow` are always on your `PATH`.
 
-To install the `hera_op` package, simply:
+To install the `hera_opm` package, simply:
 ```
 python setup.py install
 ```

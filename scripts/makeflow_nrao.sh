@@ -18,7 +18,7 @@ if [ "$#" -lt 1 ]; then
 fi
 
 if ! [ "$(makeflow_analyze -k $1)" ]; then
-    echo "Error: makeflow file is not parsable by makeflow; please contact hera_op maintainer"
+    echo "Error: makeflow file is not parsable by makeflow; please contact hera_opm maintainer"
     exit 3
 fi
 

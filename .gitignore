@@ -5,7 +5,7 @@ build/
 dist/
 *.coverage
 *.egg-info/
-hera_op/GIT_INFO
+hera_opm/GIT_INFO
 
 # Sphinx documentation
 docs/_build
@@ -13,11 +13,11 @@ docs/_static
 docs/_templates
 
 # Data files
-hera_op/data/test_output/*
+hera_opm/data/test_output/*
 
 # Test notebooks
-hera_op/notebooks
-hera_op/.ipynb_checkpoints/
+hera_opm/notebooks
+hera_opm/.ipynb_checkpoints/
 
 # Backup Files
 *~

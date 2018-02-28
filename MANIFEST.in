@@ -1,6 +1,6 @@
 include *.md
-include hera_op/VERSION
-include hera_op/GIT_INFO
-recursive-include hera_op/data *
+include hera_opm/VERSION
+include hera_opm/GIT_INFO
+recursive-include hera_opm/data *
 recursive-include docs *
 prune docs/_build
