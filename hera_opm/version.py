@@ -21,7 +21,7 @@ def construct_version_info():
                                              stderr=subprocess.STDOUT).strip()
         git_version = subprocess.check_output(['git', '-C', hera_op_dir, 'describe',
                                                '--tags', '--abbrev=0']).strip()
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError: # pragma: no cover
         try:
             # Check if a GIT_INFO file was created when installing package
             git_file = os.path.join(hera_op_dir, 'GIT_INFO')

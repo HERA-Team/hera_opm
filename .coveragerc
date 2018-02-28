@@ -1,5 +1,9 @@
 [run]
-omit = */tests/*
+omit =
+    */tests/*
 
 [report]
-omit = */tests/*
+omit =
+    */tests/*
+exclude_lines =
+    pragma: no cover
