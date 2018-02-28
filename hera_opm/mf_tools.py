@@ -145,6 +145,8 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
     if conda_env == []:
         conda_env = None
+    else:
+        conda_env = conda_env[0]
 
     # open file for writing
     cf = os.path.basename(config_file)
@@ -166,7 +168,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
         for obsid in obsids:
             # get parent directory
             abspath = os.path.abspath(obsid)
-            parent_dir = os.path.dirname(obsid)
+            parent_dir = os.path.dirname(abspath)
 
             # loop over actions for this obsid
             for ia, action in enumerate(workflow):
