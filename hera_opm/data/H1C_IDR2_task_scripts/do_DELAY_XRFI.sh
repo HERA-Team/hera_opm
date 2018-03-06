@@ -10,9 +10,9 @@ pol1="xx"
 pol2="yy"
 
 # make the file name
-bn=$(basename ${!#})
+bn=$(basename ${1})
 # Get pol
-pol=$(get_pol ${!#})
+pol=$(get_pol ${1})
 
 
 # We need to run xrfi on the raw visibilities for all polarizations.
@@ -33,23 +33,22 @@ pol=$(get_pol ${!#})
 
 # Parameters are set in the configuration file, here we define their positions,
 # which must be consistent with the config.
+# 1 - filename
 ### Delay filter parameters - see hera_cal.utils for details
-# 1 - standoff
-# 2 - horizon
-# 3 - tol
-# 4 - window
-# 5 - skip_wgt
-# 6 - maxiter
+# 2 - standoff
+# 3 - horizon
+# 4 - tol
+# 5 - window
+# 6 - skip_wgt
+# 7 - maxiter
 ### XRFI parameters - see hera_qm.utils for details
-# 7 - kt_size
-# 8 - kf_size
-# 9 - sig_init
-# 10 - sig_adj
-# 11 - px_threshold
-# 12 - freq_threshold
-# 13 - time_threshold
-### Last one is the filename
-# 14 - filename
+# 8 - kt_size
+# 9 - kf_size
+# 10 - sig_init
+# 11 - sig_adj
+# 12 - px_threshold
+# 13 - freq_threshold
+# 14 - time_threshold
 
 if [is_same_pol $bn $pol1] || [is_same_pol $bn $pol2]; then
     # This thread runs on raw visibility + cal + model
@@ -59,10 +58,10 @@ if [is_same_pol $bn $pol1] || [is_same_pol $bn $pol2]; then
     vis_f=`echo ${bn}.vis.uvfits`
 
     # run the xrfi command
-    echo delay_xrfi_run.py --standoff=${1} --horizon=${2} --tol=${3} --window=${4} --skip_wgt=${5} --maxiter=${6} --kt_size=${7} --kf_size=${8} --sig_init=${9} --sig_adj=${10} --px_threshold=${11} --freq_threshold=${12} --time_threshold=${13} --calfits_file=${abs_f} --model_file=${vis_f} --model_file_format=uvfits --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
-    delay_xrfi_run.py --standoff=${1} --horizon=${2} --tol=${3} --window=${4} --skip_wgt=${5} --maxiter=${6} --kt_size=${7} --kf_size=${8} --sig_init=${9} --sig_adj=${10} --px_threshold=${11} --freq_threshold=${12} --time_threshold=${13} --calfits_file=${abs_f} --model_file=${vis_f} --model_file_format=uvfits --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
+    echo delay_xrfi_run.py --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --kt_size=${8} --kf_size=${9} --sig_init=${10} --sig_adj=${11} --px_threshold=${12} --freq_threshold=${13} --time_threshold=${14} --calfits_file=${abs_f} --model_file=${vis_f} --model_file_format=uvfits --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
+    delay_xrfi_run.py --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --kt_size=${8} --kf_size=${9} --sig_init=${10} --sig_adj=${11} --px_threshold=${12} --freq_threshold=${13} --time_threshold=${14} --calfits_file=${abs_f} --model_file=${vis_f} --model_file_format=uvfits --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
 else
     # These threads run just on raw visibility
-    echo delay_xrfi_run.py --standoff=${1} --horizon=${2} --tol=${3} --window=${4} --skip_wgt=${5} --maxiter=${6} --kt_size=${7} --kf_size=${8} --sig_init=${9} --sig_adj=${10} --px_threshold=${11} --freq_threshold=${12} --time_threshold=${13} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
-    delay_xrfi_run.py --standoff=${1} --horizon=${2} --tol=${3} --window=${4} --skip_wgt=${5} --maxiter=${6} --kt_size=${7} --kf_size=${8} --sig_init=${9} --sig_adj=${10} --px_threshold=${11} --freq_threshold=${12} --time_threshold=${13} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
+    echo delay_xrfi_run.py --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --kt_size=${8} --kf_size=${9} --sig_init=${10} --sig_adj=${11} --px_threshold=${12} --freq_threshold=${13} --time_threshold=${14} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
+    delay_xrfi_run.py --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --kt_size=${8} --kf_size=${9} --sig_init=${10} --sig_adj=${11} --px_threshold=${12} --freq_threshold=${13} --time_threshold=${14} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
 fi
