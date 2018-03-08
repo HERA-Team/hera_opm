@@ -104,9 +104,8 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     ====================
     obsids (str) -- path to obsids/filenames for processing
     config_file (str) -- path to configuration file
-    mf_name (str) -- name of makeflow file. Note that this is just the prefix, as the full
-        makeflow filename also includes the name of the config file, and the proper suffix.
-        Defaults to current UNIX time, to avoid naming conflicts.
+    mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
+        specified.
     work_dir (str) -- path to the "work directory" where all of the wrapper scripts and log
         files will be made. Defaults to the current directory.
 
@@ -151,10 +150,10 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     # open file for writing
     cf = os.path.basename(config_file)
     if mf_name is not None:
-        fn = "{0}.{1}.mf".format(mf_name, cf)
+        fn = mf_name
     else:
-        t = str(int(time.time()))
-        fn = "{0}.{1}.mf".format(t, cf)
+        base, ext = os.path.splitext(cf)
+        fn = "{0}.mf".format(base)
 
     # get the work directory
     if work_dir is None:
@@ -165,6 +164,11 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
 
     # write makeflow file
     with open(makeflowfile, "w") as f:
+        # add comment at top of file listing date of creation and config file name
+        dt = time.strftime('%H:%M:%S on %d %B %Y')
+        print("# makeflow file generated from config file {}".format(cf), file=f)
+        print("# created at {}".format(dt), file=f)
+
         for obsid in obsids:
             # get parent directory
             abspath = os.path.abspath(obsid)

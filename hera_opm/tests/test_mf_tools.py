@@ -65,14 +65,13 @@ class TestMethods(object):
         # define args
         obsids = self.obsids_pol
         config_file = self.config_file
-        mf_name = "test"
         work_dir = os.path.join(DATA_PATH, 'test_output')
 
-        mf_output = mf_name + '.' + os.path.basename(config_file) + '.mf'
+        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_makeflow_from_config(obsids, config_file, mf_name, work_dir)
+        mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
@@ -89,7 +88,22 @@ class TestMethods(object):
                     nt.assert_true(os.path.exists(wrapper_fn))
 
         # clean up after ourselves
+        os.remove(outfile)
         mt.clean_wrapper_scripts(work_dir)
+
+        # also test providing the name of the output file
+        mf_output = "output.mf"
+        outfile = os.path.join(work_dir, mf_output)
+        if os.path.exists(outfile):
+            os.remove(outfile)
+        mt.build_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
+
+        nt.assert_true(os.path.exists(outfile))
+
+        # clean up after ourselves
+        os.remove(outfile)
+        mt.clean_wrapper_scripts(work_dir)
+
         return
 
     def test_clean_wrapper_scripts(self):
