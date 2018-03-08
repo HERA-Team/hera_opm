@@ -100,17 +100,16 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None):
         prev_obsid = obsids[obs_idx - 1]
     else:
         prev_obsid = None
-    if obs_idx < len(obsids) - 2:
+    if obs_idx < len(obsids) - 1:
         next_obsid = obsids[obs_idx + 1]
     else:
         next_obsid = None
 
     if pol is not None:
         # replace polarization string in obsid with pol
-        match = re.search(r'zen\.\d{7}\.\d{5}\.(.+)\.', obsid)
+        match = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid)
         if match:
             obs_pol = match.group(1)
-            basename = re.sub(obs_pol, pol, obsid)
             if prev_obsid is not None:
                 prev_obsid = re.sub(obs_pol, pol, prev_obsid)
                 of = "{0}.{1}.{2}.out".format(prev_obsid, action, pol)
@@ -118,7 +117,7 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None):
             if next_obsid is not None:
                 next_obsid = re.sub(obs_pol, pol, next_obsid)
                 of = "{0}.{1}.{2}.out".format(next_obsid, action, pol)
-                outfiles.append(next_obsid)
+                outfiles.append(of)
         else:
             raise ValueError("Could not extract polarization string from obsid {}".format(obsid))
     else:
@@ -148,7 +147,7 @@ def prep_args(args, obsid, pol=None):
     '''
     if pol is not None:
         # replace pol if present
-        match = re.search(r'zen\.\d{7}\.\d{5}\.(.+)\.', obsid)
+        match = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid)
         if match:
             obs_pol = match.group(1)
             basename = re.sub(obs_pol, pol, obsid)
