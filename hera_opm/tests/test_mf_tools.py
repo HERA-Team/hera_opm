@@ -16,6 +16,8 @@ class TestMethods(object):
                            'zen.2457698.40355.yx.HH.uvcA', 'zen.2457698.40355.yy.HH.uvcA']
         self.obsids_nopol = ['zen.2457698.40355.HH.uvcA']
         self.pols = ['xx', 'xy', 'yx', 'yy']
+        self.obsids_time = ['zen.2457698.30355.xx.HH.uvcA', 'zen.2457698.40355.xx.HH.uvcA',
+                            'zen.2457698.50355.xx.HH.uvcA']
         return
 
     def test_get_config_entry(self):
@@ -52,12 +54,45 @@ class TestMethods(object):
         nt.assert_equal(outfiles, mt.make_outfile_name(obsid, action, pols))
         return
 
+    def test_make_time_neighbor_outfile_name(self):
+        # define args
+        obsid = self.obsids_time[1]
+        action = 'OMNICAL'
+        pol = self.pols[3]
+        outfiles = set(['zen.2457698.30355.yy.HH.uvcA.OMNICAL.yy.out', 'zen.2457698.50355.yy.HH.uvcA.OMNICAL.yy.out'])
+        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
+
+        # test edge cases
+        obsid = self.obsids_time[0]
+        outfiles = set(['zen.2457698.40355.yy.HH.uvcA.OMNICAL.yy.out'])
+        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
+        obsid = self.obsids_time[2]
+        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))        
+
+        # run for no polarizations
+        obsid = self.obsids_time[1]
+        outfiles = set(['zen.2457698.30355.xx.HH.uvcA.OMNICAL.out', 'zen.2457698.50355.xx.HH.uvcA.OMNICAL.out'])
+        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time)))
+        return
+
+    def test_make_time_neighbor_outfile_name_errors(self):
+        # test not having the obsid in the supplied list
+        obsid = 'zen.1234567.12345.xx.HH.uvcA'
+        action = 'OMNICAL'
+        nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, obsid, action, self.obsids_time)
+
+        # test requesting a pol substitution, but not providing an appropriate obsid
+        fake_obsids = ['zen.1234567.12345.uv', 'zen.1234567.23456.uv', 'zen.1234567.34567.uv']
+        obsid = fake_obsids[1]
+        nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, obsid, action, fake_obsids, pol='xx')
+        return
+
     def test_prep_args(self):
         # define args
         obsid = self.obsids_pol[0]
         args = '{basename}'
         pol = self.pols[3]
-        output = 'zen.2457698.40355.yy.uvcA'
+        output = 'zen.2457698.40355.yy.HH.uvcA'
         nt.assert_equal(output, mt.prep_args(args, obsid, pol))
         return
 
