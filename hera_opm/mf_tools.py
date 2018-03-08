@@ -70,7 +70,68 @@ def make_outfile_name(obsid, action, pol_list=[]):
     return outfiles
 
 
-def prep_args(args, obsid, pol):
+def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None):
+    '''
+    Make a list of neighbors in time for prereqs.
+
+    Args:
+    ====================
+    obsid (str) -- obsid of the current file
+    action (str) -- the action corresponding to the time prereqs
+    obsids -- list of all obsids for the given day; uses this list (sorted) to
+        define neighbors
+    pol (str) -- if present, polarization string to substitute into obsid
+
+    Returns:
+    ====================
+    outfiles -- a list of files for time-adjacent neighbors.
+    '''
+    outfiles = []
+
+    # find the neighbors of current obsid in list of obsids
+    obsids = sorted(obsids)
+    try:
+        obs_idx = obsids.index(obsid)
+    except ValueError:
+        raise ValueError("obsid {} not found in list of obsids".format(obsid))
+
+    # extract adjacent neighbors, if not on the end
+    if obs_idx > 0:
+        prev_obsid = obsids[obs_idx - 1]
+    else:
+        prev_obsid = None
+    if obs_idx < len(obsids) - 2:
+        next_obsid = obsids[obs_idx + 1]
+    else:
+        next_obsid = None
+
+    if pol is not None:
+        # replace polarization string in obsid with pol
+        match = re.search(r'zen\.\d{7}\.\d{5}\.(.+)\.', obsid)
+        if match:
+            obs_pol = match.group(1)
+            basename = re.sub(obs_pol, pol, obsid)
+            if prev_obsid is not None:
+                prev_obsid = re.sub(obs_pol, pol, prev_obsid)
+                of = "{0}.{1}.{2}.out".format(prev_obsid, action, pol)
+                outfiles.append(of)
+            if next_obsid is not None:
+                next_obsid = re.sub(obs_pol, pol, next_obsid)
+                of = "{0}.{1}.{2}.out".format(next_obsid, action, pol)
+                outfiles.append(next_obsid)
+        else:
+            raise ValueError("Could not extract polarization string from obsid {}".format(obsid))
+    else:
+        if prev_obsid is not None:
+            of = "{0}.{1}.out".format(prev_obsid, action)
+            outfiles.append(of)
+        if next_obsid is not None:
+            of = "{0}.{1}.out".format(next_obsid, action)
+            outfiles.append(of)
+    return outfiles
+
+
+def prep_args(args, obsid, pol=None):
     '''
     Substitute the polarization string in a filename/obsid with the specified one.
 
@@ -85,15 +146,19 @@ def prep_args(args, obsid, pol):
     ====================
     output (str) -- `args` string with mini-language and polarization substitutions.
     '''
-    # replace pol if present
-    match = re.search(r'zen\.\d{7}\.\d{5}\.(.+)\.', obsid)
-    if match:
-        obs_pol = match.group(1)
-        basename = re.sub(obs_pol, pol, obsid)
+    if pol is not None:
+        # replace pol if present
+        match = re.search(r'zen\.\d{7}\.\d{5}\.(.+)\.', obsid)
+        if match:
+            obs_pol = match.group(1)
+            basename = re.sub(obs_pol, pol, obsid)
+        else:
+            basename = obsid
+        # replace {basename} with actual basename
+        return re.sub(r'\{basename\}', basename, args)
     else:
         basename = obsid
-    # replace {basename} with actual basename
-    return re.sub(r'\{basename\}', basename, args)
+        return re.sub(r'\{basename\}', basename, args)
 
 
 def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None):
@@ -218,6 +283,24 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                     # also replace polarization string
                     prepped_args = prep_args(args, filename, pol)
 
+                    time_prereqs = get_config_entry(config, action, "time_prereqs", required=False)
+                    if len(time_prereqs) > 0:
+                        # get a copy of the infile list; we're going to add to it, but don't want these
+                        # entries broadcast across pols
+                        infiles_pol = infiles
+                        for tp in time_prereqs:
+                            try:
+                                ip = workflow.index(tp)
+                            except ValueError:
+                                raise ValueError("Time prereq \"{0}\" for action \"{1}\" not found in main "
+                                                 "workflow".format(tp, action))
+                            tp_outfiles = make_time_neighbor_outfile_name(filename, action, pol, obsids)
+                            for of in tp_outfiles:
+                                infiles_pol.append(of)
+                    else:
+                        # just get a copy of the infiles as-is
+                        infiles_pol = infiles
+
                     # make logfile name
                     # logfile will capture stdout and stderr
                     logfile = re.sub('\.out', '.log', outfile)
@@ -245,7 +328,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
 
                     # first line lists target file to make (dummy output file), and requirements
                     # second line is "build rule", which runs the shell script and makes the output file
-                    line1 = "{0}: {1}".format(outfile, infiles)
+                    line1 = "{0}: {1}".format(outfile, infiles_pol)
                     line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
                     print(line1, file=f)
                     print(line2, file=f)
