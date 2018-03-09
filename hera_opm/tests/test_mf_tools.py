@@ -123,6 +123,20 @@ class TestMethods(object):
 
         return
 
+    def test_prep_args_errors(self):
+        # define args
+        obsid = self.obsids_time[0]
+        obsids = self.obsids_pol
+        args = '{basename} {prev_basename}'
+        nt.assert_raises(ValueError, mt.prep_args, args, obsid)
+        nt.assert_raises(ValueError, mt.prep_args, args, obsid, obsids=obsids)
+
+        args = '{basename} {next_basename}'
+        nt.assert_raises(ValueError, mt.prep_args, args, obsid)
+        nt.assert_raises(ValueError, mt.prep_args, args, obsid, obsids=obsids)
+
+        return
+
     def test_build_makeflow_from_config(self):
         # define args
         obsids = self.obsids_pol
