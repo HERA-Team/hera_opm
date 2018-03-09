@@ -222,8 +222,11 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     mem = 5000 (MB)
 
 
-    Mini-language for replacement:
-    basename = "zen.2458000.12345.uv"
+    Mini-language for replacement (example):
+    "{basename}" = "zen.2458000.12345.uv"
+
+    "{prev_basename}" and "{next_basename}" are previous and subsequent files adjacent to
+    "{basename}", useful for specifying prereqs in time
 
     '''
     # read in config file
