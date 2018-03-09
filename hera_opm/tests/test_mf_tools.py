@@ -12,6 +12,7 @@ from configparser import ConfigParser, ExtendedInterpolation
 class TestMethods(object):
     def setUp(self):
         self.config_file = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp.cfg')
+        self.config_file_time_neighbors = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_time_neighbors.cfg')
         self.obsids_pol = ['zen.2457698.40355.xx.HH.uvcA', 'zen.2457698.40355.xy.HH.uvcA',
                            'zen.2457698.40355.yx.HH.uvcA', 'zen.2457698.40355.yy.HH.uvcA']
         self.obsids_nopol = ['zen.2457698.40355.HH.uvcA']
@@ -94,6 +95,15 @@ class TestMethods(object):
         pol = self.pols[3]
         output = 'zen.2457698.40355.yy.HH.uvcA'
         nt.assert_equal(output, mt.prep_args(args, obsid, pol))
+
+        # test requesting polarization, but none found in file
+        obsid = 'zen.2457698.40355.uv'
+        nt.assert_equal(obsid, mt.prep_args(args, obsid, pol))
+
+        # test not requesting polarization
+        obsid = self.obsids_pol[0]
+        output = 'zen.2457698.40355.xx.HH.uvcA'
+        nt.assert_equal(output, mt.prep_args(args, obsid))
         return
 
     def test_build_makeflow_from_config(self):
@@ -134,6 +144,37 @@ class TestMethods(object):
         mt.build_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
 
         nt.assert_true(os.path.exists(outfile))
+
+        # clean up after ourselves
+        os.remove(outfile)
+        mt.clean_wrapper_scripts(work_dir)
+
+        return
+
+    def test_build_makeflow_from_config_time_neighbors(self):
+        # define args
+        obsids = self.obsids_time
+        config_file = self.config_file_time_neighbors
+        work_dir = os.path.join(DATA_PATH, 'test_output')
+
+        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+        outfile = os.path.join(work_dir, mf_output)
+        if os.path.exists(outfile):
+            os.remove(outfile)
+        mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+
+        # make sure the output files we expected appeared
+        nt.assert_true(os.path.exists(outfile))
+        # also make sure the wrapper scripts were made
+        actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
+                   'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
+        pols = self.pols
+        for obsid in obsids:
+            for action in actions:
+                for pol in pols:
+                    wrapper_fn = 'wrapper_' + obsid + '.' + action + '.' + pol + '.sh'
+                    wrapper_fn = os.path.join(work_dir, wrapper_fn)
+                    nt.assert_true(os.path.exists(wrapper_fn))
 
         # clean up after ourselves
         os.remove(outfile)
