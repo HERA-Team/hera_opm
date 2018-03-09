@@ -25,8 +25,8 @@ def get_makeflow_ArgumentParser():
     a.prog = "build_makeflow_from_config.py"
     a.add_argument('-c', '--config', default='', type=str,
                    help="Full path to config file defining workflow. Default is ''")
-    a.add_argument('-o', '--output', default='out.mf', type=str,
-                   help="Full path to the output file. Default is 'out.mf'")
+    a.add_argument('-o', '--output', default=None, type=str,
+                   help="Full path to the output file. Default is None (so output is <config_basename>.mf)")
     a.add_argument('files', metavar='files', type=str, nargs='*', default=[],
                    help="Files to apply the pipeline to. Typically raw miriad files.")
 
