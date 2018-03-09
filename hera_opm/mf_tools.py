@@ -161,7 +161,7 @@ def prep_args(args, obsid, pol=None, obsids=None):
         args = re.sub(r'\{basename\}', basename, args)
 
     # also replace time-adjacent basenames if requested
-    if re.search(r'\{prev_basename\}', obsid):
+    if re.search(r'\{prev_basename\}', args):
         # check that there is an adjacent obsid to substitute
         if obsids is None:
             raise ValueError("when requesting time-adjacent obsids, obsids cannot be None")
@@ -175,7 +175,7 @@ def prep_args(args, obsid, pol=None, obsids=None):
         else:
             args = re.sub(r'\{prev_basename\}', obsids[obs_idx - 1], args)
 
-    if re.search(r'\{next_basename\}', obsid):
+    if re.search(r'\{next_basename\}', args):
         # check that there is an adjacent obsid to substitute
         if obsids is None:
             raise ValueError("when requesting time-adjacent obsids, obsids cannot be None")
