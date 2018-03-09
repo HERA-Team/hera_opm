@@ -104,6 +104,23 @@ class TestMethods(object):
         obsid = self.obsids_pol[0]
         output = 'zen.2457698.40355.xx.HH.uvcA'
         nt.assert_equal(output, mt.prep_args(args, obsid))
+
+        # test having time-adjacent keywords
+        obsid = self.obsids_time[1]
+        obsids = self.obsids_time
+        args = '{basename} {prev_basename} {next_basename}'
+        output = 'zen.2457698.40355.xx.HH.uvcA zen.2457698.30355.xx.HH.uvcA zen.2457698.50355.xx.HH.uvcA'
+        nt.assert_equal(output, mt.prep_args(args, obsid, obsids=obsids))
+
+        # test edge cases
+        obsid = self.obsids_time[0]
+        output = 'zen.2457698.30355.xx.HH.uvcA None zen.2457698.40355.xx.HH.uvcA'
+        nt.assert_equal(output, mt.prep_args(args, obsid, obsids=obsids))
+
+        obsid = self.obsids_time[2]
+        output = 'zen.2457698.50355.xx.HH.uvcA zen.2457698.40355.xx.HH.uvcA None'
+        nt.assert_equal(output, mt.prep_args(args, obsid, obsids=obsids))
+
         return
 
     def test_build_makeflow_from_config(self):
