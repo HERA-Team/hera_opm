@@ -16,8 +16,8 @@ bad_ants_dir="${2}"
 pol1="xx"
 pol2="yy"
 
-# we only run omnical for the base filename
-if is_same_pol $fn $pol1; then
+# we run omnical on linear pols only
+if is_lin_pol $fn; then
     # define polarization file names
     fn1=$(replace_pol $fn $pol1)
     fn2=$(replace_pol $fn $pol2)
@@ -47,8 +47,8 @@ if is_same_pol $fn $pol1; then
     # make comma-separated list of firstcal files
     fcal=$(join_by , "${FCAL_ARR[@]}")
 
-    # make comma-separated list of polarizations
-    pols=$(join_by , $pol1 $pol2)
+    # get current polarization
+    pol=$(get_pol $fn)
 
     # assume second argument is location of ex_ants folder
     # extract JD from filename
@@ -61,6 +61,6 @@ if is_same_pol $fn $pol1; then
     bad_ants_fn=`echo "${bad_ants_dir}/${jd_int}.txt"`
     exants=$(prep_exants ${bad_ants_fn})
 
-    echo omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pols ${fn1} ${fn2}
-    omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pols ${fn1} ${fn2}
+    echo omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pol ${fn}
+    omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pol ${fn}
 fi
