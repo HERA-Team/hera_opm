@@ -59,6 +59,15 @@ function replace_pol ()
     echo "$new_fn"
 }
 
+function get_jd ()
+# function for extracting Julian date (JD) from filename
+# assumes the typical file format, and keys in on pattern "zen.xxxxxxx.xxxxx.*"
+# returns "xxxxxxx.xxxxx" as a string
+{
+    local jd=$(echo $1 | sed -E 's/zen\.([0-9]{7}\.[0-9]{5})\..*$/\1/')
+    echo "$jd"
+}
+
 function prep_exants ()
 # take in an ex_ants file, which has one "bad antenna" per line,
 # and convert to a comma-separated list

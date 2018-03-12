@@ -5,16 +5,19 @@ set -e
 src_dir="$(dirname "$0")"
 source ${src_dir}/_common.sh
 
-# get base filename
-fn=$(basename $1 uv)
+# Parameters are set in the configuration file, here we define their positions,
+# which must be consistent with the config.
+# 1 - filename
+# 2 - glob-parsable string pointing to all model_files
+fn="${1}"
+model_files="${2}"
 
 # we only want to run on linear polarizations (e.g., "xx")
 if is_lin_pol $fn; then
-    pol=$(get_pol $fn)
+    # make calfits file name
+    calfits_fn=`echo ${fn}.abs.calfits`
 
-    # assume optional second argument is location of ex_ants file
-    exants=$(prep_exants ${2})
-
-    echo abscal_run.py --ex_ants=${exants} --pol=${pol} ${fn}uv
-    abscal_run.py --ex_ants=${exants} --pol=${pol} ${fn}uv
+    # call omni-abscal script; see hera_cal.abscal for more details
+    echo omni_abscal_run.py --delay_slope_cal --TT_phs_cal --abs_amp_cal --overwrite --calfits_fname ${calfits_fn} --data_files ${fn} --model_files ${model_files}
+    omni_abscal_run.py --delay_slope_cal --TT_phs_cal --abs_amp_cal --overwrite --calfits_fname ${calfits_fn} --data_files ${fn} --model_files ${model_files}
 fi

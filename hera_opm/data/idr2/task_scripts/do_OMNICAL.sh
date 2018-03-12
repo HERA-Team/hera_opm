@@ -5,7 +5,12 @@ set -e
 src_dir="$(dirname "$0")"
 source ${src_dir}/_common.sh
 
-fn=$(basename $1 uv)
+# Parameters are set in the configuration file, here we define their positions,
+# which must be consistent with the config.
+# 1 - filename
+# 2 - directory of bad_ants files, with filename `{JD}.txt`
+fn="${1}"
+bad_ants_dir="${2}"
 
 # define polarizations
 pol1="xx"
@@ -35,7 +40,7 @@ if is_same_pol $fn $pol1; then
     idx=0
     for pol in "${FCAL_ARR[@]}"; do
         base=$(replace_pol $fn $pol)
-        FCAL_ARR[$idx]=`echo ${base}uv.first.calfits`
+        FCAL_ARR[$idx]=`echo ${base}.first.calfits`
         idx=$((idx+1))
     done
 
@@ -45,13 +50,17 @@ if is_same_pol $fn $pol1; then
     # make comma-separated list of polarizations
     pols=$(join_by , $pol1 $pol2)
 
-    # assume optional second argument is location of ex_ants file
-    if [ "$#" -gt 1 ]; then
-        exants=$(prep_exants ${2})
-    else
-        exants=$(query_exants_db)
-    fi
+    # assume second argument is location of ex_ants folder
+    # extract JD from filename
+    jd=$(get_jd ${fn})
 
-    echo omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pols ${fn1}uv ${fn2}uv
-    omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pols ${fn1}uv ${fn2}uv
+    # use printf to round off fractional bit
+    jd_int=`printf "%d" $jd`
+
+    # make filename
+    bad_ants_fn=`echo "${bad_ants_dir}/${jd_int}.txt"`
+    exants=$(prep_exants ${bad_ants_fn})
+
+    echo omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pols ${fn1} ${fn2}
+    omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pols ${fn1} ${fn2}
 fi

@@ -50,7 +50,7 @@ pol=$(get_pol ${1})
 # 13 - freq_threshold
 # 14 - time_threshold
 
-if [is_same_pol $bn $pol1] || [is_same_pol $bn $pol2]; then
+if is_lin_pol ${bn}; then
     # This thread runs on raw visibility + cal + model
 
     # get the name of the abs.calfits and model vis files
