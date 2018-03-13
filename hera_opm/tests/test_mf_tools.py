@@ -60,15 +60,15 @@ class TestMethods(object):
         obsid = self.obsids_time[1]
         action = 'OMNICAL'
         pol = self.pols[3]
-        outfiles = set(['zen.2457698.30355.yy.HH.uvcA.OMNICAL.yy.out', 'zen.2457698.50355.yy.HH.uvcA.OMNICAL.yy.out'])
+        outfiles = set(['zen.2457698.30355.xx.HH.uvcA.OMNICAL.yy.out', 'zen.2457698.50355.xx.HH.uvcA.OMNICAL.yy.out'])
         nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
 
         # test edge cases
         obsid = self.obsids_time[0]
-        outfiles = set(['zen.2457698.40355.yy.HH.uvcA.OMNICAL.yy.out'])
+        outfiles = set(['zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out'])
         nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
         obsid = self.obsids_time[2]
-        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))        
+        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
 
         # run for no polarizations
         obsid = self.obsids_time[1]
@@ -81,11 +81,6 @@ class TestMethods(object):
         obsid = 'zen.1234567.12345.xx.HH.uvcA'
         action = 'OMNICAL'
         nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, obsid, action, self.obsids_time)
-
-        # test requesting a pol substitution, but not providing an appropriate obsid
-        fake_obsids = ['zen.1234567.12345.uv', 'zen.1234567.23456.uv', 'zen.1234567.34567.uv']
-        obsid = fake_obsids[1]
-        nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, obsid, action, fake_obsids, pol='xx')
         return
 
     def test_prep_args(self):

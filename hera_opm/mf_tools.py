@@ -80,7 +80,7 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None):
     action (str) -- the action corresponding to the time prereqs
     obsids -- list of all obsids for the given day; uses this list (sorted) to
         define neighbors
-    pol (str) -- if present, polarization string to substitute into obsid
+    pol (str) -- if present, polarization string to specify for output file
 
     Returns:
     ====================
@@ -106,20 +106,13 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None):
         next_obsid = None
 
     if pol is not None:
-        # replace polarization string in obsid with pol
-        match = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid)
-        if match:
-            obs_pol = match.group(1)
-            if prev_obsid is not None:
-                prev_obsid = re.sub(obs_pol, pol, prev_obsid)
-                of = "{0}.{1}.{2}.out".format(prev_obsid, action, pol)
-                outfiles.append(of)
-            if next_obsid is not None:
-                next_obsid = re.sub(obs_pol, pol, next_obsid)
-                of = "{0}.{1}.{2}.out".format(next_obsid, action, pol)
-                outfiles.append(of)
-        else:
-            raise ValueError("Could not extract polarization string from obsid {}".format(obsid))
+        # add polarization to output
+        if prev_obsid is not None:
+            of = "{0}.{1}.{2}.out".format(prev_obsid, action, pol)
+            outfiles.append(of)
+        if next_obsid is not None:
+            of = "{0}.{1}.{2}.out".format(next_obsid, action, pol)
+            outfiles.append(of)
     else:
         if prev_obsid is not None:
             of = "{0}.{1}.out".format(prev_obsid, action)
