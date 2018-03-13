@@ -54,8 +54,8 @@ if is_lin_pol $fn; then
     # extract JD from filename
     jd=$(get_jd ${fn})
 
-    # use printf to round off fractional bit
-    jd_int=`printf "%d" $jd`
+    # use awk to round off fractional bit
+    jd_int=`echo $jd | awk '{$1=int($1)}1'`
 
     # make filename
     bad_ants_fn=`echo "${bad_ants_dir}/${jd_int}.txt"`
