@@ -5,27 +5,15 @@ set -e
 src_dir="$(dirname "$0")"
 source ${src_dir}/_common.sh
 
-fn=$(basename $1 uv)
+fn="${1}"
 
-# define polarizations
-pol1="xx"
-pol2="yy"
-
-# we only run omnical metrics on a single polarization thread
-if is_same_pol $fn $pol1; then
-    # get firstcal file names
-    base=$(replace_pol $fn $pol1)
-    fcal_xx=`echo ${base}uv.first.calfits`
-    base=$(replace_pol $fn $pol2)
-    fcal_yy=`echo ${base}uv.first.calfits`
+# we only run omnical metrics on linear polarization threads
+if is_lin_pol $fn; then
+    # get firstcal file name
+    fcal=`echo ${fn}.first.calfits`
 
     # get omnical file name
-    nopol_base=$(remove_pol $fn)
-    omni_fn=`echo ${nopol_base}uv.omni.calfits`
-
-    # make a comma-separated list of firstcal files
-    # XXX: current design limitation: YY must come before XX
-    fcal=$(join_by , $fcal_yy $fcal_xx)
+    omni_fn=`echo ${fn}.omni.calfits`
 
     # call python script
     echo omnical_metrics_run.py --fc_files=${fcal} ${omni_fn}
