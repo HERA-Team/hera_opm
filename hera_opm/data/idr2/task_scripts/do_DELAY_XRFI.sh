@@ -34,21 +34,28 @@ pol=$(get_pol ${1})
 # Parameters are set in the configuration file, here we define their positions,
 # which must be consistent with the config.
 # 1 - filename
+# 2 - bad_ants_dir
 ### Delay filter parameters - see hera_cal.utils for details
-# 2 - standoff
-# 3 - horizon
-# 4 - tol
-# 5 - window
-# 6 - skip_wgt
-# 7 - maxiter
+# 3 - standoff
+# 4 - horizon
+# 5 - tol
+# 6 - window
+# 7 - skip_wgt
+# 8 - maxiter
 ### XRFI parameters - see hera_qm.utils for details
-# 8 - kt_size
-# 9 - kf_size
-# 10 - sig_init
-# 11 - sig_adj
-# 12 - px_threshold
-# 13 - freq_threshold
-# 14 - time_threshold
+# 9 - kt_size
+# 10 - kf_size
+# 11 - sig_init
+# 12 - sig_adj
+# 13 - px_threshold
+# 14 - freq_threshold
+# 15 - time_threshold
+
+# Get list of bad ants
+jd=$(get_jd ${bn})
+jd_int=`echo $jd | awk '{$1=int($1)}1'`
+bad_ants_fn=`echo "${2}/${jd_int}.txt"`
+exants=$(prep_exants ${bad_ants_fn})
 
 if is_lin_pol ${bn}; then
     # This thread runs on raw visibility + cal + model
@@ -58,10 +65,10 @@ if is_lin_pol ${bn}; then
     vis_f=`echo ${bn}.vis.uvfits`
 
     # run the xrfi command
-    echo delay_xrfi_run.py --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --kt_size=${8} --kf_size=${9} --sig_init=${10} --sig_adj=${11} --px_threshold=${12} --freq_threshold=${13} --time_threshold=${14} --calfits_file=${abs_f} --model_file=${vis_f} --model_file_format=uvfits --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
-    delay_xrfi_run.py --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --kt_size=${8} --kf_size=${9} --sig_init=${10} --sig_adj=${11} --px_threshold=${12} --freq_threshold=${13} --time_threshold=${14} --calfits_file=${abs_f} --model_file=${vis_f} --model_file_format=uvfits --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
+    echo delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --exants=${ex_ants} --calfits_file=${abs_f} --model_file=${vis_f} --model_file_format=uvfits --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
+    delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --exants=${ex_ants} --calfits_file=${abs_f} --model_file=${vis_f} --model_file_format=uvfits --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
 else
     # These threads run just on raw visibility
-    echo delay_xrfi_run.py --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --kt_size=${8} --kf_size=${9} --sig_init=${10} --sig_adj=${11} --px_threshold=${12} --freq_threshold=${13} --time_threshold=${14} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
-    delay_xrfi_run.py --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --kt_size=${8} --kf_size=${9} --sig_init=${10} --sig_adj=${11} --px_threshold=${12} --freq_threshold=${13} --time_threshold=${14} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
+    echo delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --exants=${ex_ants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
+    delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --exants=${ex_ants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary ${bn}OC
 fi
