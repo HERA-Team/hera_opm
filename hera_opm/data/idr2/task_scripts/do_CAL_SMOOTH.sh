@@ -9,18 +9,27 @@ source ${src_dir}/_common.sh
 # which must be consistent with the config.
 # 1 - filename
 ### adjacent filenames
-# 2 - previous filename, if available
-# 3 - subsequent filename, if available
+# 2 - previous filename, if available (otherwise "None")
+# 3 - subsequent filename, if available (otherwise "None")
 ### cal smoothing parameters - see hera_cal.smooth_cal for details
 # 4 - time_scale
 # 5 - mirror_sigmas
-# 6 - tol
+# 6 - freq_scale
+# 7 - tol
+# 8 - window
+# 9 - skip_wgt
+# 10 - maxiter
+
 fn="${1}"
 time_scale="${4}"
 mirror_sigmas="${5}"
-tol="${6}"
+freq_scale="${6}"
+tol="${7}"
+window="${8}"
+skip_wgt="${9}"
+maxiter="${10}"
 
-# we only want to run firstcal on linear polarizations (e.g. "xx")
+# we only want to run calibration smoothing on linear polarizations (e.g. "xx")
 if is_lin_pol $fn; then
     pol=$(get_pol $fn)
 
@@ -32,18 +41,22 @@ if is_lin_pol $fn; then
     prev_fn=${2}
     next_fn=${3}
 
-    # make name of associated cal files
+    # make arguments for associated cal files and data files
     if [ ${prev_fn} != "None" ]; then
-	prev_cal=`echo ${prev_fn}.abs.calfits`
+        prev_data=`echo --prev_data ${prev_fn}OCR`
+        prev_cal=`echo --prev_cal ${prev_fn}.abs.calfits`
     else
-	prev_cal="None"
+        prev_data=""
+        prev_cal=""
     fi
     if [ ${next_fn} != "None" ]; then
-	next_cal=`echo ${next_fn}.abs.calfits`
+        next_data=`echo --next_data ${next_fn}OCR`
+        next_cal=`echo --next_cal ${next_fn}.abs.calfits`
     else
-	next_cal="None"
+        next_cal=""
+        next_data=""
     fi
 
-    echo smooth_cal_run.py ${calfile} ${fn} ${outfile} --filetype=miriad --clobber --prev_cal=${prev_cal} --prev_data=${prev_fn} --next_cal=${next_cal} --next_data=${next_fn} --time_scale=${time_scale} --mirror_sigmas=${mirror_sigmas} --tol=${tol}
-    smooth_cal_run.py ${calfile} ${fn} ${outfile} --filetype=miriad --clobber --prev_cal=${prev_cal} --prev_data=${prev_fn} --next_cal=${next_cal} --next_data=${next_fn} --time_scale=${time_scale} --mirror_sigmas=${mirror_sigmas} --tol=${tol}
+    echo smooth_cal_run.py ${calfile} ${fn}OCR ${outfile} --filetype miriad --clobber ${prev_cal} ${prev_data} ${next_cal} ${next_data} --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter}
+    smooth_cal_run.py ${calfile} ${fn}OCR ${outfile} --filetype miriad --clobber ${prev_cal} ${prev_data} ${next_cal} ${next_data} --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter}
 fi
