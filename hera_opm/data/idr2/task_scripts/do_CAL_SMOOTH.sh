@@ -43,18 +43,18 @@ if is_lin_pol $fn; then
 
     # make arguments for associated cal files and data files
     if [ ${prev_fn} != "None" ]; then
-    prev_data=`echo --prev_data ${prev_fn}OCR`
-    prev_cal=`echo --prev_cal ${prev_fn}.abs.calfits`
+        prev_data=`echo --prev_data ${prev_fn}OCR`
+        prev_cal=`echo --prev_cal ${prev_fn}.abs.calfits`
     else
-    prev_data=""
-    prev_cal=""
+        prev_data=""
+        prev_cal=""
     fi
     if [ ${next_fn} != "None" ]; then
-    next_data=`echo --next_data ${next_fn}OCR`
-    next_cal=`echo --next_cal ${next_fn}.abs.calfits`
+        next_data=`echo --next_data ${next_fn}OCR`
+        next_cal=`echo --next_cal ${next_fn}.abs.calfits`
     else
-    next_cal=""
-    next_data=""
+        next_cal=""
+        next_data=""
     fi
 
     echo smooth_cal_run.py ${calfile} ${fn}OCR ${outfile} --filetype miriad --clobber ${prev_cal} ${prev_data} ${next_cal} ${next_data} --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter}
