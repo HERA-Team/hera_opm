@@ -10,7 +10,7 @@ fn=${1}
 
 if is_lin_pol ${fn}; then
     # we only need the corresponding omnical solution
-    abscal_fn=`echo ${fn}.abs.calfits`
+    abs_fn=`echo ${fn}.abs.calfits`
 
     echo apply_cal.py ${fn}O ${fn}OC --new_cal ${abs_fn} --clobber --filetype=miriad --gain_convention=divide
     apply_cal.py ${fn}O ${fn}OC --new_cal ${abs_fn} --clobber --filetype=miriad --gain_convention=divide
@@ -22,5 +22,5 @@ else
     abs_yy=`echo ${fn_yy}.abs.calfits`
 
     echo apply_cal.py ${fn}O ${fn}OC --new_cal ${abs_xx} ${abs_yy} --clobber --filetype=miriad --gain_convention=divide
-    apply_cal.py ${fn}O ${fn}OC --new_cal ${abs_fn} ${abs_yy} --clobber --filetype=miriad --gain_convention=divide
+    apply_cal.py ${fn}O ${fn}OC --new_cal ${abs_xx} ${abs_yy} --clobber --filetype=miriad --gain_convention=divide
 fi

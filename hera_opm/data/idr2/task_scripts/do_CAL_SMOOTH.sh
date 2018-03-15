@@ -43,6 +43,7 @@ if is_lin_pol $fn; then
 
     # make arguments for associated cal files and data files
     if [ ${prev_fn} != "None" ]; then
+	prev_fn=$(replace_pol ${prev_fn} ${pol})
         prev_data=`echo --prev_data ${prev_fn}OCR`
         prev_cal=`echo --prev_cal ${prev_fn}.abs.calfits`
     else
@@ -50,6 +51,7 @@ if is_lin_pol $fn; then
         prev_cal=""
     fi
     if [ ${next_fn} != "None" ]; then
+	next_fn=$(replace_pol ${next_fn} ${pol})
         next_data=`echo --next_data ${next_fn}OCR`
         next_cal=`echo --next_cal ${next_fn}.abs.calfits`
     else
