@@ -14,5 +14,5 @@ config = args.config
 output = args.output
 
 obsid_list = ' '.join(obsids)
-print("Generating {0} makeflow file from config file {1} for obsids {2}".format(output, config, obsid_list))
+print("Generating makeflow file from config file {0} for obsids {1}".format(config, obsid_list))
 mt.build_makeflow_from_config(obsids, config, output)

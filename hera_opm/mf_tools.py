@@ -316,9 +316,11 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                             except ValueError:
                                 raise ValueError("Time prereq \"{0}\" for action \"{1}\" not found in main "
                                                  "workflow".format(tp, action))
-                            tp_outfiles = make_time_neighbor_outfile_name(filename, action, obsids, pol)
-                            for of in tp_outfiles:
-                                infiles_pol.append(of)
+                            # add neighbors for all pols
+                            for pol2 in pol_list:
+                                tp_outfiles = make_time_neighbor_outfile_name(filename, tp, obsids, pol2)
+                                for of in tp_outfiles:
+                                    infiles_pol.append(of)
 
                         # replace '{basename}' with actual filename
                         # also replace polarization string, and time neighbors
