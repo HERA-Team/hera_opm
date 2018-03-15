@@ -294,7 +294,10 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                 # also add previous outfiles to input requirements
                 if ia > 0:
                     for of in outfiles_prev:
-                        infiles.append(of)
+                        # we might already have the output in the list if the
+                        # previous step is a prereq
+                        if of not in infiles:
+                            infiles.append(of)
 
                 # make argument list
                 args = get_config_entry(config, action, "args", required=False)
