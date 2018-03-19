@@ -15,6 +15,7 @@ xx_model_files="${2}"
 # we only want to run on linear polarizations (e.g., "xx")
 if is_lin_pol $fn; then
     # make calfits file name
+    omni_fn=`echo ${fn}.omni.calfits`
     calfits_fn=`echo ${fn}.abs.calfits`
 
     # substitute polarization of filename into model file list
@@ -22,6 +23,6 @@ if is_lin_pol $fn; then
     model_files=`echo ${xx_model_files} | sed -E "s/\.xx\./.$pol./g"`
 
     # call omni-abscal script; see hera_cal.abscal for more details
-    echo omni_abscal_run.py --delay_slope_cal --TT_phs_cal --abs_amp_cal --overwrite --calfits_fname ${calfits_fn} --data_files ${fn} --model_files ${model_files}
-    omni_abscal_run.py --delay_slope_cal --TT_phs_cal --abs_amp_cal --overwrite --calfits_fname ${calfits_fn} --data_files ${fn} --model_files ${model_files}
+    echo omni_abscal_run.py --delay_slope_cal --TT_phs_cal --abs_amp_cal --overwrite --calfits_infiles ${omni_fn} --output_calfits_fname ${calfits_fn} --data_files ${fn}O --model_files ${model_files}
+    omni_abscal_run.py --delay_slope_cal --TT_phs_cal --abs_amp_cal --overwrite --calfits_infiles ${omni_fn} --output_calfits_fname ${calfits_fn} --data_files ${fn}O --model_files ${model_files}
 fi
