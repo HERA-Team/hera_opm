@@ -25,23 +25,18 @@ pol=$(get_pol ${1})
 # pol4 = yx -> yy.HH.uv.abs.calfits (yy gain solutions and chi-squareds)
 
 # Parameters are set in the configuration file, here we define their positions,
-# which must be consistent with the config.
+# which must be consistent with the config. NOTE we do not pass the bad ants
+# because they will not exist in the abs.calfits, and ant numbers are meaningless
+# in model vis files.
 # 1 - filename
-# 2 - bad_ants_dir
 ### XRFI parameters - see hera_qm.utils for details
-# 3 - kt_size
-# 4 - kf_size
-# 5 - sig_init
-# 6 - sig_adj
-# 7 - px_threshold
-# 8 - freq_threshold
-# 9 - time_threshold
-
-# Get list of bad ants
-jd=$(get_jd ${bn})
-jd_int=`echo $jd | awk '{$1=int($1)}1'`
-bad_ants_fn=`echo "${2}/${jd_int}.txt"`
-exants=$(prep_exants ${bad_ants_fn})
+# 2 - kt_size
+# 3 - kf_size
+# 4 - sig_init
+# 5 - sig_adj
+# 6 - px_threshold
+# 7 - freq_threshold
+# 8 - time_threshold
 
 if is_lin_pol ${bn}; then
     # This thread runs on model vis
@@ -49,8 +44,8 @@ if is_lin_pol ${bn}; then
     vis_f=`echo ${bn}.vis.uvfits`
 
     # run the xrfi command
-    echo xrfi_run.py --kt_size=${3} --kf_size=${4} --sig_init=${5} --sig_adj=${6} --px_threshold=${7} --freq_threshold=${8} --time_threshold=${9} --exants=${exants} --model_file=${vis_f} --model_file_format=uvfits --algorithm=xrfi --extension=.flags.npz
-    xrfi_run.py --kt_size=${3} --kf_size=${4} --sig_init=${5} --sig_adj=${6} --px_threshold=${7} --freq_threshold=${8} --time_threshold=${9} --exants=${exants} --model_file=${vis_f} --model_file_format=uvfits --algorithm=xrfi --extension=.flags.npz
+    echo xrfi_run.py --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --px_threshold=${6} --freq_threshold=${7} --time_threshold=${8} --model_file=${vis_f} --model_file_format=uvfits --algorithm=xrfi --extension=.flags.npz
+    xrfi_run.py --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --px_threshold=${6} --freq_threshold=${7} --time_threshold=${8} --model_file=${vis_f} --model_file_format=uvfits --algorithm=xrfi --extension=.flags.npz
 else
     # These threads run on gains and chi-squareds
     # First switch to corresponding lin pol
@@ -61,6 +56,6 @@ else
     fi
     # get the name of the calfits file
     cal_f=`echo ${pn}.abs.calfits`
-    echo xrfi_run.py --kt_size=${3} --kf_size=${4} --sig_init=${5} --sig_adj=${6} --px_threshold=${7} --freq_threshold=${8} --time_threshold=${9} --exants=${exants} --calfits_file=${abs_f} --algorithm=xrfi --extension=.flags.npz
-    xrfi_run.py --kt_size=${3} --kf_size=${4} --sig_init=${5} --sig_adj=${6} --px_threshold=${7} --freq_threshold=${8} --time_threshold=${9} --exants=${exants} --calfits_file=${abs_f} --algorithm=xrfi --extension=.flags.npz
+    echo xrfi_run.py --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --px_threshold=${6} --freq_threshold=${7} --time_threshold=${8} --calfits_file=${abs_f} --algorithm=xrfi --extension=.flags.npz
+    xrfi_run.py --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --px_threshold=${6} --freq_threshold=${7} --time_threshold=${8} --calfits_file=${abs_f} --algorithm=xrfi --extension=.flags.npz
 fi
