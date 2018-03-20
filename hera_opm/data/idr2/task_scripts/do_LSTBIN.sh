@@ -25,8 +25,5 @@ lst_start=${6}
 data_files=($@)
 data_files=(${data_files[*]:6})
 
-# we only want to run on linear polarizations (e.g., "xx")
-if is_lin_pol $fn; then
-    echo lstbin_run.py --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} ${data_files}
-    lstbin_run.py --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} ${data_files}
-fi
+echo lstbin_run.py --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} ${data_files}
+lstbin_run.py --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} ${data_files}
