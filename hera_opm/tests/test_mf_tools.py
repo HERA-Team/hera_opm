@@ -134,7 +134,7 @@ class TestMethods(object):
 
     def test_build_makeflow_from_config(self):
         # define args
-        obsids = self.obsids_pol
+        obsids = self.obsids_pol[:1]
         config_file = self.config_file
         work_dir = os.path.join(DATA_PATH, 'test_output')
 
