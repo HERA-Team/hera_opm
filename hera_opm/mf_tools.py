@@ -232,6 +232,20 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     if len(pol_list) == 0:
         # make a dummy list of length 1, to ensure we perform actions later
         pol_list = ['']
+    else:
+        # make sure that we were only passed in a single polarization in our obsids
+        for i, obsid in enumerate(obsids):
+            match = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid)
+            if match:
+                obs_pol = match.group(1)
+                for j in range(i + 1, len(obsids)):
+                    obsid2 = obsids[j]
+                    match2 = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid2)
+                    if match2:
+                        obs_pol2 = match2.group(1)
+                        if obs_pol != obs_pol2:
+                            raise AssertionError("Polarizations do not match for all obsids")
+
     path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')[0]
     conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
     if conda_env == []:
