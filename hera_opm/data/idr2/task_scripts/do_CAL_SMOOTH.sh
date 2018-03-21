@@ -59,6 +59,6 @@ if is_lin_pol $fn; then
         next_data=""
     fi
 
-    echo smooth_cal_run.py ${calfile} ${fn}OCR ${outfile} --filetype miriad --clobber ${prev_cal} ${prev_data} ${next_cal} ${next_data} --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter}
-    smooth_cal_run.py ${calfile} ${fn}OCR ${outfile} --filetype miriad --clobber ${prev_cal} ${prev_data} ${next_cal} ${next_data} --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter}
+    echo smooth_cal_run.py ${calfile} ${fn}OCR ${outfile} --filetype miriad --clobber --binary_wgts ${prev_cal} ${prev_data} ${next_cal} ${next_data} --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter}
+    smooth_cal_run.py ${calfile} ${fn}OCR ${outfile} --filetype miriad --clobber --binary_wgts ${prev_cal} ${prev_data} ${next_cal} ${next_data} --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter}
 fi
