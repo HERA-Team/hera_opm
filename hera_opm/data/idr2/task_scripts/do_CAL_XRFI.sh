@@ -56,6 +56,6 @@ else
     fi
     # get the name of the calfits file
     cal_f=`echo ${pn}.abs.calfits`
-    echo xrfi_run.py --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --px_threshold=${6} --freq_threshold=${7} --time_threshold=${8} --calfits_file=${abs_f} --algorithm=xrfi --extension=.flags.npz
-    xrfi_run.py --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --px_threshold=${6} --freq_threshold=${7} --time_threshold=${8} --calfits_file=${abs_f} --algorithm=xrfi --extension=.flags.npz
+    echo xrfi_run.py --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --px_threshold=${6} --freq_threshold=${7} --time_threshold=${8} --calfits_file=${cal_f} --algorithm=xrfi --extension=.flags.npz
+    xrfi_run.py --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --px_threshold=${6} --freq_threshold=${7} --time_threshold=${8} --calfits_file=${cal_f} --algorithm=xrfi --extension=.flags.npz
 fi
