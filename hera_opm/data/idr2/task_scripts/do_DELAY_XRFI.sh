@@ -44,7 +44,7 @@ bn=$(basename ${1})
 jd=$(get_jd ${bn})
 jd_int=`echo $jd | awk '{$1=int($1)}1'`
 bad_ants_fn=`echo "${2}/${jd_int}.txt"`
-exants=$(prep_exants ${bad_ants_fn})
+ex_ants=$(prep_exants ${bad_ants_fn})
 
 # get waterfalls
 base_xx=$(replace_pol ${bn} ${pol1})
@@ -62,5 +62,5 @@ wf_list=$(join_by , ${vis_wf_xx} ${vis_wf_yy} ${chi_wf_xx} ${chi_wf_yy} ${g_wf_x
 
 
 # Run just on visibilities
-echo delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --exants=${exants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary --waterfalls=${wf_list} ${bn}OC
-delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --exants=${exants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary --waterfalls=${wf_list} ${bn}OC
+echo delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --ex_ants=${ex_ants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary --waterfalls=${wf_list} ${bn}OC
+delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --ex_ants=${ex_ants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary --waterfalls=${wf_list} ${bn}OC
