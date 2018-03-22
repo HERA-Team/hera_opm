@@ -208,6 +208,23 @@ class TestMethods(object):
 
         return
 
+    def test_build_makeflow_from_config_errors(self):
+        # define args
+        obsids = self.obsids_pol[:2]
+        config_file = self.config_file
+        work_dir = os.path.join(DATA_PATH, 'test_output')
+
+        # raise an error for passing in obsids with different polarizations
+        nt.assert_raises(AssertionError, mt.build_makeflow_from_config, obsids,
+                         config_file, work_dir=work_dir)
+
+        # raise an error for passing in an obsid with no polarization string
+        obsids = ['zen.2458000.12345.uv']
+        nt.assert_raises(AssertionError, mt.build_makeflow_from_config, obsids,
+                         config_file, work_dir=work_dir)
+
+        return
+
     def test_clean_wrapper_scripts(self):
         # define args
         work_dir = os.path.join(DATA_PATH, 'test_output')
