@@ -16,6 +16,10 @@ bad_ants_dir="${2}"
 if is_lin_pol $fn; then
     pol=$(get_pol $fn)
 
+    # get ant_metrics filename
+    nopol_base=$(remove_pol ${fn})
+    metrics_f=`echo ${nopol_base}.ant_metrics.json`
+
     # assume second argument is location of ex_ants folder
     # extract JD from filename
     jd=$(get_jd ${fn})
@@ -28,6 +32,6 @@ if is_lin_pol $fn; then
     exants=$(prep_exants ${bad_ants_fn})
 
     # run the command
-    echo firstcal_run.py --ex_ants=${exants} --pol=$pol ${fn}
-    firstcal_run.py --ex_ants=${exants} --pol=$pol ${fn}
+    echo firstcal_run.py --ex_ants=${exants} --metrics_json=${metrics_f} --pol=$pol ${fn}
+    firstcal_run.py --ex_ants=${exants} --metrics_json=${metrics_f} --pol=$pol ${fn}
 fi

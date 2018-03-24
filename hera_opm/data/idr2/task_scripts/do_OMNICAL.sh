@@ -50,6 +50,10 @@ if is_lin_pol $fn; then
     # get current polarization
     pol=$(get_pol $fn)
 
+    # get metrics_json filename
+    nopol_base=$(remove_pol ${fn})
+    metrics_f=`echo ${nopol_base}.ant_metrics.json`
+
     # assume second argument is location of ex_ants folder
     # extract JD from filename
     jd=$(get_jd ${fn})
@@ -61,6 +65,6 @@ if is_lin_pol $fn; then
     bad_ants_fn=`echo "${bad_ants_dir}/${jd_int}.txt"`
     exants=$(prep_exants ${bad_ants_fn})
 
-    echo omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pol ${fn}
-    omni_run.py --firstcal=$fcal --ex_ants=${exants} -p $pol ${fn}
+    echo omni_run.py --firstcal=$fcal --ex_ants=${exants} --metrics_json=${metrics_f} -p $pol ${fn}
+    omni_run.py --firstcal=$fcal --ex_ants=${exants} --metrics_json=${metrics_f} -p $pol ${fn}
 fi
