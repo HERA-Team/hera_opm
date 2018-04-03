@@ -32,6 +32,6 @@ if is_lin_pol $fn; then
     exants=$(prep_exants ${bad_ants_fn})
 
     # run the command
-    echo firstcal_run.py --ex_ants=${exants} --metrics_json=${metrics_f} --pol=$pol ${fn}
-    firstcal_run.py --ex_ants=${exants} --metrics_json=${metrics_f} --pol=$pol ${fn}
+    echo firstcal_run.py --overwrite --ex_ants=${exants} --metrics_json=${metrics_f} --pol=$pol ${fn}
+    firstcal_run.py --overwrite --ex_ants=${exants} --metrics_json=${metrics_f} --pol=$pol ${fn}
 fi

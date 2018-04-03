@@ -65,6 +65,6 @@ if is_lin_pol $fn; then
     bad_ants_fn=`echo "${bad_ants_dir}/${jd_int}.txt"`
     exants=$(prep_exants ${bad_ants_fn})
 
-    echo omni_run.py --firstcal=$fcal --ex_ants=${exants} --metrics_json=${metrics_f} -p $pol ${fn}
-    omni_run.py --firstcal=$fcal --ex_ants=${exants} --metrics_json=${metrics_f} -p $pol ${fn}
+    echo omni_run.py --firstcal=$fcal --overwrite --ex_ants=${exants} --metrics_json=${metrics_f} -p $pol ${fn}
+    omni_run.py --firstcal=$fcal --overwrite --ex_ants=${exants} --metrics_json=${metrics_f} -p $pol ${fn}
 fi
