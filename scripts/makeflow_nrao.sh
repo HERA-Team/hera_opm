@@ -30,4 +30,4 @@ fi
 
 # actually run makeflow
 # use cluster processing options
-makeflow -T torque -B "-q hera" $1
+makeflow -T torque -B "-q hera -l walltime=24:00:00" $1
