@@ -89,10 +89,10 @@ def inspect_log_files(log_files, out_files):
         runtimes.append(elapsed_time(log_lines))
 
         # It timed out
-        if timeout is not None and (
-                1.0 * np.abs(runtimes[-1] - timeout) / timeout < .01):
+        if timeout is not None and (1.0 * np.abs(runtimes[-1] - timeout) / timeout < .01) and (
+                log_file.replace('.log', '.out') not in out_files):
             timed_out_logs.append(log_file)
-        # It ran but there's out, so it errored
+        # It ran but there's no .out, so it errored
         elif (runtimes[-1] > 0) and (log_file.replace('.log', '.out') not in out_files):
             if error_warned:
                 print 'Errors also suspected in', log_file
