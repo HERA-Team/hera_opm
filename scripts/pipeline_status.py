@@ -31,6 +31,12 @@ if np.all([not os.path.isdir(wdir) for wdir in args.working_dir]):
 config = ConfigParser(interpolation=ExtendedInterpolation())
 config.read(args.config_file)
 workflow = get_config_entry(config, 'WorkFlow', 'actions')
+try:
+    timeout = get_config_entry(config, 'Options', 'timeout')[0]
+    timeout = float(eval(timeout.replace('s', '').replace(
+        'm', '*60').replace('h', '*60*60').replace('d', '*60*60*24'))) / 60.0
+except BaseException:
+    timeout = None
 
 
 def elapsed_time(log_lines):
@@ -54,9 +60,9 @@ def elapsed_time(log_lines):
         end = None
 
     if (start is not None) and (end is None):
-        return -1
+        return -1  # currently running
     elif (start is None):
-        return -2
+        return -2  # never started
     else:
         return ((end - start).seconds + 24.0 *
                 60 * 60 * (end - start).days) / 60.0
@@ -72,23 +78,37 @@ def inspect_log_files(log_files, out_files):
     Returns:
         average_runtime: average runtime of all finished jobs that took longer than a second, in minutes
         nRunning: number of jobs believed to be running (start time with no stop time)
+        nTimedOut: number of jobs that terminated within 1% of the wall-time specified for timeouts
     '''
     error_warned = False
     runtimes = []
+    timed_out_logs = []
     for log_file in log_files:
         with open(log_file, 'r') as f:
             log_lines = f.readlines()
         runtimes.append(elapsed_time(log_lines))
 
-        # If it completed running but there's no .out file, it's suspected to
-        # have errored
-        if (runtimes[-1] > 0) and (log_file.replace('.log',
-                                                    '.out') not in out_files) and not error_warned:
-            print '\n\nError Suspected (no .out found) in', log_file
-            print '------------------------------------------------\n'
-            print '\n'.join(log_lines)
-            print '------------------------------------------------\n\n'
-            error_warned = True
+        # It timed out
+        if timeout is not None and (
+                1.0 * np.abs(runtimes[-1] - timeout) / timeout < .01):
+            timed_out_logs.append(log_file)
+        # It ran but there's out, so it errored
+        elif (runtimes[-1] > 0) and (log_file.replace('.log', '.out') not in out_files):
+            if error_warned:
+                print 'Errors also suspected in', log_file
+            else:
+                print '\n\nError Suspected (no .out found) in', log_file
+                print '------------------------------------------------\n'
+                print ''.join(log_lines)
+                print '------------------------------------------------\n'
+                error_warned = True
+    if error_warned:
+        print '\n'
+    if len(timed_out_logs) > 0:
+        print '\nTimeouts (wall-time > ' + str(timeout) + ' minutes) detected in:'
+        for log in timed_out_logs:
+            print log
+        print '\n'
 
     runtimes = np.array(runtimes)
     finished_runtimes = runtimes[runtimes > 1 / 60.0]
@@ -97,7 +117,7 @@ def inspect_log_files(log_files, out_files):
     else:
         average_runtime = np.nan
 
-    return average_runtime, np.sum(runtimes == -1)
+    return average_runtime, np.sum(runtimes == -1), len(timed_out_logs)
 
 
 # Run pipeline report
@@ -110,9 +130,10 @@ for job in workflow:
             total += glob.glob(os.path.join(wdir, 'wrapper_*.' + job + '.*sh'))
             logged += glob.glob(os.path.join(wdir, '*.' + job + '.*log'))
             done += glob.glob(os.path.join(wdir, '*.' + job + '.*out'))
-    average_runtime, nRunning = inspect_log_files(logged, done)
-    nErrored = len(logged) - (len(done) + nRunning)
+    average_runtime, nRunning, nTimedOut = inspect_log_files(logged, done)
+    nErrored = len(logged) - (len(done) + nRunning + nTimedOut)
 
     print 'Average (non-zero) runtime:', average_runtime, 'minutes'
-    print len(total), '\t|\t', len(done), '\t|\t', nRunning, '\t|\t', nErrored
-    print 'total\t|\tdone\t|\trunning\t|\terrored\n\n'
+    print len(total), '\t|\t', len(
+        done), '\t|\t', nRunning, '\t|\t', nErrored, '\t|\t', nTimedOut
+    print 'total\t|\tdone\t|\trunning\t|\terrored\t|\ttimed out\n\n'
