@@ -5,15 +5,18 @@ set -e
 src_dir="$(dirname "$0")"
 source ${src_dir}/_common.sh
 
-# get base filename
+# Positional parameters passed as defined in the configuration file:
+# 1 - base filename
+# 2 - flag_nchan_low (n low frequency channels to flag)
+# 3 - flag_nchan_high (n high frequency channels to flag)
 fn=${1}
 
 if is_lin_pol ${fn}; then
     # we only need the corresponding omnical solution
     abs_fn=`echo ${fn}.abs.calfits`
 
-    echo apply_cal.py ${fn} ${fn}OC --new_cal ${abs_fn} --clobber --filetype=miriad --gain_convention=divide
-    apply_cal.py ${fn} ${fn}OC --new_cal ${abs_fn} --clobber --filetype=miriad --gain_convention=divide
+    echo apply_cal.py ${fn} ${fn}OC --new_cal ${abs_fn} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide
+    apply_cal.py ${fn} ${fn}OC --new_cal ${abs_fn} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide
 else
     # we need both omnical solutions
     fn_xx=$(replace_pol $fn "xx")
@@ -21,6 +24,6 @@ else
     abs_xx=`echo ${fn_xx}.abs.calfits`
     abs_yy=`echo ${fn_yy}.abs.calfits`
 
-    echo apply_cal.py ${fn} ${fn}OC --new_cal ${abs_xx} ${abs_yy} --clobber --filetype=miriad --gain_convention=divide
-    apply_cal.py ${fn} ${fn}OC --new_cal ${abs_xx} ${abs_yy} --clobber --filetype=miriad --gain_convention=divide
+    echo apply_cal.py ${fn} ${fn}OC --new_cal ${abs_xx} ${abs_yy} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide
+    apply_cal.py ${fn} ${fn}OC --new_cal ${abs_xx} ${abs_yy} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide
 fi
