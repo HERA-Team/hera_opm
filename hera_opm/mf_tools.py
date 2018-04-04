@@ -8,6 +8,7 @@ import sys
 import time
 import gzip
 import shutil
+import subprocess
 import ConfigParser as configparser
 from configparser import ConfigParser, ExtendedInterpolation
 
@@ -256,6 +257,19 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
         conda_env = None
     else:
         conda_env = conda_env[0]
+    timeout = get_config_entry(config, 'Options', 'timeout', required=False)
+    if timeout == []:
+        timeout = None
+    else:
+        # check that the `timeout' command exists on the system
+        try:
+            out = subprocess.check_output(["timeout", "--help"])
+        except OSError:
+            raise AssertionError("A value for the \"timeout\" option was specified,"
+                                 " but the `timeout' command does not appear to be"
+                                 " installed. Please install or remove the option"
+                                 " from the config file")
+        timeout = timeout[0]
 
     # open file for writing
     cf = os.path.basename(config_file)
@@ -369,7 +383,10 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                             print("source activate {}".format(conda_env), file=f2)
                         print("date", file=f2)
                         print("cd {}".format(parent_dir), file=f2)
-                        print("{0} {1}".format(command, prepped_args), file=f2)
+                        if timeout is not None:
+                            print("timeout {0} {1} {2}".format(timeout, command, prepped_args), file=f2)
+                        else:
+                            print("{0} {1}".format(command, prepped_args), file=f2)
                         print("if [ $? -eq 0 ]; then", file=f2)
                         print("  cd {}".format(work_dir), file=f2)
                         print("  touch {}".format(outfile), file=f2)
