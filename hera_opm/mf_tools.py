@@ -369,12 +369,12 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
 
                     # make logfile name
                     # logfile will capture stdout and stderr
-                    logfile = re.sub('\.out', '.log', outfile)
+                    logfile = re.sub(r'\.out', '.log', outfile)
                     logfile = os.path.join(work_dir, logfile)
 
                     # make a small wrapper script that will run the actual command
                     # can't embed if; then statements in makeflow script
-                    wrapper_script = re.sub('\.out', '.sh', outfile)
+                    wrapper_script = re.sub(r'\.out', '.sh', outfile)
                     wrapper_script = "wrapper_{}".format(wrapper_script)
                     wrapper_script = os.path.join(work_dir, wrapper_script)
                     with open(wrapper_script, "w") as f2:

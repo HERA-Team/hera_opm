@@ -28,7 +28,7 @@ install:
   - conda list
 script:
   - nosetests hera_opm --with-coverage --cover-package=hera_opm
-  - pycodestyle */*.py --ignore=E501
+  - pycodestyle */*.py --ignore=E501,W503
 
 after_success:
   - coveralls

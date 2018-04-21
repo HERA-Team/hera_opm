@@ -12,11 +12,11 @@ from datetime import datetime
 import argparse
 
 # Parse arguments
-parser = argparse.ArgumentParser(description="Check the status of a pipeline. Prints out the total number of jobs of each " +
-                                 "task in the workflow (by the wrapper*.sh files), the number completed (by the .out " +
-                                 "files), the number currently running (which have starting but not stopping times in the" +
-                                 ".log files), and the number errored (which have stopping times in the log but no .out" +
-                                 "file). Also prints the average time elapsed for non-trivial jobs (i.e. those that take" +
+parser = argparse.ArgumentParser(description="Check the status of a pipeline. Prints out the total number of jobs of each "
+                                 "task in the workflow (by the wrapper*.sh files), the number completed (by the .out "
+                                 "files), the number currently running (which have starting but not stopping times in the"
+                                 ".log files), and the number errored (which have stopping times in the log but no .out"
+                                 "file). Also prints the average time elapsed for non-trivial jobs (i.e. those that take"
                                  "more than a second).")
 parser.add_argument("--config_file", type=str, required=True,
                     help="Absolute path to makeflow .cfg file.")
@@ -64,8 +64,8 @@ def elapsed_time(log_lines):
     elif (start is None):
         return -2  # never started
     else:
-        return ((end - start).seconds + 24.0 *
-                60 * 60 * (end - start).days) / 60.0
+        return ((end - start).seconds + 24.0
+                * 60 * 60 * (end - start).days) / 60.0
 
 
 def inspect_log_files(log_files, out_files):
