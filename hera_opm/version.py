@@ -53,10 +53,10 @@ git_branch = version_info['git_branch']
 # String to add to history of any files written with this version of hera_op
 hera_op_version_str = ('hera_op version: ' + version + '.')
 if git_hash is not '':
-    hera_op_version_str += ('  Git origin: ' + git_origin +
-                            '.  Git hash: ' + git_hash +
-                            '.  Git branch: ' + git_branch +
-                            '.  Git description: ' + git_description + '.')
+    hera_op_version_str += ('  Git origin: ' + git_origin
+                            + '.  Git hash: ' + git_hash
+                            + '.  Git branch: ' + git_branch
+                            + '.  Git description: ' + git_description + '.')
 
 
 def main():  # pragma: no cover
