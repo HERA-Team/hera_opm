@@ -11,6 +11,9 @@ source ${src_dir}/_common.sh
 # 2 - glob-parsable string pointing to model_files
 # 3 - integer maximum number of iterations of TT_phs_cal allowed
 # 4 - float convergence criterion in Delta g / g for stopping iterative TT_phs_cal
+# 5 - reference antenna for phase solvers
+# 6 - enact a cut on max baseline length for data that goes into calibration equations
+# 7 - number of channels on each edge of bandpass to flag before delay calibration
 
 fn="${1}"
 model_files="${2}"
