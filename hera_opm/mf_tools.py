@@ -293,13 +293,13 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
         print("# makeflow file generated from config file {}".format(cf), file=f)
         print("# created at {}".format(dt), file=f)
 
-        # if present, add resource information
+        # add resource information
+        base_mem = get_config_entry(config, 'Options', 'base_mem', required=True)
         base_cpu = get_config_entry(config, 'Options', 'base_cpu', required=False)
-        base_mem = get_config_entry(config, 'Options', 'base_mem', required=False)
+        batch_options = "-l vmem={:d}".format(int(base_mem[0]))
         if base_cpu != []:
-            print("CORES={:d}".format(int(base_cpu[0])), file=f)
-        if base_mem != []:
-            print("MEMORY={:d}".format(int(base_cpu[0])), file=f)
+            batch_options += ",nodes=1:ppn={:d}".format(int(base_cpu[0]))
+        print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
 
         for obsid in obsids:
             # get parent directory
