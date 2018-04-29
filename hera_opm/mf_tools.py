@@ -296,7 +296,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
         # add resource information
         base_mem = get_config_entry(config, 'Options', 'base_mem', required=True)
         base_cpu = get_config_entry(config, 'Options', 'base_cpu', required=False)
-        batch_options = "-l vmem={:d}M".format(int(base_mem[0]))
+        batch_options = "-l pvmem={0:d}M,pmem={0:d}M".format(int(base_mem[0]))
         if base_cpu != []:
             batch_options += ",nodes=1:ppn={:d}".format(int(base_cpu[0]))
         print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
