@@ -13,6 +13,23 @@ import ConfigParser as configparser
 from configparser import ConfigParser, ExtendedInterpolation
 
 
+def get_jd(filename):
+    '''
+    Get the JD from a data file name.
+
+    Args:
+    ====================
+    filename (str) -- file name; assumed to follow standard convention where name is
+        `zen.xxxxxxx.xxxxx.uv` (potentially with polarization and subarray information mixed in).
+
+    Returns:
+    ====================
+    jd (str) -- the integer JD (fractional part truncated) as a string
+    '''
+    m = re.match(r"zen\.([0-9]{7})\.[0-9]{5}\.", filename)
+    return m.groups()[0]
+
+
 def get_config_entry(config, header, item, required=True):
     '''
     Helper function to extract specific entry from config file.
@@ -89,8 +106,13 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None):
     '''
     outfiles = []
 
+    # extract the integer JD of the current file
+    jd = get_jd(obsid)
+
     # find the neighbors of current obsid in list of obsids
-    obsids = sorted(obsids)
+    # need to get just the filename, and just ones on the same day
+    obsids = sorted([os.path.basename(os.path.abspath(o)) for o in obsids
+                     if jd in os.path.basename(os.path.abspath(o))])
     try:
         obs_idx = obsids.index(obsid)
     except ValueError:
@@ -134,6 +156,7 @@ def prep_args(args, obsid, pol=None, obsids=None):
         is to be substituted.
     obsid (str) -- string of filename/obsid.
     pol (str) -- polarization to substitute for the one found in obsid.
+    obsids -- full list of obsids; optional, but required when time-adjacent neighbors are desired.
 
     Returns:
     ====================
@@ -158,30 +181,34 @@ def prep_args(args, obsid, pol=None, obsids=None):
     if re.search(r'\{prev_basename\}', args):
         # check that there is an adjacent obsid to substitute
         if obsids is None:
-            raise ValueError("when requesting time-adjacent obsids, obsids cannot be None")
-        obsids = sorted(obsids)
+            raise ValueError("when requesting time-adjacent obsids, obsids must be provided")
+        jd = get_jd(obsid)
+        oids = sorted([os.path.basename(os.path.abspath(o)) for o in obsids
+                       if jd in os.path.basename(os.path.abspath(o))])
         try:
-            obs_idx = obsids.index(obsid)
+            obs_idx = oids.index(obsid)
         except ValueError:
             raise ValueError("{} not found in list of obsids".format(obsid))
         if obs_idx == 0:
             args = re.sub(r'\{prev_basename\}', "None", args)
         else:
-            args = re.sub(r'\{prev_basename\}', obsids[obs_idx - 1], args)
+            args = re.sub(r'\{prev_basename\}', oids[obs_idx - 1], args)
 
     if re.search(r'\{next_basename\}', args):
         # check that there is an adjacent obsid to substitute
         if obsids is None:
-            raise ValueError("when requesting time-adjacent obsids, obsids cannot be None")
-        obsids = sorted(obsids)
+            raise ValueError("when requesting time-adjacent obsids, obsids must be provided")
+        jd = get_jd(obsid)
+        oids = sorted([os.path.basename(os.path.abspath(o)) for o in obsids
+                       if jd in os.path.basename(os.path.abspath(o))])
         try:
-            obs_idx = obsids.index(obsid)
+            obs_idx = oids.index(obsid)
         except ValueError:
             raise ValueError("{} not found in list of obsids".format(obsid))
-        if obs_idx == len(obsids) - 1:
+        if obs_idx == len(oids) - 1:
             args = re.sub(r'\{next_basename\}', "None", args)
         else:
-            args = re.sub(r'\{next_basename\}', obsids[obs_idx + 1], args)
+            args = re.sub(r'\{next_basename\}', oids[obs_idx + 1], args)
 
     return args
 
@@ -296,7 +323,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
         # add resource information
         base_mem = get_config_entry(config, 'Options', 'base_mem', required=True)
         base_cpu = get_config_entry(config, 'Options', 'base_cpu', required=False)
-        batch_options = "-l pvmem={0:d}M,pmem={0:d}M".format(int(base_mem[0]))
+        batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(base_mem[0]))
         if base_cpu != []:
             batch_options += ",nodes=1:ppn={:d}".format(int(base_cpu[0]))
         print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)

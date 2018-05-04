@@ -22,6 +22,13 @@ class TestMethods(object):
                             'zen.2457698.50355.xx.HH.uvcA']
         return
 
+    def test_get_jd(self):
+        # send in a sample file name
+        filename = "zen.2458000.12345.xx.HH.uv"
+        jd = mt.get_jd(filename)
+        nt.assert_true(jd, "2458000")
+        return
+
     def test_get_config_entry(self):
         # retreive config
         config = ConfigParser(interpolation=ExtendedInterpolation())
