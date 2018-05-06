@@ -4,6 +4,7 @@ import nose.tools as nt
 import os
 import shutil
 import gzip
+import glob
 from hera_opm.data import DATA_PATH
 import hera_opm.mf_tools as mt
 import ConfigParser as configparser
@@ -14,9 +15,11 @@ class TestMethods(object):
         self.config_file = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp.cfg')
         self.config_file_time_neighbors = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_time_neighbors.cfg')
         self.config_file_options = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_options.cfg')
+        self.config_file_lstbin = os.path.join(DATA_PATH, 'sample_config', 'lstbin.cfg')
         self.obsids_pol = ['zen.2457698.40355.xx.HH.uvcA', 'zen.2457698.40355.xy.HH.uvcA',
                            'zen.2457698.40355.yx.HH.uvcA', 'zen.2457698.40355.yy.HH.uvcA']
         self.obsids_nopol = ['zen.2457698.40355.HH.uvcA']
+        self.obsids_lstbin = [sorted(glob.glob(DATA_PATH + '/zen.2457698.4*uvcA'))]
         self.pols = ['xx', 'xy', 'yx', 'yy']
         self.obsids_time = ['zen.2457698.30355.xx.HH.uvcA', 'zen.2457698.40355.xx.HH.uvcA',
                             'zen.2457698.50355.xx.HH.uvcA']
@@ -285,6 +288,40 @@ class TestMethods(object):
         if os.path.exists(outfile):
             os.remove(outfile)
         mt.build_analysis_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
+
+        nt.assert_true(os.path.exists(outfile))
+
+        # clean up after ourselves
+        os.remove(outfile)
+        mt.clean_wrapper_scripts(work_dir)
+
+        return
+
+    def test_build_lstbin_makeflow_from_config(self):
+        # define args
+        obsids = self.obsids_lstbin
+        config_file = self.config_file_lstbin
+        work_dir = os.path.join(DATA_PATH, 'test_output')
+
+        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+        outfile = os.path.join(work_dir, mf_output)
+        if os.path.exists(outfile):
+            os.remove(outfile)
+        mt.build_lstbin_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+
+        # make sure the output files we expected appeared
+        nt.assert_true(os.path.exists(outfile))
+
+        # clean up after ourselves
+        os.remove(outfile)
+        mt.clean_wrapper_scripts(work_dir)
+
+        # also test providing the name of the output file
+        mf_output = "output.mf"
+        outfile = os.path.join(work_dir, mf_output)
+        if os.path.exists(outfile):
+            os.remove(outfile)
+        mt.build_lstbin_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
 
         nt.assert_true(os.path.exists(outfile))
 
