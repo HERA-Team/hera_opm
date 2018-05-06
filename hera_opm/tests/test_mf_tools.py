@@ -156,7 +156,7 @@ class TestMethods(object):
 
         return
 
-    def test_build_makeflow_from_config(self):
+    def test_build_analysis_makeflow_from_config(self):
         # define args
         obsids = self.obsids_pol[:1]
         config_file = self.config_file
@@ -166,7 +166,7 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
@@ -191,7 +191,7 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
+        mt.build_analysis_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
 
         nt.assert_true(os.path.exists(outfile))
 
@@ -201,7 +201,7 @@ class TestMethods(object):
 
         return
 
-    def test_build_makeflow_from_config_time_neighbors(self):
+    def test_build_analysis_makeflow_from_config_time_neighbors(self):
         # define args
         obsids = self.obsids_time
         config_file = self.config_file_time_neighbors
@@ -211,7 +211,7 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
@@ -232,24 +232,24 @@ class TestMethods(object):
 
         return
 
-    def test_build_makeflow_from_config_errors(self):
+    def test_build_analysis_makeflow_from_config_errors(self):
         # define args
         obsids = self.obsids_pol[:2]
         config_file = self.config_file
         work_dir = os.path.join(DATA_PATH, 'test_output')
 
         # raise an error for passing in obsids with different polarizations
-        nt.assert_raises(AssertionError, mt.build_makeflow_from_config, obsids,
+        nt.assert_raises(AssertionError, mt.build_analysis_makeflow_from_config, obsids,
                          config_file, work_dir=work_dir)
 
         # raise an error for passing in an obsid with no polarization string
         obsids = ['zen.2458000.12345.uv']
-        nt.assert_raises(AssertionError, mt.build_makeflow_from_config, obsids,
+        nt.assert_raises(AssertionError, mt.build_analysis_makeflow_from_config, obsids,
                          config_file, work_dir=work_dir)
 
         return
 
-    def test_build_makeflow_from_config_options(self):
+    def test_build_analysis_makeflow_from_config_options(self):
         # define args
         obsids = self.obsids_pol[:1]
         config_file = self.config_file_options
@@ -259,7 +259,7 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
@@ -284,7 +284,7 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
+        mt.build_analysis_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
 
         nt.assert_true(os.path.exists(outfile))
 
