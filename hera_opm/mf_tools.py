@@ -541,26 +541,26 @@ def build_lstbin_makeflow_from_config(obsids, config_file, mf_name=None, work_di
 
     # get general options
     pol_list = get_config_entry(config, 'Options', 'pols', required=False)
-    if len(pol_list) == 0:
-        # make a dummy list of length 1, to ensure we perform actions later
-        pol_list = ['']
-    else:
-        # make sure that we were only passed in a single polarization in our obsids
-        for i, obsid in enumerate(obsids):
-            match = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid)
-            if match:
-                obs_pol = match.group(1)
-            else:
-                raise AssertionError("Polarization not detected for input"
-                                     " obsid {}".format(obsid))
-            for j in range(i + 1, len(obsids)):
-                obsid2 = obsids[j]
-                match2 = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid2)
-                if match2:
-                    obs_pol2 = match2.group(1)
-                    if obs_pol != obs_pol2:
-                        raise AssertionError("Polarizations do not match for"
-                                             " obsids {} and {}".format(obsid, obsid2))
+    # if len(pol_list) == 0:
+    #     # make a dummy list of length 1, to ensure we perform actions later
+    #     pol_list = ['']
+    # else:
+    #     # make sure that we were only passed in a single polarization in our obsids
+    #     for i, obsid in enumerate(obsids):
+    #         match = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid)
+    #         if match:
+    #             obs_pol = match.group(1)
+    #         else:
+    #             raise AssertionError("Polarization not detected for input"
+    #                                  " obsid {}".format(obsid))
+    #         for j in range(i + 1, len(obsids)):
+    #             obsid2 = obsids[j]
+    #             match2 = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid2)
+    #             if match2:
+    #                 obs_pol2 = match2.group(1)
+    #                 if obs_pol != obs_pol2:
+    #                     raise AssertionError("Polarizations do not match for"
+    #                                          " obsids {} and {}".format(obsid, obsid2))
     path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')[0]
     conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
     if conda_env == []:
@@ -597,16 +597,23 @@ def build_lstbin_makeflow_from_config(obsids, config_file, mf_name=None, work_di
     makeflowfile = os.path.join(work_dir, fn)
 
     # get LST-specific config options
-    dlst = get_config_entry(config, 'Options', 'dlst', required=True)[0]
-    lst_start = get_config_entry(config, 'Options', 'lst_start', required=True)[0]
-    ntimes_per_file = get_config_entry(config, 'Options', 'ntimes_per_file', required=True)[0]
+    dlst = get_config_entry(config, 'LSTBIN_OPTS', 'dlst', required=True)[0]
+    if dlst == "None":
+        dlst = None
+    else:
+        dlst = float(dlst)
+    lst_start = float(get_config_entry(config, 'LSTBIN_OPTS', 'lst_start', required=True)[0])
+    ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True)[0])
 
     # pre-process files to determine the number of output files
-    obsids = sorted(glob.glob(obsids))
+    parent_dir = os.path.dirname(os.path.dirname(obsids[0][0]))
     output = lstbin.config_lst_bin_files(obsids, dlst=dlst, lst_start=lst_start,
-                                         ntimes_per_file=nstimes_per_file)
-
+                                         ntimes_per_file=ntimes_per_file)
     nfiles = len(output[3])
+
+    # define command
+    command = "do_LSTBIN.sh"
+    command = os.path.join(path_to_do_scripts, command)
 
     # write makeflow file
     with open(makeflowfile, "w") as f:
@@ -624,7 +631,7 @@ def build_lstbin_makeflow_from_config(obsids, config_file, mf_name=None, work_di
         print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
 
         # loop over output files
-        for output_file_index in range(nfile):
+        for output_file_index in range(nfiles):
             # make outfile list
             outfiles = make_outfile_name('lst_outfile', 'LSTBIN', pol_list)
 
@@ -637,7 +644,7 @@ def build_lstbin_makeflow_from_config(obsids, config_file, mf_name=None, work_di
                 # make logfile name
                 # logfile will capture stdout and stderr
                 logfile = re.sub(r'\.out', '.log', outfile)
-                logfile = os.path.join(word_dir, logfile)
+                logfile = os.path.join(work_dir, logfile)
 
                 # make a small wrapper script that will run the actual command
                 # can't embed if; then statements in makeflow script
@@ -658,14 +665,12 @@ def build_lstbin_makeflow_from_config(obsids, config_file, mf_name=None, work_di
                     print("  cd {}".format(work_dir), file=f2)
                     print("  touch {}".format(outfile), file=f2)
                     print("fi", file=f2)
-                    print("date")
+                    print("date", file=f2)
                 # make file executable
                 os.chmod(wrapper_script, 0o755)
 
                 # first line lists target file to make (dummy output file), and requirements
                 # second line is "build rule", which runs the shell script and makes the output file
-                command = "do_LSTBIN.sh"
-                command = os.path.join(path_to_do_scripts, command)
                 line1 = "{0}: {1}".format(outfile, command)
                 line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
                 print(line1, file=f)

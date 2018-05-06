@@ -25,7 +25,13 @@ install:
 
   # create environment and install dependencies
   - conda install nose pip configparser
-  - conda install -c conda-forge pycodestyle coveralls
+  - conda install -c conda-forge pycodestyle coveralls aipy
+  - pip install git+https://github.com/HERA-Team/pyuvdata.git
+  - pip install git+https://github.com/HERA-Team/omnical.git
+  - pip install git+https://github.com/HERA-Team/linsolve.git
+  - pip install git+https://github.com/HERA-Team/hera_qm.git
+  - pip install git+https://github.com/HERA-Team/uvtools.git
+  - pip install git+https://github.com/HERA-Team/hera_cal.git
   - conda list
 script:
   - nosetests hera_opm --with-coverage --cover-package=hera_opm
