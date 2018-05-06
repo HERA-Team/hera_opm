@@ -648,7 +648,7 @@ def build_lstbin_makeflow_from_config(obsids, config_file, mf_name=None, work_di
                     print("#!/bin/bash", file=f2)
                     if conda_env is not None:
                         print("source activate {}".format(conda_env), file=f2)
-                    print("date", file-f2)
+                    print("date", file=f2)
                     print("cd {}".format(parent_dir), file=f2)
                     if timeout is not None:
                         print("timeout {0} {1} {2}".format(timeout, command, args), file=f2)
