@@ -24,8 +24,8 @@ install:
   - conda info -a
 
   # create environment and install dependencies
-  - conda install nose pip configparser
-  - conda install -c conda-forge pycodestyle coveralls aipy scipy
+  - conda install nose pip configparser scipy matplotlib
+  - conda install -c conda-forge pycodestyle coveralls aipy
   - pip install git+https://github.com/HERA-Team/pyuvdata.git
   - pip install git+https://github.com/HERA-Team/omnical.git
   - pip install git+https://github.com/HERA-Team/linsolve.git
