@@ -225,11 +225,49 @@ def prep_args(args, obsid, pol=None, obsids=None):
 
 def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None):
     '''
+    Function for constructing a makeflow from a config file.
+
+    Args:
+    ====================
+    obsids (str) -- list of paths to obsids/filenames for processing
+    config_file (str) -- path to configuration file
+    mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
+        specified.
+    work_dir (str) -- path to the "work directory" where all of the wrapper scripts and log
+        files will be made. Defaults to the current directory.
+
+    Returns:
+    ====================
+    None
+
+
+    Notes:
+    ====================
+    This function will read the "makeflow_type" entry under the "[Options]" header to
+    determine if the config file specifies an "analysis" type or "lstbin" type, and
+    call the appropriate funciton below.
+    '''
+    # read in config file
+    config = ConfigParser(interpolation=ExtendedInterpolation())
+    config.read(config_file)
+    makeflow_type = get_config_entry(config, 'Options', 'makeflow_type', required=True)[0]
+    if makeflow_type == 'analysis':
+        build_analysis_makeflow_from_config(obsids, config_file, mf_name=mf_name, work_dir=work_dir)
+    elif makeflow_type == 'lstbin':
+        build_lstbin_makeflow_from_config(obsids, config_file, mf_name=mf_name, work_dir=work_dir)
+    else:
+        raise ValueError("unknown makeflow_type {} specified; must be 'analysis' or 'lstbin'".format(makeflow_type))
+
+    return
+
+
+def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None):
+    '''
     Construct a makeflow file from a config file.
 
     Args:
     ====================
-    obsids (str) -- path to obsids/filenames for processing
+    obsids (str) -- list of paths to obsids/filenames for processing
     config_file (str) -- path to configuration file
     mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
         specified.
@@ -466,6 +504,172 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
 
                 # save previous outfiles for next time
                 outfiles_prev = outfiles
+
+    return
+
+
+def build_lstbin_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None):
+    """
+    Function for constructing an LST-binning makeflow file from input data and a config_file.
+
+    Arguments:
+    ====================
+    obsids (str) -- list of paths to files to include in LST binning
+    config_file (str) -- path to config file containing options
+    mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
+        specified.
+    work_dir (str) -- path to the "work directory" where all of the wrapper scripts and log
+        files will be made. Defaults to the current directory.
+
+    Returns:
+    ====================
+    None
+
+
+    Notes:
+    ====================
+    The major difference between this function and the one above is the use of the `config_lst_bin_files`
+    function from hera_cal, which is used to determine the number of output files, which are parallelized
+    over in the makeflow.
+    """
+    # import hera_cal
+    from hera_cal import lstbin
+
+    # read in config file
+    config = ConfigParser(interpolation=ExtendedInterpolation())
+    config.read(config_file)
+
+    # get general options
+    pol_list = get_config_entry(config, 'Options', 'pols', required=False)
+    if len(pol_list) == 0:
+        # make a dummy list of length 1, to ensure we perform actions later
+        pol_list = ['']
+    else:
+        # make sure that we were only passed in a single polarization in our obsids
+        for i, obsid in enumerate(obsids):
+            match = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid)
+            if match:
+                obs_pol = match.group(1)
+            else:
+                raise AssertionError("Polarization not detected for input"
+                                     " obsid {}".format(obsid))
+            for j in range(i + 1, len(obsids)):
+                obsid2 = obsids[j]
+                match2 = re.search(r'zen\.\d{7}\.\d{5}\.(.*?)\.', obsid2)
+                if match2:
+                    obs_pol2 = match2.group(1)
+                    if obs_pol != obs_pol2:
+                        raise AssertionError("Polarizations do not match for"
+                                             " obsids {} and {}".format(obsid, obsid2))
+    path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')[0]
+    conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
+    if conda_env == []:
+        conda_env = None
+    else:
+        conda_env = conda_env[0]
+    timeout = get_config_entry(config, 'Options', 'timeout', required=False)
+    if timeout == []:
+        timeout = None
+    else:
+        # check that the `timeout' command exists on the system
+        try:
+            out = subprocess.check_output(["timeout", "--help"])
+        except OSError:
+            raise AssertionError("A value for the \"timeout\" option was specified,"
+                                 " but the `timeout' command does not appear to be"
+                                 " installed. Please install or remove the option"
+                                 " from the config file")
+        timeout = timeout[0]
+
+    # open file for writing
+    cf = os.path.basename(config_file)
+    if mf_name is not None:
+        fn = mf_name
+    else:
+        base, ext = os.path.splitext(cf)
+        fn = "{0}.mf".format(base)
+
+    # get the work directory
+    if work_dir is None:
+        work_dir = os.getcwd()
+    else:
+        work_dir = os.path.abspath(work_dir)
+    makeflowfile = os.path.join(work_dir, fn)
+
+    # get LST-specific config options
+    dlst = get_config_entry(config, 'Options', 'dlst', required=True)[0]
+    lst_start = get_config_entry(config, 'Options', 'lst_start', required=True)[0]
+    ntimes_per_file = get_config_entry(config, 'Options', 'ntimes_per_file', required=True)[0]
+
+    # pre-process files to determine the number of output files
+    obsids = sorted(glob.glob(obsids))
+    output = lstbin.config_lst_bin_files(obsids, dlst=dlst, lst_start=lst_start,
+                                         ntimes_per_file=nstimes_per_file)
+
+    nfiles = len(output[3])
+
+    # write makeflow file
+    with open(makeflowfile, "w") as f:
+        # add comment at top of file listing date of creation and config file name
+        dt = time.strftime('%H:%M:%S on %d %B %Y')
+        print("# makeflow file generated from config file {}".format(cf), file=f)
+        print("# created at {}".format(dt), file=f)
+
+        # add resource information
+        base_mem = get_config_entry(config, 'Options', 'base_mem', required=True)
+        base_cpu = get_config_entry(config, 'Options', 'base_cpu', required=False)
+        batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(base_mem[0]))
+        if base_cpu != []:
+            batch_options += ",nodes=1:ppn={:d}".format(int(base_cpu[0]))
+        print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
+
+        # loop over output files
+        for output_file_index in range(nfile):
+            # make outfile list
+            outfiles = make_outfile_name('lst_outfile', 'LSTBIN', pol_list)
+
+            # get args for lst-binning step
+            args = get_config_entry(config, "LSTBIN", "args", required=False)
+            args = ' '.join(args)
+
+            # loop over polarizations
+            for pol, outfile in zip(pol_list, outfiles):
+                # make logfile name
+                # logfile will capture stdout and stderr
+                logfile = re.sub(r'\.out', '.log', outfile)
+                logfile = os.path.join(word_dir, logfile)
+
+                # make a small wrapper script that will run the actual command
+                # can't embed if; then statements in makeflow script
+                wrapper_script = re.sub(r'\.out', '.sh', outfile)
+                wrapper_script = "wrapper_{}".format(wrapper_script)
+                wrapper_script = os.path.join(work_dir, wrapper_script)
+                with open(wrapper_script, 'w') as f2:
+                    print("#!/bin/bash", file=f2)
+                    if conda_env is not None:
+                        print("source activate {}".format(conda_env), file=f2)
+                    print("date", file-f2)
+                    print("cd {}".format(parent_dir), file=f2)
+                    if timeout is not None:
+                        print("timeout {0} {1} {2}".format(timeout, command, args), file=f2)
+                    else:
+                        print("{0} {1}".format(command, args), file=f2)
+                    print("if [ $? -eq 0 ]; then", file=f2)
+                    print("  cd {}".format(work_dir), file=f2)
+                    print("  touch {}".format(outfile), file=f2)
+                    print("fi", file=f2)
+                    print("date")
+                # make file executable
+                os.chmod(wrapper_script, 0o755)
+
+                # first line lists target file to make (dummy output file), and requirements
+                # second line is "build rule", which runs the shell script and makes the output file
+                command = "do_LSTBIN.sh"
+                command = os.path.join(path_to_do_scripts, command)
+                line1 = "{0}: {1}".format(outfile, command)
+                line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
+                print(line1, file=f)
+                print(line2, file=f)
 
     return
 
