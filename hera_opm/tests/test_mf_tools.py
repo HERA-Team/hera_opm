@@ -73,6 +73,10 @@ class TestMethods(object):
                     'zen.2457698.50355.xx.HH.uvcA.OMNICAL.yy.out']
         nt.assert_equal(set(outfiles), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
 
+        # test asking for "all" neighbors
+        nt.assert_equal(set(outfiles), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol,
+                                                                              n_neighbors='all')))
+
         # test edge cases
         obsid = self.obsids_time[0]
         nt.assert_equal(set(outfiles[:2]), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
@@ -92,6 +96,15 @@ class TestMethods(object):
         obsid = 'zen.1234567.12345.xx.HH.uvcA'
         action = 'OMNICAL'
         nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, obsid, action, self.obsids_time)
+
+        # test passing in nonsense for all_neighbors
+        nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, self.obsids_time[0], action,
+                         self.obsids_time, pol='xx', n_neighbors='blah')
+
+        # test passing in a negative number of neighbors
+        nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, self.obsids_time[0], action,
+                         self.obsids_time, pol='xx', n_neighbors='-1')
+
         return
 
     def test_prep_args(self):
