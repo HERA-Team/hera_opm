@@ -68,19 +68,22 @@ class TestMethods(object):
         obsid = self.obsids_time[1]
         action = 'OMNICAL'
         pol = self.pols[3]
-        outfiles = set(['zen.2457698.30355.xx.HH.uvcA.OMNICAL.yy.out', 'zen.2457698.50355.xx.HH.uvcA.OMNICAL.yy.out'])
-        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
+        outfiles = ['zen.2457698.30355.xx.HH.uvcA.OMNICAL.yy.out',
+                    'zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out',
+                    'zen.2457698.50355.xx.HH.uvcA.OMNICAL.yy.out']
+        nt.assert_equal(set(outfiles), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
 
         # test edge cases
         obsid = self.obsids_time[0]
-        outfiles = set(['zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out'])
-        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
+        nt.assert_equal(set(outfiles[:2]), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
         obsid = self.obsids_time[2]
-        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
+        nt.assert_equal(set(outfiles[1:]), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
 
         # run for no polarizations
         obsid = self.obsids_time[1]
-        outfiles = set(['zen.2457698.30355.xx.HH.uvcA.OMNICAL.out', 'zen.2457698.50355.xx.HH.uvcA.OMNICAL.out'])
+        outfiles = set(['zen.2457698.30355.xx.HH.uvcA.OMNICAL.out',
+                        'zen.2457698.40355.xx.HH.uvcA.OMNICAL.out',
+                        'zen.2457698.50355.xx.HH.uvcA.OMNICAL.out'])
         nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time)))
         return
 

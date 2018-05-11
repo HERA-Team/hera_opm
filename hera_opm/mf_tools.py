@@ -88,7 +88,8 @@ def make_outfile_name(obsid, action, pol_list=[]):
     return outfiles
 
 
-def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None):
+def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None,
+                                    n_neighbors='1'):
     '''
     Make a list of neighbors in time for prereqs.
 
@@ -99,6 +100,8 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None):
     obsids -- list of all obsids for the given day; uses this list (sorted) to
         define neighbors
     pol (str) -- if present, polarization string to specify for output file
+    n_neighbors (str) -- number of neighboring time files to append to list.
+        If set to the string "all", then all neighbors from that JD are added.
 
     Returns:
     ====================
@@ -118,31 +121,35 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None):
     except ValueError:
         raise ValueError("obsid {} not found in list of obsids".format(obsid))
 
-    # extract adjacent neighbors, if not on the end
-    if obs_idx > 0:
-        prev_obsid = obsids[obs_idx - 1]
+    if n_neighbors == 'all':
+        i0 = 0
+        i1 = len(obsids)
     else:
-        prev_obsid = None
-    if obs_idx < len(obsids) - 1:
-        next_obsid = obsids[obs_idx + 1]
-    else:
-        next_obsid = None
+        # assume we got an integer as a string; try to make sense of it
+        try:
+            n_neighbors = int(n_neighbors)
+        except ValueError:
+            raise ValueError("n_neighbors must be parsable as an int")
+        if n_neighbors <= 0:
+            raise ValueError("n_neighbors must be a postitive integer")
+        # get n_neighbors before and after; make sure we don't have an IndexError
+        i0 = max(obs_idx - n_neighbors, 0)
+        i1 = min(obs_idx + n_neighbors + 1, len(obsids))
 
-    if pol is not None:
-        # add polarization to output
-        if prev_obsid is not None:
-            of = "{0}.{1}.{2}.out".format(prev_obsid, action, pol)
-            outfiles.append(of)
-        if next_obsid is not None:
-            of = "{0}.{1}.{2}.out".format(next_obsid, action, pol)
-            outfiles.append(of)
+    # build list of output files to wait for
+    for i in range(i0, i1):
+        outfiles.append(obsids[i])
+
+    # finalize the names of files
+    if pol is None:
+        for i, of in enumerate(outfiles):
+            of = "{0}.{1}.out".format(of, action)
+            outfiles[i] = of
     else:
-        if prev_obsid is not None:
-            of = "{0}.{1}.out".format(prev_obsid, action)
-            outfiles.append(of)
-        if next_obsid is not None:
-            of = "{0}.{1}.out".format(next_obsid, action)
-            outfiles.append(of)
+        for i, of in enumerate(outfiles):
+            of = "{0}.{1}.{2}.out".format(of, action, pol)
+            outfiles[i] = of
+
     return outfiles
 
 
@@ -377,6 +384,9 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                 for pol, outfile in zip(pol_list, outfiles):
                     time_prereqs = get_config_entry(config, action, "time_prereqs", required=False)
                     if len(time_prereqs) > 0:
+                        # get how many neighbors we should be including
+                        n_neighbors = get_config_entry(config, action, "n_time_neighbors", required=True)[0]
+
                         # get a copy of the infile list; we're going to add to it, but don't want these
                         # entries broadcast across pols
                         infiles_pol = infiles
@@ -388,7 +398,8 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                                                  "workflow".format(tp, action))
                             # add neighbors for all pols
                             for pol2 in pol_list:
-                                tp_outfiles = make_time_neighbor_outfile_name(filename, tp, obsids, pol2)
+                                tp_outfiles = make_time_neighbor_outfile_name(filename, tp, obsids, pol2,
+                                                                              n_neighbors)
                                 for of in tp_outfiles:
                                     infiles_pol.append(of)
 
