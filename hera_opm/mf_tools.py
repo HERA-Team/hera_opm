@@ -12,6 +12,7 @@ import subprocess
 import warnings
 import ConfigParser as configparser
 from configparser import ConfigParser, ExtendedInterpolation
+import glob
 
 
 def get_jd(filename):
@@ -31,7 +32,7 @@ def get_jd(filename):
     return m.groups()[0]
 
 
-def get_config_entry(config, header, item, required=True):
+def get_config_entry(config, header, item, required=True, json_type=False):
     '''
     Helper function to extract specific entry from config file.
 
@@ -42,7 +43,9 @@ def get_config_entry(config, header, item, required=True):
     item (str) -- the attribute to retreive, e.g., 'prereqs'
     required (bool) -- whether the attribute is required or not. If required and not present,
         an error is raised.
-
+    json_type (bool) -- whether to use JSON to convert config's unicode string output
+        into a Python data type.
+    
     Returns:
     ====================
     entries -- a list of entries contained in the config file. If item is not present, and
@@ -254,7 +257,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     if makeflow_type == 'analysis':
         build_analysis_makeflow_from_config(obsids, config_file, mf_name=mf_name, work_dir=work_dir)
     elif makeflow_type == 'lstbin':
-        build_lstbin_makeflow_from_config(obsids, config_file, mf_name=mf_name, work_dir=work_dir)
+        build_lstbin_makeflow_from_config(config_file, mf_name=mf_name, work_dir=work_dir)
     else:
         raise ValueError("unknown makeflow_type {} specified; must be 'analysis' or 'lstbin'".format(makeflow_type))
 
@@ -508,13 +511,12 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
     return
 
 
-def build_lstbin_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None):
+def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
     """
     Function for constructing an LST-binning makeflow file from input data and a config_file.
 
     Arguments:
     ====================
-    obsids (str) -- list of paths to files to include in LST binning
     config_file (str) -- path to config file containing options
     mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
         specified.
@@ -587,7 +589,10 @@ def build_lstbin_makeflow_from_config(obsids, config_file, mf_name=None, work_di
 
     # pre-process files to determine the number of output files
     parent_dir = os.path.dirname(os.path.dirname(obsids[0][0]))
-    output = lstbin.config_lst_bin_files(obsids, dlst=dlst, lst_start=lst_start,
+    datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
+    datafiles = map(lambda df: str(df), datafiles)
+    datafiles = map(lambda df: sorted(glob.glob(df)), datafiles)
+    output = lstbin.config_lst_bin_files(datafiles, dlst=dlst, lst_start=lst_start,
                                          ntimes_per_file=ntimes_per_file)
     nfiles = len(output[3])
 
