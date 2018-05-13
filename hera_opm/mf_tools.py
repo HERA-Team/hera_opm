@@ -32,7 +32,7 @@ def get_jd(filename):
     return m.groups()[0]
 
 
-def get_config_entry(config, header, item, required=True, json_type=False):
+def get_config_entry(config, header, item, required=True):
     '''
     Helper function to extract specific entry from config file.
 
@@ -43,8 +43,6 @@ def get_config_entry(config, header, item, required=True, json_type=False):
     item (str) -- the attribute to retreive, e.g., 'prereqs'
     required (bool) -- whether the attribute is required or not. If required and not present,
         an error is raised.
-    json_type (bool) -- whether to use JSON to convert config's unicode string output
-        into a Python data type.
     
     Returns:
     ====================
