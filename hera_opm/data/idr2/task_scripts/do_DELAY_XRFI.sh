@@ -32,13 +32,14 @@ bn=$(basename ${1})
 # 6 - window
 # 7 - skip_wgt
 # 8 - maxiter
-# 9 - kt_size
-# 10 - kf_size
-# 11 - sig_init
-# 12 - sig_adj
-# 13 - px_threshold
-# 14 - freq_threshold
-# 15 - time_threshold
+# 9 - alpha
+# 10 - kt_size
+# 11 - kf_size
+# 12 - sig_init
+# 13 - sig_adj
+# 14 - px_threshold
+# 15 - freq_threshold
+# 16 - time_threshold
 
 # Get list of bad ants
 jd=$(get_jd ${bn})
@@ -62,5 +63,5 @@ wf_list=$(join_by , ${vis_wf_xx} ${vis_wf_yy} ${chi_wf_xx} ${chi_wf_yy} ${g_wf_x
 
 
 # Run just on visibilities
-echo delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --ex_ants=${ex_ants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary --waterfalls=${wf_list} ${bn}OC
-delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --kt_size=${9} --kf_size=${10} --sig_init=${11} --sig_adj=${12} --px_threshold=${13} --freq_threshold=${14} --time_threshold=${15} --ex_ants=${ex_ants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary --waterfalls=${wf_list} ${bn}OC
+echo delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --alpha=${9} --kt_size=${10} --kf_size=${11} --sig_init=${12} --sig_adj=${13} --px_threshold=${14} --freq_threshold=${15} --time_threshold=${16} --ex_ants=${ex_ants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary --waterfalls=${wf_list} ${bn}OC
+delay_xrfi_run.py --standoff=${3} --horizon=${4} --tol=${5} --window=${6} --skip_wgt=${7} --maxiter=${8} --alpha=${9} --kt_size=${10} --kf_size=${11} --sig_init=${12} --sig_adj=${13} --px_threshold=${14} --freq_threshold=${15} --time_threshold=${16} --ex_ants=${ex_ants} --infile_format=miriad --algorithm=xrfi --extension=.flags.npz --summary --waterfalls=${wf_list} ${bn}OC
