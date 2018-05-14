@@ -17,6 +17,7 @@ source ${src_dir}/_common.sh
 # 7 - skip_wgt
 # 8 - maxiter
 # 9 - alpha
+# 10 - antflag_thresh
 
 fn="${1}"
 time_scale="${2}"
@@ -27,6 +28,7 @@ window="${6}"
 skip_wgt="${7}"
 maxiter="${8}"
 alpha="${9}"
+antflag_thresh="${10}"
 
 # we only want to run calibration smoothing on linear polarizations (e.g. "xx")
 if is_lin_pol $fn; then
@@ -42,6 +44,6 @@ if is_lin_pol $fn; then
     # make the name of this calfits file for --run_if_first option
     this_calfile=`echo "${fn}.abs.calfits"`
 
-    echo smooth_cal_run.py ${calfiles} --flags_npz_list ${flagfiles} --infile_replace .abs. --outfile_replace .smooth_abs. --clobber --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha} --run_if_first ${this_calfile}
-    smooth_cal_run.py ${calfiles} --flags_npz_list ${flagfiles} --infile_replace .abs. --outfile_replace .smooth_abs. --clobber --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha} --run_if_first ${this_calfile}
+    echo smooth_cal_run.py ${calfiles} --flags_npz_list ${flagfiles} --infile_replace .abs. --outfile_replace .smooth_abs. --clobber --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha} --antflag_thresh ${antflag_thresh} --run_if_first ${this_calfile}
+    smooth_cal_run.py ${calfiles} --flags_npz_list ${flagfiles} --infile_replace .abs. --outfile_replace .smooth_abs. --clobber --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha} --antflag_thresh ${antflag_thresh} --run_if_first ${this_calfile}
 fi
