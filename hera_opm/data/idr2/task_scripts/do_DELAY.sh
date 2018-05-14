@@ -31,6 +31,8 @@ source ${src_dir}/_common.sh
 # 5 - window
 # 6 - skip_wgt
 # 7 - maxiter
+# 8 - alpha
+
 fn="${1}"
 standoff="${2}"
 horizon="${3}"
@@ -38,7 +40,8 @@ tol="${4}"
 window="${5}"
 skip_wgt="${6}"
 maxiter="${7}"
+alpha="${8}"
 
 # run the command
-echo delay_filter_run.py ${fn}OCRS ${fn}OCRSD --filetype=miriad --clobber --standoff=${standoff} --horizon=${horizon} --tol=${tol} --window=${window} --skip_wgt=${skip_wgt} --maxiter=${maxiter}
-delay_filter_run.py ${fn}OCRS ${fn}OCRSD --filetype=miriad --clobber --standoff=${standoff} --horizon=${horizon} --tol=${tol} --window=${window} --skip_wgt=${skip_wgt} --maxiter=${maxiter}
+echo delay_filter_run.py ${fn}OCRS ${fn}OCRSD --filetype=miriad --clobber --standoff=${standoff} --horizon=${horizon} --tol=${tol} --window=${window} --skip_wgt=${skip_wgt} --maxiter=${maxiter} --alpha=${alpha}
+delay_filter_run.py ${fn}OCRS ${fn}OCRSD --filetype=miriad --clobber --standoff=${standoff} --horizon=${horizon} --tol=${tol} --window=${window} --skip_wgt=${skip_wgt} --maxiter=${maxiter} --alpha=${alpha}
