@@ -37,12 +37,12 @@ class TestMethods(object):
         # retrieve specific entry
         header = 'OMNICAL'
         item = 'prereqs'
-        nt.assert_equal(["FIRSTCAL_METRICS"], mt.get_config_entry(config, header, item))
+        nt.assert_equal("FIRSTCAL_METRICS", mt.get_config_entry(config, header, item))
 
         # get nonexistent, but not required, entry
         header = 'OMNICAL'
         item = 'blah'
-        nt.assert_equal([], mt.get_config_entry(config, header, item, required=False))
+        nt.assert_equal(None, mt.get_config_entry(config, header, item, required=False))
 
         # raise an error for a nonexistent, required entry
         nt.assert_raises(AttributeError, mt.get_config_entry, config, header, item)

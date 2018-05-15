@@ -9,6 +9,7 @@ import time
 import gzip
 import shutil
 import subprocess
+import warnings
 import ConfigParser as configparser
 from configparser import ConfigParser, ExtendedInterpolation
 
@@ -50,10 +51,12 @@ def get_config_entry(config, header, item, required=True):
     if config.has_option(header, item):
         entries = config.get(header, item).split(',')
         entries = [entry.strip() for entry in entries]
+        if len(entries) == 1:
+            entries = entries[0]
         return entries
     else:
         if not required:
-            return []
+            return None
         else:
             raise AttributeError("Error processing config file: item \"{0}\" under header \"{1}\" is "
                                  "required, but not specified".format(item, header))
@@ -285,25 +288,19 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                         raise AssertionError("Polarizations do not match for"
                                              " obsids {} and {}".format(obsid, obsid2))
 
-    path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')[0]
+    path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')
     conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
-    if conda_env == []:
-        conda_env = None
-    else:
-        conda_env = conda_env[0]
     timeout = get_config_entry(config, 'Options', 'timeout', required=False)
-    if timeout == []:
-        timeout = None
-    else:
+    if timeout is not None:
         # check that the `timeout' command exists on the system
         try:
             out = subprocess.check_output(["timeout", "--help"])
         except OSError:
-            raise AssertionError("A value for the \"timeout\" option was specified,"
-                                 " but the `timeout' command does not appear to be"
-                                 " installed. Please install or remove the option"
-                                 " from the config file")
-        timeout = timeout[0]
+            warnings.warn("A value for the \"timeout\" option was specified,"
+                          " but the `timeout' command does not appear to be"
+                          " installed. Please install or remove the option"
+                          " from the config file")
+        timeout = timeout
 
     # open file for writing
     cf = os.path.basename(config_file)
@@ -330,10 +327,6 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
         # add resource information
         base_mem = get_config_entry(config, 'Options', 'base_mem', required=True)
         base_cpu = get_config_entry(config, 'Options', 'base_cpu', required=False)
-        batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(base_mem[0]))
-        if base_cpu != []:
-            batch_options += ",nodes=1:ppn={:d}".format(int(base_cpu[0]))
-        print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
 
         for obsid in obsids:
             # get parent directory
@@ -348,7 +341,9 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
 
                 # get dependencies
                 prereqs = get_config_entry(config, action, "prereqs", required=False)
-                if len(prereqs) > 0:
+                if prereqs is not None:
+                    if not isinstance(prereqs, list):
+                        prereqs = [prereqs]
                     for prereq in prereqs:
                         try:
                             ip = workflow.index(prereq)
@@ -380,12 +375,27 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                 # make outfile name
                 outfiles = make_outfile_name(filename, action, pol_list)
 
+                # get processing options
+                mem = get_config_entry(config, action, "mem", required=False)
+                ncpu = get_config_entry(config, action, "ncpu", required=False)
+                if mem is None:
+                    mem = base_mem
+                if ncpu is None:
+                    if base_cpu is not None:
+                        ncpu = base_cpu
+                batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(mem))
+                if ncpu is not None:
+                    batch_options += ",nodes=1:ppn={:d}".format(int(ncpu))
+                print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
+
                 # make rules
                 for pol, outfile in zip(pol_list, outfiles):
                     time_prereqs = get_config_entry(config, action, "time_prereqs", required=False)
-                    if len(time_prereqs) > 0:
+                    if time_prereqs is not None:
+                        if not isinstance(time_prereqs, list):
+                            time_prereqs = [time_prereqs]
                         # get how many neighbors we should be including
-                        n_neighbors = get_config_entry(config, action, "n_time_neighbors", required=True)[0]
+                        n_neighbors = get_config_entry(config, action, "n_time_neighbors", required=True)
 
                         # get a copy of the infile list; we're going to add to it, but don't want these
                         # entries broadcast across pols
