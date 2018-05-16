@@ -38,11 +38,11 @@ if is_lin_pol $fn; then
     # get integer JD by extracting first 7 characters
     jd=$(get_jd $fn)
     int_jd=${jd:0:7}
-    calfiles=`echo "zen.${int_jd}.*.${pol}.*.abs.calfits"`
-    flagfiles=`echo "zen.${int_jd}.*.${pol}.*.flags.applied.npz"`
+    calfiles=`echo zen.${int_jd}.*.${pol}.*.abs.calfits`
+    flagfiles=`echo zen.${int_jd}.*.${pol}.*.flags.applied.npz`
 
     # make the name of this calfits file for --run_if_first option
-    this_calfile=`echo "${fn}.abs.calfits"`
+    this_calfile=`echo ${fn}.abs.calfits`
 
     echo smooth_cal_run.py ${calfiles} --flags_npz_list ${flagfiles} --infile_replace .abs. --outfile_replace .smooth_abs. --clobber --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha} --antflag_thresh ${antflag_thresh} --run_if_first ${this_calfile}
     smooth_cal_run.py ${calfiles} --flags_npz_list ${flagfiles} --infile_replace .abs. --outfile_replace .smooth_abs. --clobber --time_scale ${time_scale} --mirror_sigmas ${mirror_sigmas} --freq_scale ${freq_scale} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha} --antflag_thresh ${antflag_thresh} --run_if_first ${this_calfile}
