@@ -290,6 +290,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
 
     path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')
     conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
+    pbs_mail_user = get_config_entry(config, 'Options', 'pbs_mail_user', required=False)
     timeout = get_config_entry(config, 'Options', 'timeout', required=False)
     if timeout is not None:
         # check that the `timeout' command exists on the system
@@ -386,6 +387,8 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
                 batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(mem))
                 if ncpu is not None:
                     batch_options += ",nodes=1:ppn={:d}".format(int(ncpu))
+                if pbs_mail_user is not None:
+                    batch_options += " -M {}".format(pbs_mail_user)
                 print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
 
                 # make rules
