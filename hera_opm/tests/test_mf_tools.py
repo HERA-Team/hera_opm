@@ -404,7 +404,7 @@ class TestMethods(object):
         config_file = self.config_file_lstbin_options
         config = ConfigParser(interpolation=ExtendedInterpolation())
         config.read(config_file)
-        contentfig["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
+        config["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
 
         obsids = self.obsids_lstbin
         config_file = self.config_file_lstbin
