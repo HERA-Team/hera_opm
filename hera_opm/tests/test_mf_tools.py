@@ -339,16 +339,25 @@ class TestMethods(object):
         return
 
     def test_build_lstbin_makeflow_from_config_options(self):
+        # define load in config
+        config_file = self.config_file_lstbin_options
+        config = ConfigParser(interpolation=ExtendedInterpolation())
+        config.read(config_file)
+
+        # overwrite parent dir
+        config["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
+
         # define args
         obsids = self.obsids_lstbin
         config_file = self.config_file_lstbin_options
-        work_dir = os.path.join(DATA_PATH, 'test_output')
 
+        # setup vars
+        work_dir = os.path.join(DATA_PATH, 'test_output')
         mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+        mt.build_lstbin_makeflow_from_config(config, mf_name=outfile, work_dir=work_dir)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
@@ -362,7 +371,7 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
+        mt.build_lstbin_makeflow_from_config(config, mf_name=outfile, work_dir=work_dir)
 
         nt.assert_true(os.path.exists(outfile))
 
@@ -392,13 +401,18 @@ class TestMethods(object):
         mt.clean_wrapper_scripts(work_dir)
 
         # also test lstbin version
+        config_file = self.config_file_lstbin_options
+        config = ConfigParser(interpolation=ExtendedInterpolation())
+        config.read(config_file)
+        contentfig["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
+
         obsids = self.obsids_lstbin
         config_file = self.config_file_lstbin
         mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+        mt.build_makeflow_from_config(obsids, config, mf_name=outfile, work_dir=work_dir)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
