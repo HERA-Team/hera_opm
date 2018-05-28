@@ -1,5 +1,4 @@
 """Tests for mf_tools.py"""
-
 import nose.tools as nt
 import os
 import shutil
@@ -9,6 +8,7 @@ from hera_opm.data import DATA_PATH
 import hera_opm.mf_tools as mt
 import ConfigParser as configparser
 from configparser import ConfigParser, ExtendedInterpolation
+
 
 class TestMethods(object):
     def setUp(self):
@@ -301,7 +301,6 @@ class TestMethods(object):
 
     def test_build_lstbin_makeflow_from_config(self):
         # define args
-        obsids = self.obsids_lstbin
         config_file = self.config_file_lstbin
         work_dir = os.path.join(DATA_PATH, 'test_output')
 
@@ -309,7 +308,7 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+        mt.build_lstbin_makeflow_from_config(config_file, work_dir=work_dir)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
