@@ -643,7 +643,7 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
             # if parallize, update output_file_select
             if parallelize:
                 config['LSTBIN_OPTS']['output_file_select'] = str(output_file_index)
-                
+
             # make outfile list
             outfiles = make_outfile_name('lstbin_outfile_{}'.format(output_file_index), 'LSTBIN', pol_list)
 
