@@ -250,8 +250,12 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     call the appropriate funciton below.
     '''
     # read in config file
-    config = ConfigParser(interpolation=ExtendedInterpolation())
-    config.read(config_file)
+    if isinstance(config_file, (str, np.str, unicode)):
+        config = ConfigParser(interpolation=ExtendedInterpolation())
+        config.read(config_file)
+    else:
+        # assume config_file is a ConfigParser instance
+        config = config_file
     makeflow_type = get_config_entry(config, 'Options', 'makeflow_type', required=True)[0]
     if makeflow_type == 'analysis':
         build_analysis_makeflow_from_config(obsids, config_file, mf_name=mf_name, work_dir=work_dir)
