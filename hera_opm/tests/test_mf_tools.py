@@ -21,7 +21,7 @@ class TestMethods(object):
         self.obsids_pol = ['zen.2457698.40355.xx.HH.uvcA', 'zen.2457698.40355.xy.HH.uvcA',
                            'zen.2457698.40355.yx.HH.uvcA', 'zen.2457698.40355.yy.HH.uvcA']
         self.obsids_nopol = ['zen.2457698.40355.HH.uvcA']
-        self.obsids_lstbin = [sorted(glob.glob(DATA_PATH + '/zen.2457698.4*uvcA'))]
+        self.obsids_lstbin = [sorted(glob.glob(DATA_PATH + '/zen.245804{}.*.xx.HH.uvXRAA'.format(i))) for i in [3,4,5]]
         self.pols = ['xx', 'xy', 'yx', 'yy']
         self.obsids_time = ['zen.2457698.30355.xx.HH.uvcA', 'zen.2457698.40355.xx.HH.uvcA',
                             'zen.2457698.50355.xx.HH.uvcA']
@@ -300,15 +300,21 @@ class TestMethods(object):
         return
 
     def test_build_lstbin_makeflow_from_config(self):
-        # define args
+        # define load in config
         config_file = self.config_file_lstbin
-        work_dir = os.path.join(DATA_PATH, 'test_output')
+        config = ConfigParser(interpolation=ExtendedInterpolation())
+        config.read(config_file)
 
+        # overwrite parent dir
+        config["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
+
+        # setup vars
+        work_dir = os.path.join(DATA_PATH, 'test_output')
         mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(config_file, work_dir=work_dir)
+        mt.build_lstbin_makeflow_from_config(config, mf_name='lstbin.mf', work_dir=work_dir)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
@@ -322,7 +328,7 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
+        mt.build_lstbin_makeflow_from_config(config, mf_name=outfile, work_dir=work_dir)
 
         nt.assert_true(os.path.exists(outfile))
 
