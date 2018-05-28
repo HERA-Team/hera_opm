@@ -43,7 +43,7 @@ def get_config_entry(config, header, item, required=True):
     item (str) -- the attribute to retreive, e.g., 'prereqs'
     required (bool) -- whether the attribute is required or not. If required and not present,
         an error is raised.
-    
+
     Returns:
     ====================
     entries -- a list of entries contained in the config file. If item is not present, and
@@ -539,6 +539,12 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
     config = ConfigParser(interpolation=ExtendedInterpolation())
     config.read(config_file)
 
+    # get LSTBIN arguments
+    lstbin_args = get_config_entry(config, 'LSTBIN', 'args', required=False)
+
+    # set output_file_select to None
+    config['LSTBIN_OPTS']['output_file_select'] = u'None'
+
     # get general options
     pol_list = get_config_entry(config, 'Options', 'pols', required=False)
     path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')[0]
@@ -576,23 +582,31 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
         work_dir = os.path.abspath(work_dir)
     makeflowfile = os.path.join(work_dir, fn)
 
-    # get LST-specific config options
-    dlst = get_config_entry(config, 'LSTBIN_OPTS', 'dlst', required=True)[0]
-    if dlst == "None":
-        dlst = None
-    else:
-        dlst = float(dlst)
-    lst_start = float(get_config_entry(config, 'LSTBIN_OPTS', 'lst_start', required=True)[0])
-    ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True)[0])
+    # determine whether or not to parallelize
+    parallelize = str(get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)[0]) == 'True'
+    parent_dir = str(get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True)[0])
 
-    # pre-process files to determine the number of output files
-    parent_dir = os.path.dirname(os.path.dirname(obsids[0][0]))
-    datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
-    datafiles = map(lambda df: str(df), datafiles)
-    datafiles = map(lambda df: sorted(glob.glob(df)), datafiles)
-    output = lstbin.config_lst_bin_files(datafiles, dlst=dlst, lst_start=lst_start,
-                                         ntimes_per_file=ntimes_per_file)
-    nfiles = len(output[3])
+    if parallelize:
+        # get LST-specific config options
+        dlst = get_config_entry(config, 'LSTBIN_OPTS', 'dlst', required=True)[0]
+        if dlst == "None":
+            dlst = None
+        else:
+            dlst = float(dlst)
+        lst_start = float(get_config_entry(config, 'LSTBIN_OPTS', 'lst_start', required=True)[0])
+        ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True)[0])
+
+        # pre-process files to determine the number of output files
+        datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
+        datafiles = [df.strip("\\\'") for df in datafiles]
+        datafiles = map(lambda df: str(df), datafiles)
+        datafiles = map(lambda df: sorted(glob.glob(df)), datafiles)
+
+        output = lstbin.config_lst_bin_files(datafiles, dlst=dlst, lst_start=lst_start,
+                                             ntimes_per_file=ntimes_per_file)
+        nfiles = len(output[3])
+    else:
+        nfiles = 1
 
     # define command
     command = "do_LSTBIN.sh"
@@ -615,11 +629,20 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
 
         # loop over output files
         for output_file_index in range(nfiles):
+            # if parallize, update output_file_select
+            if parallelize:
+                config['LSTBIN_OPTS']['output_file_select'] = str(output_file_index)
+                
             # make outfile list
-            outfiles = make_outfile_name('lst_outfile', 'LSTBIN', pol_list)
+            outfiles = make_outfile_name('lstbin_outfile_{}'.format(output_file_index), 'LSTBIN', pol_list)
 
-            # get args for lst-binning step
-            args = get_config_entry(config, "LSTBIN", "args", required=False)
+            # get args list for lst-binning step
+            args = [get_config_entry(config, "LSTBIN_OPTS", a, required=False) for a in lstbin_args]
+
+            # flatten list
+            args = [item for sublist in args for item in sublist]
+
+            # turn into string
             args = ' '.join(args)
 
             # loop over polarizations
