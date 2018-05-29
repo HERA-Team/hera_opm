@@ -652,7 +652,7 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
         base_cpu = get_config_entry(config, 'Options', 'base_cpu', required=False)
         pbs_mail_user = get_config_entry(config, 'Options', 'pbs_mail_user', required=False)
         batch_options = process_batch_options(base_mem, base_cpu, pbs_mail_user)
-        print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
+        print('export BATCH_OPTIONS = {}'.format(batch_options), file=f)
 
         # loop over output files
         for output_file_index in range(nfiles):
