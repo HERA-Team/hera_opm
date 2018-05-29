@@ -256,7 +256,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     else:
         # assume config_file is a ConfigParser instance
         config = config_file
-    makeflow_type = get_config_entry(config, 'Options', 'makeflow_type', required=True)[0]
+    makeflow_type = get_config_entry(config, 'Options', 'makeflow_type', required=True)
     if makeflow_type == 'analysis':
         build_analysis_makeflow_from_config(obsids, config_file, mf_name=mf_name, work_dir=work_dir)
     elif makeflow_type == 'lstbin':
@@ -559,25 +559,18 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
 
     # get general options
     pol_list = get_config_entry(config, 'Options', 'pols', required=False)
-    path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')[0]
+    path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')
     conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
-    if conda_env == []:
-        conda_env = None
-    else:
-        conda_env = conda_env[0]
     timeout = get_config_entry(config, 'Options', 'timeout', required=False)
-    if timeout == []:
-        timeout = None
-    else:
+    if timeout is not None:
         # check that the `timeout' command exists on the system
         try:
             out = subprocess.check_output(["timeout", "--help"])
         except OSError:
-            raise AssertionError("A value for the \"timeout\" option was specified,"
-                                 " but the `timeout' command does not appear to be"
-                                 " installed. Please install or remove the option"
-                                 " from the config file")
-        timeout = timeout[0]
+            warnings.warn("A value for the \"timeout\" option was specified,"
+                          " but the `timeout' command does not appear to be"
+                          " installed. Please install or remove the option"
+                          " from the config file")
 
     # open file for writing
     if mf_name is not None:
@@ -594,18 +587,18 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
     makeflowfile = os.path.join(work_dir, fn)
 
     # determine whether or not to parallelize
-    parallelize = str(get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)[0]) == 'True'
-    parent_dir = str(get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True)[0])
+    parallelize = str(get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)) == 'True'
+    parent_dir = str(get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True))
 
     if parallelize:
         # get LST-specific config options
-        dlst = get_config_entry(config, 'LSTBIN_OPTS', 'dlst', required=True)[0]
+        dlst = get_config_entry(config, 'LSTBIN_OPTS', 'dlst', required=True)
         if dlst == "None":
             dlst = None
         else:
             dlst = float(dlst)
-        lst_start = float(get_config_entry(config, 'LSTBIN_OPTS', 'lst_start', required=True)[0])
-        ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True)[0])
+        lst_start = float(get_config_entry(config, 'LSTBIN_OPTS', 'lst_start', required=True))
+        ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True))
 
         # pre-process files to determine the number of output files
         datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
@@ -633,9 +626,9 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
         # add resource information
         base_mem = get_config_entry(config, 'Options', 'base_mem', required=True)
         base_cpu = get_config_entry(config, 'Options', 'base_cpu', required=False)
-        batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(base_mem[0]))
-        if base_cpu != []:
-            batch_options += ",nodes=1:ppn={:d}".format(int(base_cpu[0]))
+        batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(base_mem))
+        if base_cpu is not None:
+            batch_options += ",nodes=1:ppn={:d}".format(int(base_cpu))
         print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
 
         # loop over output files
