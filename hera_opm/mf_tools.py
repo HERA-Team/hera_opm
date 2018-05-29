@@ -158,6 +158,33 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None,
     return outfiles
 
 
+def process_batch_options(mem, ncpu=None, pbs_mail_user='youremail@example.org', queue='hera'):
+    '''
+    Form a series of PBS batch options to be passed to makeflow.
+
+    Args:
+    ====================
+    mem (str) -- amount of memory to reserve for the task, in MB
+    ncpu (str) -- number of processors to reserve
+    pbs_mail_user (str) -- email address to send PBS reports to
+    queue (str) -- name of PBS queue to submit to; defaults to "hera"
+
+    Returns:
+    ====================
+    batch_options (str) -- series of batch options that will be parsed by makeflow; should be
+        added to the makeflow file with the syntax:
+            "export BATCH_OPTIONS = {batch_options}"
+    '''
+    batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(mem))
+    if ncpu is not None:
+        batch_options += ",nodes=1:ppn={:d}".format(int(ncpu))
+    if pbs_mail_user is not None:
+        batch_options += " -M {}".format(pbs_mail_user)
+    if queue is not None:
+        batch_options += " -q {}".format(queue)
+    return batch_options
+
+
 def prep_args(args, obsid, pol=None, obsids=None):
     '''
     Substitute the polarization string in a filename/obsid with the specified one.
@@ -428,12 +455,9 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
                 if ncpu is None:
                     if base_cpu is not None:
                         ncpu = base_cpu
-                batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(mem))
-                if ncpu is not None:
-                    batch_options += ",nodes=1:ppn={:d}".format(int(ncpu))
-                if pbs_mail_user is not None:
-                    batch_options += " -M {}".format(pbs_mail_user)
-                print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
+
+                batch_options = process_batch_options(mem, ncpu, pbs_mail_user)
+                print('export BATCH_OPTIONS = {}'.format(batch_options), file=f)
 
                 # make rules
                 for pol, outfile in zip(pol_list, outfiles):
@@ -626,9 +650,8 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
         # add resource information
         base_mem = get_config_entry(config, 'Options', 'base_mem', required=True)
         base_cpu = get_config_entry(config, 'Options', 'base_cpu', required=False)
-        batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(base_mem))
-        if base_cpu is not None:
-            batch_options += ",nodes=1:ppn={:d}".format(int(base_cpu))
+        pbs_mail_user = get_config_entry(config, 'Options', 'pbs_mail_user', required=False)
+        batch_options = process_batch_options(base_mem, base_cpu, pbs_mail_user)
         print('export BATCH_OPTIONS = -q hera {}'.format(batch_options), file=f)
 
         # loop over output files
