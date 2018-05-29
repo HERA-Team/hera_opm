@@ -147,6 +147,7 @@ class TestMethods(object):
 
         return
 
+
     def test_prep_args_errors(self):
         # define args
         obsid = self.obsids_time[0]
@@ -160,6 +161,21 @@ class TestMethods(object):
         nt.assert_raises(ValueError, mt.prep_args, args, obsid, obsids=obsids)
 
         return
+
+
+    def test_process_batch_options(self):
+        # define args
+        mem = 8000
+        ncpu = 1
+        pbs_mail_user = 'youremail@example.org'
+        queue = 'hera'
+        batch_options = mt.process_batch_options(mem, ncpu, pbs_mail_user, queue)
+        nt.assert_true('-l vmem=8000M,mem=8000M' in batch_options)
+        nt.assert_true('nodes=1:ppn=1' in batch_options)
+        nt.assert_true('-M youremail@example.org' in batch_options)
+        nt.assert_true('-q hera' in batch_options)
+        return
+
 
     def test_build_analysis_makeflow_from_config(self):
         # define args
