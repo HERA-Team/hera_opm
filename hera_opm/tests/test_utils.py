@@ -4,6 +4,7 @@ import os
 from hera_opm.data import DATA_PATH
 import hera_opm.utils as utils
 
+
 def test_get_makeflow_ArgumentParser():
     # get an argument parser and make sure it behaves as expected
     a = utils.get_makeflow_ArgumentParser()

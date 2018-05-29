@@ -21,7 +21,7 @@ class TestMethods(object):
         self.obsids_pol = ['zen.2457698.40355.xx.HH.uvcA', 'zen.2457698.40355.xy.HH.uvcA',
                            'zen.2457698.40355.yx.HH.uvcA', 'zen.2457698.40355.yy.HH.uvcA']
         self.obsids_nopol = ['zen.2457698.40355.HH.uvcA']
-        self.obsids_lstbin = [sorted(glob.glob(DATA_PATH + '/zen.245804{}.*.xx.HH.uvXRAA'.format(i))) for i in [3,4,5]]
+        self.obsids_lstbin = [sorted(glob.glob(DATA_PATH + '/zen.245804{}.*.xx.HH.uvXRAA'.format(i))) for i in [3, 4, 5]]
         self.pols = ['xx', 'xy', 'yx', 'yy']
         self.obsids_time = ['zen.2457698.30355.xx.HH.uvcA', 'zen.2457698.40355.xx.HH.uvcA',
                             'zen.2457698.50355.xx.HH.uvcA']
