@@ -664,7 +664,7 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
             outfiles = make_outfile_name('lstbin_outfile_{}'.format(output_file_index), 'LSTBIN', pol_list)
 
             # get args list for lst-binning step
-            _args = [get_config_entry(config, "LSTBIN_OPTS", a, required=False) for a in lstbin_args]
+            _args = [get_config_entry(config, "LSTBIN_OPTS", a, required=True) for a in lstbin_args]
             args = []
             for a in _args:
                 if isinstance(a, list):
