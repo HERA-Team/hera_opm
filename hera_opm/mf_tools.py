@@ -671,7 +671,7 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
                     args.extend(a)
                 else:
                     args.append(a)
-                    
+
             # turn into string
             args = ' '.join(args)
 
