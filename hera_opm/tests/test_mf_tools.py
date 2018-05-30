@@ -147,7 +147,6 @@ class TestMethods(object):
 
         return
 
-
     def test_prep_args_errors(self):
         # define args
         obsid = self.obsids_time[0]
@@ -162,7 +161,6 @@ class TestMethods(object):
 
         return
 
-
     def test_process_batch_options(self):
         # define args
         mem = 8000
@@ -175,7 +173,6 @@ class TestMethods(object):
         nt.assert_true('-M youremail@example.org' in batch_options)
         nt.assert_true('-q hera' in batch_options)
         return
-
 
     def test_build_analysis_makeflow_from_config(self):
         # define args
