@@ -538,7 +538,7 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
     return
 
 
-def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
+def build_lstbin_makeflow_from_config(config_file, mf_name=None):
     """
     Function for constructing an LST-binning makeflow file from input data and a config_file.
 
@@ -547,8 +547,6 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
     config_file (str) -- path to config file containing options
     mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
         specified.
-    work_dir (str) -- path to the "work directory" where all of the wrapper scripts and log
-        files will be made. Defaults to the current directory.
 
     Returns:
     ====================
@@ -605,16 +603,11 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
         base, ext = os.path.splitext(cf)
         fn = "{0}.mf".format(base)
 
-    # get the work directory
-    if work_dir is None:
-        work_dir = os.getcwd()
-    else:
-        work_dir = os.path.abspath(work_dir)
-    makeflowfile = os.path.join(work_dir, fn)
-
     # determine whether or not to parallelize
     parallelize = str(get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)) == 'True'
     parent_dir = str(get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True))
+    work_dir = parent_dir
+    makeflowfile = os.path.join(work_dir, fn)
 
     # define command
     command = "do_LSTBIN.sh"
