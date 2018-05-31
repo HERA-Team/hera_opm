@@ -538,7 +538,7 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
     return
 
 
-def build_lstbin_makeflow_from_config(config_file, mf_name=None):
+def build_lstbin_makeflow_from_config(config_file, mf_name=None, **kwargs):
     """
     Function for constructing an LST-binning makeflow file from input data and a config_file.
 
