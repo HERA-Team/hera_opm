@@ -628,7 +628,7 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
         datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
         datafiles = [df.strip("\\\'") for df in datafiles]
         datafiles = map(lambda df: str(df), datafiles)
-        datafiles = map(lambda df: sorted(glob.glob(os.path.join(parent_dir, df))), datafiles)
+        datafiles = map(lambda df: sorted(glob.glob(df)), datafiles)
 
         output = lstbin.config_lst_bin_files(datafiles, dlst=dlst, lst_start=lst_start,
                                              ntimes_per_file=ntimes_per_file)
