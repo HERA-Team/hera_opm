@@ -15,7 +15,8 @@ source ${src_dir}/_common.sh
 # 6 - lst_start
 # 7 - vis_units
 # 8 - output_file_select
-# 9+ - series of glob-parsable search strings (in quotations!) to files to LSTBIN
+# 9 - outdir
+# 10+ - series of glob-parsable search strings (in quotations!) to files to LSTBIN
 
 # get positional arguments
 sig_clip=${1}
@@ -26,8 +27,9 @@ ntimes_per_file=${5}
 lst_start=${6}
 vis_units=${7}
 output_file_select=${8}
+outdir=${9}
 data_files=($@)
-data_files=(${data_files[*]:8})
+data_files=(${data_files[*]:9})
 
 # set special kwargs
 if [ $sig_clip == True ]; then
@@ -41,5 +43,5 @@ else
     rephase=""
 fi
 
-echo lstbin_run.py --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} ${data_files[@]}
-lstbin_run.py --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} ${data_files}
+echo lstbin_run.py --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} ${data_files[@]}
+lstbin_run.py --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} ${data_files}
