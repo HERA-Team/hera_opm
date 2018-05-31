@@ -45,5 +45,5 @@ else
     rephase=""
 fi
 
-echo lstbin_run.py --file_ext ${file_ext} --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} ${data_files[@]}
-lstbin_run.py --file_ext ${file_ext} --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} --overwrite ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} ${data_files}
+echo lstbin_run.py --file_ext ${file_ext} --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} --overwrite ${data_files[@]}
+lstbin_run.py --file_ext ${file_ext} --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} --overwrite ${data_files[@]}
