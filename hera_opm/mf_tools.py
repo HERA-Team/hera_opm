@@ -582,7 +582,8 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
     config['LSTBIN_OPTS']['output_file_select'] = u'None'
 
     # get general options
-    pol_list = get_config_entry(config, 'Options', 'pols', required=False)
+    pol_list = get_config_entry(config, 'Options', 'pols', required=True)
+    if not isinstance(pol_list, list): pol_list = [pol_list]
     path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')
     conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
     timeout = get_config_entry(config, 'Options', 'timeout', required=False)
@@ -614,28 +615,6 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
     parallelize = str(get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)) == 'True'
     parent_dir = str(get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True))
 
-    if parallelize:
-        # get LST-specific config options
-        dlst = get_config_entry(config, 'LSTBIN_OPTS', 'dlst', required=True)
-        if dlst == "None":
-            dlst = None
-        else:
-            dlst = float(dlst)
-        lst_start = float(get_config_entry(config, 'LSTBIN_OPTS', 'lst_start', required=True))
-        ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True))
-
-        # pre-process files to determine the number of output files
-        datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
-        datafiles = [df.strip("\\\'") for df in datafiles]
-        datafiles = map(lambda df: str(df), datafiles)
-        datafiles = map(lambda df: sorted(glob.glob(df)), datafiles)
-
-        output = lstbin.config_lst_bin_files(datafiles, dlst=dlst, lst_start=lst_start,
-                                             ntimes_per_file=ntimes_per_file)
-        nfiles = len(output[3])
-    else:
-        nfiles = 1
-
     # define command
     command = "do_LSTBIN.sh"
     command = os.path.join(path_to_do_scripts, command)
@@ -654,29 +633,59 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
         batch_options = process_batch_options(base_mem, base_cpu, pbs_mail_user)
         print('export BATCH_OPTIONS = {}'.format(batch_options), file=f)
 
-        # loop over output files
-        for output_file_index in range(nfiles):
-            # if parallize, update output_file_select
+        # loop over polarizations
+        for pol in pol_list:
+
+            # get data files and substitute w/ pol
+            datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
+            datafiles = [df.format(pol=pol) for df in datafiles]
+
+            # get number of output files for this pol
             if parallelize:
-                config['LSTBIN_OPTS']['output_file_select'] = str(output_file_index)
-
-            # make outfile list
-            outfiles = make_outfile_name('lstbin_outfile_{}'.format(output_file_index), 'LSTBIN', pol_list)
-
-            # get args list for lst-binning step
-            _args = [get_config_entry(config, "LSTBIN_OPTS", a, required=True) for a in lstbin_args]
-            args = []
-            for a in _args:
-                if isinstance(a, list):
-                    args.extend(a)
+                # get LST-specific config options
+                dlst = get_config_entry(config, 'LSTBIN_OPTS', 'dlst', required=True)
+                if dlst == "None":
+                    dlst = None
                 else:
-                    args.append(a)
+                    dlst = float(dlst)
+                lst_start = float(get_config_entry(config, 'LSTBIN_OPTS', 'lst_start', required=True))
+                ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True))
 
-            # turn into string
-            args = ' '.join(args)
+                # pre-process files to determine the number of output files
+                _datafiles = [df.strip("\\\'") for df in datafiles]
+                _datafiles = map(lambda df: str(df), _datafiles)
+                _datafiles = map(lambda df: sorted(glob.glob(df)), _datafiles)
 
-            # loop over polarizations
-            for pol, outfile in zip(pol_list, outfiles):
+                output = lstbin.config_lst_bin_files(_datafiles, dlst=dlst, lst_start=lst_start,
+                                                     ntimes_per_file=ntimes_per_file)
+                nfiles = len(output[3])
+            else:
+                nfiles = 1
+
+            # loop over output files
+            for output_file_index in range(nfiles):
+                # if parallize, update output_file_select
+                if parallelize:
+                    config['LSTBIN_OPTS']['output_file_select'] = str(output_file_index)
+
+                # make outfile list
+                outfile = 'lstbin_outfile_{}.{}.{}.out'.format(output_file_index, 'LSTBIN', pol)
+
+                # get args list for lst-binning step
+                _args = [get_config_entry(config, "LSTBIN_OPTS", a, required=True) for a in lstbin_args]
+                args = []
+                for a in _args:
+                    if isinstance(a, list):
+                        args.extend(a)
+                    else:
+                        args.append(a)
+
+                # extend datafiles
+                args.extend(datafiles)
+
+                # turn into string
+                args = ' '.join(args)
+
                 # make logfile name
                 # logfile will capture stdout and stderr
                 logfile = re.sub(r'\.out', '.log', outfile)
