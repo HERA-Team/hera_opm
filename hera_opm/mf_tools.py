@@ -583,7 +583,8 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None):
 
     # get general options
     pol_list = get_config_entry(config, 'Options', 'pols', required=True)
-    if not isinstance(pol_list, list): pol_list = [pol_list]
+    if not isinstance(pol_list, list):
+        pol_list = [pol_list]
     path_to_do_scripts = get_config_entry(config, 'Options', 'path_to_do_scripts')
     conda_env = get_config_entry(config, 'Options', 'conda_env', required=False)
     timeout = get_config_entry(config, 'Options', 'timeout', required=False)
