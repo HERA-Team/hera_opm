@@ -318,11 +318,16 @@ class TestMethods(object):
         config = ConfigParser(interpolation=ExtendedInterpolation())
         config.read(config_file)
 
-        # overwrite parent dir
-        config["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
+        # overwrite datafiles prefix
+        datafiles = config["LSTBIN_OPTS"]["data_files"].split('\n')
+        datafiles = [df.replace("zen", os.path.join(DATA_PATH, "zen")) for df in datafiles]
+        datafiles = '\n'.join(datafiles)
+        config["LSTBIN_OPTS"]['data_files'] = datafiles
 
         # setup vars
         work_dir = os.path.join(DATA_PATH, 'test_output')
+        config["LSTBIN_OPTS"]['parent_dir'] = work_dir
+        config["LSTBIN_OPTS"]['outdir'] = work_dir
         mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
@@ -357,15 +362,16 @@ class TestMethods(object):
         config = ConfigParser(interpolation=ExtendedInterpolation())
         config.read(config_file)
 
-        # overwrite parent dir
-        config["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
-
-        # define args
-        obsids = self.obsids_lstbin
-        config_file = self.config_file_lstbin_options
+        # overwrite datafiles prefix
+        datafiles = config["LSTBIN_OPTS"]["data_files"].split('\n')
+        datafiles = [df.replace("zen", os.path.join(DATA_PATH, "zen")) for df in datafiles]
+        datafiles = '\n'.join(datafiles)
+        config["LSTBIN_OPTS"]['data_files'] = datafiles
 
         # setup vars
         work_dir = os.path.join(DATA_PATH, 'test_output')
+        config["LSTBIN_OPTS"]['parent_dir'] = work_dir
+        config["LSTBIN_OPTS"]['outdir'] = work_dir
         mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
@@ -417,14 +423,19 @@ class TestMethods(object):
         config_file = self.config_file_lstbin_options
         config = ConfigParser(interpolation=ExtendedInterpolation())
         config.read(config_file)
-        config["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
-
+        datafiles = config["LSTBIN_OPTS"]["data_files"].split('\n')
+        datafiles = [df.replace("zen", os.path.join(DATA_PATH, "zen")) for df in datafiles]
+        datafiles = '\n'.join(datafiles)
+        config["LSTBIN_OPTS"]['data_files'] = datafiles
         obsids = self.obsids_lstbin
-        config_file = self.config_file_lstbin
+        work_dir = os.path.join(DATA_PATH, 'test_output')
+        config["LSTBIN_OPTS"]['parent_dir'] = work_dir
+        config["LSTBIN_OPTS"]['outdir'] = work_dir
         mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
+
         mt.build_makeflow_from_config(obsids, config, mf_name=outfile, work_dir=work_dir)
 
         # make sure the output files we expected appeared
