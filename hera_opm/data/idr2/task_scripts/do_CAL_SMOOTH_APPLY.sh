@@ -29,5 +29,5 @@ else
     smoothcal_yy=`echo ${fn_yy}.abs.calfits`
 
     echo apply_cal.py ${fn} ${fn}OCRS --new_cal ${smoothcal_xx} ${smoothcal_yy} --flags_npz=${flags_npz} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide --vis_units ${4}
-    apply_cal.py ${fn} ${fn}OCRS --new_cal ${smoothcal_fn} ${smoothcal_yy} --flags_npz=${flags_npz} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide --vis_units ${4}
+    apply_cal.py ${fn} ${fn}OCRS --new_cal ${smoothcal_xx} ${smoothcal_yy} --flags_npz=${flags_npz} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide --vis_units ${4}
 fi

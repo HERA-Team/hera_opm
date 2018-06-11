@@ -25,5 +25,5 @@ else
     omni_yy=`echo ${fn_yy}.omni.calfits`
 
     echo apply_cal.py ${fn} ${fn}O --new_cal ${omni_xx} ${omni_yy} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide
-    apply_cal.py ${fn} ${fn}O --new_cal ${omni_fn} ${omni_yy} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide
+    apply_cal.py ${fn} ${fn}O --new_cal ${omni_xx} ${omni_yy} --flag_nchan_low=${2} --flag_nchan_high=${3} --clobber --filetype=miriad --gain_convention=divide
 fi
