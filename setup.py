@@ -8,6 +8,7 @@ data = [version.git_origin, version.git_hash, version.git_description, version.g
 with open(os.path.join('hera_opm', 'GIT_INFO'), 'w') as outfile:
     json.dump(data, outfile)
 
+
 def package_files(package_dir, subdirectory):
     # walk the input package_dir/subdirectory
     # return a package_data list
@@ -18,6 +19,8 @@ def package_files(package_dir, subdirectory):
             path = path.replace(package_dir + '/', '')
             paths.append(os.path.join(path, filename))
     return paths
+
+
 data_files = package_files('hera_opm', 'data')
 
 setup_args = {
