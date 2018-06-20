@@ -1,5 +1,6 @@
 #!/bin/bash
 # Copyright (c) 2018 The HERA Collaboration
+# This code is licensed under the BSD 2-clause license
 
 # This command is makeflow_nrao.sh
 # Use this to run makeflow on the NRAO cluster environment
@@ -23,8 +24,8 @@ if ! [ "$(makeflow_analyze -k $1)" ]; then
 fi
 
 # make sure that we're on the right host
-if [ "$(hostname)" != "nmpost-master" ]; then
-    echo "Error: batch submission jobs can only be run from nmpost-master; please log in there and retry"
+if [ "$(hostname)" != "herapost-master" ]; then
+    echo "Error: batch submission jobs can only be run from herapost-master; please log in there and retry"
     exit 4
 fi
 
