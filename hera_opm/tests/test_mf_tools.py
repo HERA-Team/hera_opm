@@ -6,7 +6,9 @@ import gzip
 import glob
 from hera_opm.data import DATA_PATH
 import hera_opm.mf_tools as mt
-import ConfigParser as configparser
+import six
+if six.PY2:  # noqa
+    import ConfigParser as configparser
 from configparser import ConfigParser, ExtendedInterpolation
 
 
@@ -546,14 +548,19 @@ class TestMethods(object):
         nt.assert_true(os.path.exists(output_gz))
 
         # make sure that individual logs' content was transferred over
-        with gzip.open(output_gz, 'r') as f_out:
-            out_lines = set(f_out.read().splitlines())
+        with gzip.open(output_gz, 'rb') as f_out:
+            data = f_out.read()
+            if six.PY3:
+                data = data.decode('utf-8')
+            out_lines = set(data.splitlines())
+            print(out_lines)
             for fn in input_files:
                 abspath = os.path.join(input_dir, fn)
                 with open(abspath, 'r') as f_in:
                     # check log content
                     in_lines = set(f_in.read().splitlines())
                     for line in in_lines:
+                        print(line)
                         nt.assert_true(line in out_lines)
                 # also check file name
                 nt.assert_true(fn in out_lines)

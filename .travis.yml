@@ -4,6 +4,8 @@ language: python
 python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - "2.7"
+  - "3.6"
+
 install:
   - git fetch --unshallow --tags
   - sudo apt-get update
@@ -23,7 +25,7 @@ install:
   - conda info -a
 
   # create environment and install dependencies
-  - conda install nose pip configparser scipy matplotlib
+  - conda install nose pip configparser scipy matplotlib six
   - conda install -c conda-forge pycodestyle coveralls aipy
   - pip install git+https://github.com/HERA-Team/pyuvdata.git
   - pip install git+https://github.com/HERA-Team/omnical.git

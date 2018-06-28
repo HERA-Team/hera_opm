@@ -1,32 +1,53 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2018 The HERA Collaboration
+# Licensed under the BSD 2-clause license
+
 import os
+import six
 import subprocess
 import json
 
 
 def construct_version_info():
-    hera_op_dir = os.path.dirname(os.path.realpath(__file__))
-    version_file = os.path.join(hera_op_dir, 'VERSION')
+    hera_opm_dir = os.path.dirname(os.path.realpath(__file__))
+
+    def get_git_output(args, capture_stderr=False):
+        """Get output from Git, ensuring that it is of the ``str`` type,
+        not bytes."""
+
+        argv = ['git', '-C', hera_opm_dir] + args
+
+        if capture_stderr:
+            data = subprocess.check_output(argv, stderr=subprocess.STDOUT)
+        else:
+            data = subprocess.check_output(argv)
+
+        data = data.strip()
+
+        if six.PY2:
+            return data
+        return data.decode('utf-8')
+
+    def unicode_to_str(u):
+        if six.PY2:
+            return u.encode('utf-8')
+        return u
+
+    version_file = os.path.join(hera_opm_dir, 'VERSION')
     version = open(version_file).read().strip()
 
     try:
-        git_origin = subprocess.check_output(['git', '-C', hera_op_dir, 'config',
-                                              '--get', 'remote.origin.url'],
-                                             stderr=subprocess.STDOUT).strip()
-        git_hash = subprocess.check_output(['git', '-C', hera_op_dir, 'rev-parse', 'HEAD'],
-                                           stderr=subprocess.STDOUT).strip()
-        git_description = subprocess.check_output(['git', '-C', hera_op_dir,
-                                                   'describe', '--dirty', '--tag', '--always']).strip()
-        git_branch = subprocess.check_output(['git', '-C', hera_op_dir, 'rev-parse',
-                                              '--abbrev-ref', 'HEAD'],
-                                             stderr=subprocess.STDOUT).strip()
-        git_version = subprocess.check_output(['git', '-C', hera_op_dir, 'describe',
-                                               '--tags', '--abbrev=0']).strip()
-    except subprocess.CalledProcessError:  # pragma: no cover
+        git_origin = get_git_output(['config', '--get', 'remote.origin.url'], capture_stderr=True)
+        git_hash = get_git_output(['rev-parse', 'HEAD'], capture_stderr=True)
+        git_description = get_git_output(['describe', '--dirty', '--tag', '--always'])
+        git_branch = get_git_output(['rev-parse', '--abbrev-ref', 'HEAD'], capture_stderr=True)
+        git_version = get_git_output(['describe', '--tags', '--abbrev=0'])
+    except subprocess.CalledProcessError:
         try:
             # Check if a GIT_INFO file was created when installing package
-            git_file = os.path.join(hera_op_dir, 'GIT_INFO')
+            git_file = os.path.join(hera_opm_dir, 'GIT_INFO')
             with open(git_file) as data_file:
-                data = [x.encode('UTF8') for x in json.loads(data_file.read().strip())]
+                data = [unicode_to_str(x) for x in json.loads(data_file.read().strip())]
                 git_origin = data[0]
                 git_hash = data[1]
                 git_description = data[2]
@@ -50,13 +71,13 @@ git_hash = version_info['git_hash']
 git_description = version_info['git_description']
 git_branch = version_info['git_branch']
 
-# String to add to history of any files written with this version of hera_op
-hera_op_version_str = ('hera_op version: ' + version + '.')
+# String to add to history of any files written with this version of hera_opm
+hera_opm_version_str = ('hera_opm version: ' + version + '.')
 if git_hash is not '':
-    hera_op_version_str += ('  Git origin: ' + git_origin
-                            + '.  Git hash: ' + git_hash
-                            + '.  Git branch: ' + git_branch
-                            + '.  Git description: ' + git_description + '.')
+    hera_opm_version_str += ('  Git origin: ' + git_origin
+                             + '.  Git hash: ' + git_hash
+                             + '.  Git branch: ' + git_branch
+                             + '.  Git description: ' + git_description + '.')
 
 
 def main():  # pragma: no cover
