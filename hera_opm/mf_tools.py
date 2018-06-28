@@ -10,10 +10,14 @@ import gzip
 import shutil
 import subprocess
 import warnings
-import ConfigParser as configparser
-from configparser import ConfigParser, ExtendedInterpolation
+import six
 import glob
 import numpy as np
+
+# in python2, the built-in module is called ConfigParser instead of configparser
+if six.PY2:  # noqa
+    import ConfigParser as configparser
+from configparser import ConfigParser, ExtendedInterpolation
 
 
 def get_jd(filename):
@@ -277,7 +281,7 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     call the appropriate funciton below.
     '''
     # read in config file
-    if isinstance(config_file, (str, np.str, unicode)):
+    if isinstance(config_file, (str, np.str)):
         config = ConfigParser(interpolation=ExtendedInterpolation())
         config.read(config_file)
     else:
