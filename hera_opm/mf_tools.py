@@ -643,7 +643,7 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, **kwargs):
                 else:
                     dlst = float(dlst)
                 lst_start = float(get_config_entry(config, 'LSTBIN_OPTS', 'lst_start', required=True))
-                fixed_lst_start = bool(get_config_entry(config, "LSTBIN_OPTS", "fixed_lst_start"), required=True)
+                fixed_lst_start = bool(get_config_entry(config, "LSTBIN_OPTS", "fixed_lst_start", required=True))
                 ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True))
 
                 # pre-process files to determine the number of output files
