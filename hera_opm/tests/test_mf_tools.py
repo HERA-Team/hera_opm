@@ -12,12 +12,12 @@ import toml
 
 class TestMethods(object):
     def setUp(self):
-        self.config_file = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp.cfg')
-        self.config_file_time_neighbors = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_time_neighbors.cfg')
-        self.config_file_options = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_options.cfg')
-        self.config_file_lstbin = os.path.join(DATA_PATH, 'sample_config', 'lstbin.cfg')
-        self.config_file_lstbin_options = os.path.join(DATA_PATH, 'sample_config', 'lstbin_options.cfg')
-        self.bad_config_file = os.path.join(DATA_PATH, 'sample_config', 'bad_example.cfg')
+        self.config_file = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp.toml')
+        self.config_file_time_neighbors = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_time_neighbors.toml')
+        self.config_file_options = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_options.toml')
+        self.config_file_lstbin = os.path.join(DATA_PATH, 'sample_config', 'lstbin.toml')
+        self.config_file_lstbin_options = os.path.join(DATA_PATH, 'sample_config', 'lstbin_options.toml')
+        self.bad_config_file = os.path.join(DATA_PATH, 'sample_config', 'bad_example.toml')
         self.obsids_pol = ['zen.2457698.40355.xx.HH.uvcA', 'zen.2457698.40355.xy.HH.uvcA',
                            'zen.2457698.40355.yx.HH.uvcA', 'zen.2457698.40355.yy.HH.uvcA']
         self.obsids_nopol = ['zen.2457698.40355.HH.uvcA']
