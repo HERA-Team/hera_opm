@@ -25,8 +25,7 @@ install:
   - conda info -a
 
   # create environment and install dependencies
-  - conda install nose pip scipy matplotlib six toml astropy
-  - conda install -c conda-forge pycodestyle coveralls
+  - conda install nose pip scipy matplotlib six toml astropy ephem pycodestyle coveralls
   - pip install git+https://github.com/HERA-Team/pyuvdata.git
   - pip install git+https://github.com/HERA-Team/omnical.git
   - pip install git+https://github.com/HERA-Team/linsolve.git
