@@ -80,7 +80,7 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
     item (str) -- the attribute to retreive, e.g., 'prereqs'
     required (bool) -- whether the attribute is required or not. If required and not present,
         an error is raised. Default is True
-    interpolate (bool) -- whether to interpolate the entry with an option found elsewhere in 
+    interpolate (bool) -- whether to interpolate the entry with an option found elsewhere in
         the config file. Interpolation is triggered by a string with the template "${header:item}".
         If the corresponding key is not defined in that part of the config file, an error is raised.
         Default is True.
