@@ -30,9 +30,7 @@ args = ["{basename}", "${Options:ex_ants}"]
 
 [OMNICAL_METRICS]
 prereqs = "OMNICAL"
-time_prereqs = "OMNICAL"
-n_time_neighbors = 1
-args = ["{basename}", "{prev_basename}", "{next_basename}"]
+args = "{basename}"
 
 [OMNI_APPLY]
 prereqs = "OMNICAL_METRICS"

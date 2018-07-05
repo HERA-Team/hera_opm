@@ -1,0 +1,30 @@
+[Options]
+makeflow_type = "lstbin"
+pols = "xx"
+path_to_do_scripts = "~/hera/hera_opm/hera_opm/data/sample_task_scripts"
+conda_env = "hera"
+base_mem = 10000
+base_cpu = 1
+
+[LSTBIN_OPTS]
+sig_clip = true
+sigma = 5
+min_N = 5
+rephase = false
+ntimes_per_file = 60
+dlst = "None"
+lst_start = 0.0
+fixed_lst_start = false
+vis_units = "Jy"
+parallelize = true
+file_ext = "grp1.of2.{}.{}.{:7.5f}.uvXRAA"
+outdir = "../data"
+parent_dir = "../data"
+data_files = ["zen.2458043.*.{pol}.HH.uvXRAA",
+              "zen.2458044.*.{pol}.HH.uvXRAA",
+              "zen.2458045.*.{pol}.HH.uvXRAA"]
+
+[LSTBIN]
+args = ["sig_clip", "sigma", "min_N", "rephase", "ntimes_per_file", "lst_start",
+        "fixed_lst_start", "dlst", "vis_units", "output_file_select", "file_ext",
+        "outdir"]

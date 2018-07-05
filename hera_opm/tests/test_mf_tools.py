@@ -5,11 +5,9 @@ import shutil
 import gzip
 import glob
 from hera_opm.data import DATA_PATH
-import hera_opm.mf_tools as mt
+from hera_opm import mf_tools as mt
 import six
-if six.PY2:  # noqa
-    import ConfigParser as configparser
-from configparser import ConfigParser, ExtendedInterpolation
+import toml
 
 
 class TestMethods(object):
@@ -38,8 +36,7 @@ class TestMethods(object):
 
     def test_get_config_entry(self):
         # retreive config
-        config = ConfigParser(interpolation=ExtendedInterpolation())
-        config.read(self.config_file)
+        config = toml.load(self.config_file)
 
         # retrieve specific entry
         header = 'OMNICAL'
@@ -317,24 +314,15 @@ class TestMethods(object):
     def test_build_lstbin_makeflow_from_config(self):
         # define load in config
         config_file = self.config_file_lstbin
-        config = ConfigParser(interpolation=ExtendedInterpolation())
-        config.read(config_file)
-
-        # overwrite datafiles prefix
-        datafiles = config["LSTBIN_OPTS"]["data_files"].split('\n')
-        datafiles = [df.replace("zen", os.path.join(DATA_PATH, "zen")) for df in datafiles]
-        datafiles = '\n'.join(datafiles)
-        config["LSTBIN_OPTS"]['data_files'] = datafiles
 
         # setup vars
         work_dir = os.path.join(DATA_PATH, 'test_output')
-        config["LSTBIN_OPTS"]['parent_dir'] = work_dir
-        config["LSTBIN_OPTS"]['outdir'] = work_dir
         mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(config, mf_name='lstbin.mf', work_dir=work_dir)
+        mt.build_lstbin_makeflow_from_config(config_file, mf_name='lstbin.mf',
+                                             work_dir=work_dir, parent_dir=DATA_PATH)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
@@ -348,7 +336,8 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(config, mf_name=outfile, work_dir=work_dir)
+        mt.build_lstbin_makeflow_from_config(config_file, mf_name=outfile, work_dir=work_dir,
+                                             parent_dir=DATA_PATH)
 
         nt.assert_true(os.path.exists(outfile))
 
@@ -361,24 +350,15 @@ class TestMethods(object):
     def test_build_lstbin_makeflow_from_config_options(self):
         # define load in config
         config_file = self.config_file_lstbin_options
-        config = ConfigParser(interpolation=ExtendedInterpolation())
-        config.read(config_file)
-
-        # overwrite datafiles prefix
-        datafiles = config["LSTBIN_OPTS"]["data_files"].split('\n')
-        datafiles = [df.replace("zen", os.path.join(DATA_PATH, "zen")) for df in datafiles]
-        datafiles = '\n'.join(datafiles)
-        config["LSTBIN_OPTS"]['data_files'] = datafiles
 
         # setup vars
         work_dir = os.path.join(DATA_PATH, 'test_output')
-        config["LSTBIN_OPTS"]['parent_dir'] = work_dir
-        config["LSTBIN_OPTS"]['outdir'] = work_dir
         mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(config, mf_name=outfile, work_dir=work_dir)
+        mt.build_lstbin_makeflow_from_config(config_file, mf_name=outfile, work_dir=work_dir,
+                                             parent_dir=DATA_PATH)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
@@ -392,7 +372,8 @@ class TestMethods(object):
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(config, mf_name=outfile, work_dir=work_dir)
+        mt.build_lstbin_makeflow_from_config(config_file, mf_name=outfile, work_dir=work_dir,
+                                             parent_dir=DATA_PATH)
 
         nt.assert_true(os.path.exists(outfile))
 
@@ -423,22 +404,14 @@ class TestMethods(object):
 
         # also test lstbin version
         config_file = self.config_file_lstbin_options
-        config = ConfigParser(interpolation=ExtendedInterpolation())
-        config.read(config_file)
-        datafiles = config["LSTBIN_OPTS"]["data_files"].split('\n')
-        datafiles = [df.replace("zen", os.path.join(DATA_PATH, "zen")) for df in datafiles]
-        datafiles = '\n'.join(datafiles)
-        config["LSTBIN_OPTS"]['data_files'] = datafiles
-        obsids = self.obsids_lstbin
         work_dir = os.path.join(DATA_PATH, 'test_output')
-        config["LSTBIN_OPTS"]['parent_dir'] = work_dir
-        config["LSTBIN_OPTS"]['outdir'] = work_dir
         mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
         outfile = os.path.join(work_dir, mf_output)
         if os.path.exists(outfile):
             os.remove(outfile)
 
-        mt.build_makeflow_from_config(obsids, config, mf_name=outfile, work_dir=work_dir)
+        mt.build_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir,
+                                      parent_dir=DATA_PATH)
 
         # make sure the output files we expected appeared
         nt.assert_true(os.path.exists(outfile))
