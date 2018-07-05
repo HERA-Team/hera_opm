@@ -6,10 +6,11 @@
 makeflow_type = "analysis"
 pols = ["xx", "xy", "yx", "yy"]
 path_to_do_scripts = "~/hera/hera_op/hera_op/data/sample_task_scripts"
-conda_env = "hera"
 ex_ants = "~/hera/hera_cal/hera_cal/calibrations/herahex_ex_ants.txt"
 base_mem = 10000
 base_cpu = 1
+timeout = "1m"
+pbs_mail_user = "heramgr@nrao.edu"
 
 [WorkFlow]
 actions = ["ANT_METRICS", "FIRSTCAL", "FIRSTCAL_METRICS", "OMNICAL",
@@ -30,9 +31,7 @@ args = ["{basename}", "${Options:ex_ants}"]
 
 [OMNICAL_METRICS]
 prereqs = "OMNICAL"
-time_prereqs = "OMNICAL"
-n_time_neighbors = 1
-args = ["{basename}", "{prev_basename}", "{next_basename}"]
+args = "{basename}"
 
 [OMNI_APPLY]
 prereqs = "OMNICAL_METRICS"

@@ -13,11 +13,7 @@ import warnings
 import six
 import glob
 import numpy as np
-
-# in python2, the built-in module is called ConfigParser instead of configparser
-if six.PY2:  # noqa
-    import ConfigParser as configparser
-from configparser import ConfigParser, ExtendedInterpolation
+import toml
 
 
 def get_jd(filename):
@@ -37,28 +33,72 @@ def get_jd(filename):
     return m.groups()[0]
 
 
-def get_config_entry(config, header, item, required=True):
+def _interpolate_config(config, entry):
+    '''
+    Interpolate entries in the configuration file.
+
+    Args:
+    ====================
+    config -- a dict of the processed config file
+    entry -- the raw entry in the config file to be processed
+
+    Returns:
+    ====================
+    entry -- a config entry that has been interpolated
+
+    Notes:
+    ====================
+    The interpolation will be invoked for strings matching the pattern:
+        ${Header:Key}
+    This will match an entry in the config file of the form:
+        [Header]
+        Key = value
+    The entry "value" will be returned. If "Key" is not found in the parsed
+    config file, an error is raised.
+    '''
+    m = re.match(r"\$\{(.+)\}", str(entry))
+    if m is not None:
+        value = m.groups()[0]
+        header, key = value.split(':')
+        try:
+            return config[header][key]
+        except KeyError:
+            raise KeyError("Option {0} under header {1} was not found when "
+                           "processing config file".format(key, header))
+    else:
+        return entry
+
+
+def get_config_entry(config, header, item, required=True, interpolate=True):
     '''
     Helper function to extract specific entry from config file.
 
     Args:
     ====================
-    config -- a ConfigParser object that has read in the config file
+    config -- a dict of a config file that has already been processed
     header (str) -- the entry in a config file to get the item of, e.g., 'OMNICAL'
     item (str) -- the attribute to retreive, e.g., 'prereqs'
     required (bool) -- whether the attribute is required or not. If required and not present,
-        an error is raised.
+        an error is raised. Default is True
+    interpolate (bool) -- whether to interpolate the entry with an option found elsewhere in 
+        the config file. Interpolation is triggered by a string with the template "${header:item}".
+        If the corresponding key is not defined in that part of the config file, an error is raised.
+        Default is True.
 
     Returns:
     ====================
     entries -- a list of entries contained in the config file. If item is not present, and
         required is False, an empty list is returned.
     '''
-    if config.has_option(header, item):
-        entries = config.get(header, item).split(',')
-        entries = [entry.strip() for entry in entries]
-        if len(entries) == 1:
-            entries = entries[0]
+    if item in config[header]:
+        entries = config[header][item]
+        if interpolate:
+            # if we have a list, interpolate for each element
+            if isinstance(entries, list):
+                for i, entry in enumerate(entries):
+                    entries[i] = _interpolate_config(config, entry)
+            else:
+                entries = _interpolate_config(config, entries)
         return entries
     else:
         if not required:
@@ -179,9 +219,9 @@ def process_batch_options(mem, ncpu=None, pbs_mail_user='youremail@example.org',
         added to the makeflow file with the syntax:
             "export BATCH_OPTIONS = {batch_options}"
     '''
-    batch_options = "-l vmem={0:d}M,mem={0:d}M".format(int(mem))
+    batch_options = "-l vmem={0:d}M,mem={0:d}M".format(mem)
     if ncpu is not None:
-        batch_options += ",nodes=1:ppn={:d}".format(int(ncpu))
+        batch_options += ",nodes=1:ppn={:d}".format(ncpu)
     if pbs_mail_user is not None:
         batch_options += " -M {}".format(pbs_mail_user)
     if queue is not None:
@@ -256,14 +296,14 @@ def prep_args(args, obsid, pol=None, obsids=None):
     return args
 
 
-def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None):
+def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None, **kwargs):
     '''
     Function for constructing a makeflow from a config file.
 
     Args:
     ====================
     obsids (str) -- list of paths to obsids/filenames for processing
-    config_file (str) -- path to configuration file
+    config_file (str) -- path to configuration file (str)
     mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
         specified.
     work_dir (str) -- path to the "work directory" where all of the wrapper scripts and log
@@ -280,18 +320,17 @@ def build_makeflow_from_config(obsids, config_file, mf_name=None, work_dir=None)
     determine if the config file specifies an "analysis" type or "lstbin" type, and
     call the appropriate funciton below.
     '''
-    # read in config file
     if isinstance(config_file, (str, np.str)):
-        config = ConfigParser(interpolation=ExtendedInterpolation())
-        config.read(config_file)
+        # read in config file
+        config = toml.load(config_file)
     else:
-        # assume config_file is a ConfigParser instance
-        config = config_file
+        raise ValueError("config must be a path to a TOML config file")
+
     makeflow_type = get_config_entry(config, 'Options', 'makeflow_type', required=True)
     if makeflow_type == 'analysis':
-        build_analysis_makeflow_from_config(obsids, config_file, mf_name=mf_name, work_dir=work_dir)
+        build_analysis_makeflow_from_config(obsids, config_file, mf_name=mf_name, work_dir=work_dir, **kwargs)
     elif makeflow_type == 'lstbin':
-        build_lstbin_makeflow_from_config(config_file, mf_name=mf_name, work_dir=work_dir)
+        build_lstbin_makeflow_from_config(config_file, mf_name=mf_name, work_dir=work_dir, **kwargs)
     else:
         raise ValueError("unknown makeflow_type {} specified; must be 'analysis' or 'lstbin'".format(makeflow_type))
 
@@ -335,9 +374,7 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
     "{basename}", useful for specifying prereqs in time
 
     '''
-    # read in config file
-    config = ConfigParser(interpolation=ExtendedInterpolation())
-    config.read(config_file)
+    config = toml.load(config_file)
     workflow = get_config_entry(config, 'WorkFlow', 'actions')
 
     # get general options
@@ -446,6 +483,8 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
 
                 # make argument list
                 args = get_config_entry(config, action, "args", required=False)
+                if not isinstance(args, list):
+                    args = [args]
                 args = ' '.join(args)
 
                 # make outfile name
@@ -542,7 +581,7 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
     return
 
 
-def build_lstbin_makeflow_from_config(config_file, mf_name=None, **kwargs):
+def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None, **kwargs):
     """
     Function for constructing an LST-binning makeflow file from input data and a config_file.
 
@@ -566,22 +605,15 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, **kwargs):
     # import hera_cal
     from hera_cal import lstbin
 
-    # read in config file if fed as a string
-    if isinstance(config_file, (str, np.str)):
-        config = ConfigParser(interpolation=ExtendedInterpolation())
-        config.read(config_file)
-        cf = os.path.basename(config_file)
-    else:
-        # assume config_file is a ConfigParser instance
-        config = config_file
-        assert mf_name is not None, "If config_file fed as ConfigParser, mf_name must be fed"
-        cf = 'unknown'
+    # read in config file
+    config = toml.load(config_file)
+    cf = os.path.basename(config_file)
 
     # get LSTBIN arguments
     lstbin_args = get_config_entry(config, 'LSTBIN', 'args', required=False)
 
     # set output_file_select to None
-    config['LSTBIN_OPTS']['output_file_select'] = u'None'
+    config['LSTBIN_OPTS']['output_file_select'] = str('None')
 
     # get general options
     pol_list = get_config_entry(config, 'Options', 'pols', required=True)
@@ -608,9 +640,13 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, **kwargs):
         fn = "{0}.mf".format(base)
 
     # determine whether or not to parallelize
-    parallelize = str(get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)) == 'True'
-    parent_dir = str(get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True))
-    work_dir = parent_dir
+    parallelize = get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)
+    if 'parent_dir' in kwargs:
+        parent_dir = kwargs['parent_dir']
+    else:
+        parent_dir = get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True)
+    if work_dir is None:
+        work_dir = parent_dir
     makeflowfile = os.path.join(work_dir, fn)
 
     # define command
@@ -633,10 +669,10 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, **kwargs):
 
         # loop over polarizations
         for pol in pol_list:
-
             # get data files and substitute w/ pol
             datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
             datafiles = [df.format(pol=pol) for df in datafiles]
+            datafiles = [os.path.join(parent_dir, df) for df in datafiles]
 
             # get number of output files for this pol
             if parallelize:
@@ -651,9 +687,9 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, **kwargs):
                 ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True))
 
                 # pre-process files to determine the number of output files
-                _datafiles = [df.strip("\\\'") for df in datafiles]
-                _datafiles = map(lambda df: str(df), _datafiles)
-                _datafiles = map(lambda df: sorted(glob.glob(df)), _datafiles)
+                _datafiles = map(lambda df: sorted(glob.glob(df)), datafiles)
+                if six.PY2:
+                    _datafiles = [[df.encode('utf-8') for df in li] for li in _datafiles]
 
                 output = lstbin.config_lst_bin_files(_datafiles, dlst=dlst, lst_start=lst_start, fixed_lst_start=fixed_lst_start,
                                                      ntimes_per_file=ntimes_per_file)
@@ -675,9 +711,10 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, **kwargs):
                 args = []
                 for a in _args:
                     if isinstance(a, list):
+                        a = [str(arg) for arg in a]
                         args.extend(a)
                     else:
-                        args.append(a)
+                        args.append(str(a))
 
                 # extend datafiles
                 args.extend(datafiles)
