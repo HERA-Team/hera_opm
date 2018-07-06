@@ -1,0 +1,35 @@
+[Options]
+makeflow_type = "lstbin"
+pols = ["xx", "xy", "yx", "yy"]
+path_to_do_scripts = "~/hera/hera_opm/hera_opm/data/idr2/task_scripts"
+conda_env = "hera"
+base_mem = 10000
+base_cpu = 1
+timeout = "24h"
+pbs_mail_user = "plaplant@sas.upenn.edu"
+
+[LSTBIN_OPTS]
+sig_clip = True
+sigma = 5
+min_N = 5
+rephase = False
+ntimes_per_file = 60
+dlst = "None"
+lst_start = 0.0
+fixed_lst_start = True
+vis_units = "Jy"
+parallelize = True
+file_ext = "grp1.of2.{}.{}.{:7.5f}.uvXRAA"
+outdir = "./"
+parent_dir = "./"
+data_files = ["data/zen.2458043.*.{pol}.HH.uvXRAA",
+              "data/zen.2458044.*.{pol}.HH.uvXRAA",
+              "data/zen.2458045.*.{pol}.HH.uvXRAA"]
+
+[WorkFlow]
+actions = "LSTBIN"
+
+[LSTBIN]
+args = ["sig_clip", "sigma", "min_N", "rephase", "ntimes_per_file", "lst_start",
+        "fixed_lst_start", "dlst", "vis_units", "output_file_select", "file_ext",
+        "outdir"]
