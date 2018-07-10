@@ -42,7 +42,7 @@ def construct_version_info():
         git_description = get_git_output(['describe', '--dirty', '--tag', '--always'])
         git_branch = get_git_output(['rev-parse', '--abbrev-ref', 'HEAD'], capture_stderr=True)
         git_version = get_git_output(['describe', '--tags', '--abbrev=0'])
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError:  # pragma: no cover
         try:
             # Check if a GIT_INFO file was created when installing package
             git_file = os.path.join(hera_opm_dir, 'GIT_INFO')
