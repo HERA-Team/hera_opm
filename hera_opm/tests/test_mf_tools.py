@@ -600,3 +600,23 @@ class TestMethods(object):
         os.remove(output_gz)
 
         return
+
+    def test_interpolate_config(self):
+        # define and load config file
+        config_file = self.config_file
+        config = toml.load(config_file)
+
+        # interpolate config
+        opt = mt._interpolate_config(config, "${Options:ex_ants}")
+        nt.assert_equal(opt, "~/hera/hera_cal/hera_cal/calibrations/herahex_ex_ants.txt")
+
+        # raise error
+        nt.assert_raises(ValueError, mt._interpolate_config, config, "${Bad:interp}")
+
+        return
+
+    def build_makeflow_from_config_errors(self):
+        # try to pass in something that is not a string
+        nt.assert_raises(ValueError, mt.build_makeflow_from_config, ['obids'], 3)
+
+        return

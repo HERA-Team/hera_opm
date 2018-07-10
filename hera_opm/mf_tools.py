@@ -63,8 +63,8 @@ def _interpolate_config(config, entry):
         try:
             return config[header][key]
         except KeyError:
-            raise KeyError("Option {0} under header {1} was not found when "
-                           "processing config file".format(key, header))
+            raise ValueError("Option {0} under header {1} was not found when "
+                             "processing config file".format(key, header))
     else:
         return entry
 
@@ -691,7 +691,8 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None, 
                 if six.PY2:
                     _datafiles = [[df.encode('utf-8') for df in li] for li in _datafiles]
 
-                output = lstbin.config_lst_bin_files(_datafiles, dlst=dlst, lst_start=lst_start, fixed_lst_start=fixed_lst_start,
+                output = lstbin.config_lst_bin_files(_datafiles, dlst=dlst, lst_start=lst_start,
+                                                     fixed_lst_start=fixed_lst_start,
                                                      ntimes_per_file=ntimes_per_file)
                 nfiles = len(output[3])
             else:
@@ -710,11 +711,7 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None, 
                 _args = [get_config_entry(config, "LSTBIN_OPTS", a, required=True) for a in lstbin_args]
                 args = []
                 for a in _args:
-                    if isinstance(a, list):
-                        a = [str(arg) for arg in a]
-                        args.extend(a)
-                    else:
-                        args.append(str(a))
+                    args.append(str(a))
 
                 # extend datafiles
                 args.extend(datafiles)
