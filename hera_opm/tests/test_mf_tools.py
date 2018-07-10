@@ -615,7 +615,7 @@ class TestMethods(object):
 
         return
 
-    def build_makeflow_from_config_errors(self):
+    def test_build_makeflow_from_config_errors(self):
         # try to pass in something that is not a string
         nt.assert_raises(ValueError, mt.build_makeflow_from_config, ['obids'], 3)
 
