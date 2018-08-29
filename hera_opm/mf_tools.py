@@ -485,6 +485,8 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
                 args = get_config_entry(config, action, "args", required=False)
                 if not isinstance(args, list):
                     args = [args]
+                # convert args list to strings
+                args = [str(a) for a in args]
                 args = ' '.join(args)
 
                 # make outfile name
