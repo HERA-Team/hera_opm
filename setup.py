@@ -35,6 +35,7 @@ setup_args = {
     'scripts': glob('scripts/*.py') + glob('scripts/*.sh'),
     'version': version.version,
     'package_data': {'hera_opm': data_files},
+    'install_requires': ['toml>=0.9.4'],
     'zip_safe': False,
 }
 

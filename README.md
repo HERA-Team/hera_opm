@@ -56,6 +56,17 @@ export PATH=${PATH}:${HOME}/cctools/bin
 For convenience, it is helpful to add the `export` statement to your `.bashrc`
 file, so that the `makeflow` are always on your `PATH`.
 
+`hera_opm` stores workflow configuration files in the [TOML
+format](https://github.com/toml-lang/toml). The [toml
+package](https://github.com/uiri/toml) is required. To install it, either:
+```
+conda install toml
+```
+or
+```
+pip install toml
+```
+
 To install the `hera_opm` package, simply:
 ```
 python setup.py install
