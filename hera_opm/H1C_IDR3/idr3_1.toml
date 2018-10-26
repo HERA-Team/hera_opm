@@ -1,5 +1,6 @@
 [Options]
 makeflow_type = "analysis"
+pols = ["xx", "xy", "yx", "yy"]
 path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/hera_opm/H1C_IDR3/bad_ants/"
 conda_env = "hera"
 ex_ants_path = "/users/jsdillon/Libraries/hera_opm/hera_opm/H1C_IDR3/bad_ants"
