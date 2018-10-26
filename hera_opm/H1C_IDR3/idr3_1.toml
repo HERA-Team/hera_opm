@@ -1,0 +1,23 @@
+[Options]
+makeflow_type = "analysis"
+path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/hera_opm/H1C_IDR3/bad_ants/"
+conda_env = "hera"
+ex_ants_path = "/users/jsdillon/Libraries/hera_opm/hera_opm/H1C_IDR3/bad_ants"
+base_mem = 8000
+base_cpu = 1
+timeout = "24h"
+pbs_mail_user = "jsdillon+makeflow@berkeley.edu"
+
+[REDCAL_OPTS]
+ant_z_thresh = 4.0
+solar_horizon = 0.0
+nInt_to_load = 8
+
+
+[WorkFlow]
+actions = ["REDCAL"]
+
+[REDCAL]
+prereqs = "FIRSTCAL_METRICS"
+args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS}:ant_z_thresh",
+        "${REDCAL_OPTS}:solar_horizon", "${REDCAL_OPTS}:nInt_to_load"]
