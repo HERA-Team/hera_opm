@@ -1,0 +1,139 @@
+# This is a sample configuration script for how RTP for H1C on-site (roughly)
+# operates.
+
+[Options]
+makeflow_type = "analysis"
+pols = ["xx", "xy", "yx", "yy"]
+path_to_do_scripts = "/home/obs/src/RTP/scripts/hera"
+lib_conn = 'local-rtp'
+parent_dirs = '/data/'
+base_mem = 10000
+base_cpu = 1
+
+[WorkFlow]
+actions = ["UV", "PLOTAUTOS", "ADD_LIBRARIAN_PLOTAUTOS", "CLEAN_PLOTAUTOS",
+           "PULL_SUBARRAY", "CLEAN_UV", "ADD_LIBRARIAN_SUBARRAY", "ANT_METRICS",
+           "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "FIRSTCAL",
+           "ADD_LIBRARIAN_FIRSTCAL", "FIRSTCAL_METRICS", "ADD_LIBRARIAN_FIRSTCAL_METRICS",
+           "ADD_MC_FIRSTCAL_METRICS", "OMNICAL", "ADD_LIBRARIAN_OMNICAL", "OMNICAL_METRICS",
+           "ADD_LIBRARIAN_OMNICAL_METRICS", "ADD_MC_OMNICAL_METRICS", "OMNI_APPLY",
+           "XRFI", "XRFI_APPLY", "ADD_LIBRARIAN_XRFI", "CLEAN_SUBARRAY", "CLEAN_ANT_METRICS",
+           "CLEAN_FIRSTCAL", "CLEAN_FIRSTCAL_METRICS", "CLEAN_OMNICAL", "CLEAN_OMNICAL_METRICS",
+           "CLEAN_OMNI_APPLY", "CLEAN_XRFI"]
+
+[UV]
+args = "{basename}"
+
+[PLOTAUTOS]
+prereqs = "UV"
+args = "{basename}"
+
+[ADD_LIBRARIAN_PLOTAUTOS]
+prereqs = "PLOTAUTOS"
+args = ["${Options:lib_conn}", "${Options:parent_dirs}", "{basename}"]
+
+[CLEAN_PLOTAUTOS]
+args = "{basename}"
+
+[PULL_SUBARRAY]
+args = "{basename}"
+
+[CLEAN_UV]
+args = "{basename}"
+
+[ADD_LIBRARIAN_SUBARRAY]
+args = ["${Options:lib_conn}", "${Options:parent_dirs}", "{basename}"]
+
+[ANT_METRICS]
+prereqs = "ADD_LIBRARIAN_SUBARRAY"
+args = "{basename}"
+
+[ADD_LIBRARIAN_ANT_METRICS]
+prereqs = "ANT_METRICS"
+args = ["${Options:lib_conn}", "${Options:parent_dirs}", "{basename}"]
+
+[ADD_MC_ANT_METRICS]
+args = "{basename}"
+
+[FIRSTCAL]
+args = "{basename}"
+
+[ADD_LIBRARIAN_FIRSTCAL]
+prereqs = "FIRSTCAL"
+args = ["${Options:lib_conn}", "${Options:parent_dirs}", "{basename}"]
+
+[FIRSTCAL_METRICS]
+prereqs = "ADD_LIBRARIAN_FIRSTCAL"
+args = "{basename}"
+
+[ADD_LIBRARIAN_FIRSTCAL_METRICS]
+prereqs = "FIRSTCAL_METRICS"
+args = ["${Options:lib_conn}", "${Options:parent_dirs}", "{basename}"]
+
+[ADD_MC_FIRSTCAL_METRICS]
+prereqs = "FIRSTCAL_METRICS"
+args = "{basename}"
+
+[OMNICAL]
+prereqs = "ADD_MC_FIRSTCAL_METRICS"
+args = "{basename}"
+
+[ADD_LIBRARIAN_OMNICAL]
+prereqs = "OMNICAL"
+args = ["${Options:lib_conn}", "${Options:parent_dirs}", "{basename}"]
+
+[OMNICAL_METRICS]
+prereqs = "ADD_LIBRARIAN_OMNICAL"
+args = "{basename}"
+
+[ADD_LIBRARIAN_OMNICAL_METRICS]
+prereqs = "OMNICAL_METRICS"
+args = "{basename}"
+
+[ADD_MC_OMNICAL_METRICS]
+prereqs = "ADD_LIBRARIAN_OMNICAL_METRICS"
+args = "{basename}"
+
+[OMNI_APPLY]
+prereqs = "ADD_LIBRARIAN_OMNICAL_METRICS"
+args = "{basename}"
+
+[XRFI]
+args = "{basename}"
+
+[XRFI_APPLY]
+prereqs = "XRFI"
+args = "{basename}"
+
+[ADD_LIBRARIAN_XRFI]
+prereqs = "XRFI_APPLY"
+args = ["${Options:lib_conn}", "${Options:parent_dirs}", "{basename}"]
+
+[CLEAN_SUBARRAY]
+prereqs = "ADD_LIBRARIAN_XRFI"
+args = "{basename}"
+
+[CLEAN_ANT_METRICS]
+args = "{basename}"
+
+[CLEAN_FIRSTCAL]
+prereqs = "OMNICAL"
+args = "{basename}"
+
+[CLEAN_FIRSTCAL_METRICS]
+prereqs = "ADD_MC_FIRSTCAL_METRICS"
+args = "{basename}"
+
+[CLEAN_OMNICAL]
+prereqs = "XRFI_APPLY"
+args = "{basename}"
+
+[CLEAN_OMNICAL_METRICS]
+prereqs = "ADD_MC_OMNICAL_METRICS"
+args = "{basename}"
+
+[CLEAN_OMNI_APPLY]
+args = "{basename}"
+
+[CLEAN_XRFI]
+args = "{basename}"

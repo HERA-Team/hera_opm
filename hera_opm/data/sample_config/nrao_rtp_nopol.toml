@@ -1,0 +1,70 @@
+# This is a sample configuration for reanalysis steps at NRAO. Note that
+# specifications exist for steps not in the actions list. Though not necessary,
+# these are not harmful either.
+
+[Options]
+makeflow_type = "analysis"
+path_to_do_scripts = "~/hera/hera_op/hera_op/data/sample_task_scripts"
+conda_env = "hera"
+ex_ants = "~/hera/hera_cal/hera_cal/calibrations/herahex_ex_ants.txt"
+base_mem = 10000
+base_cpu = 1
+
+[WorkFlow]
+actions = ["ANT_METRICS", "FIRSTCAL", "FIRSTCAL_METRICS", "OMNICAL",
+           "OMNICAL_METRICS", "OMNI_APPLY", "XRFI", "XRFI_APPLY"]
+
+[ANT_METRICS]
+args = "{basename}"
+
+[FIRSTCAL]
+args = ["{basename}", "${Options:ex_ants}"]
+
+[FIRSTCAL_METRICS]
+args = "{basename}"
+
+[OMNICAL]
+prereqs = "FIRSTCAL_METRICS"
+args = ["{basename}", "${Options:ex_ants}"]
+
+[OMNICAL_METRICS]
+prereqs = "OMNICAL"
+args = "{basename}"
+
+[OMNI_APPLY]
+prereqs = "OMNICAL_METRICS"
+args = "{basename}"
+
+[XRFI]
+args = "{basename}"
+
+[XRFI_APPLY]
+prereqs = "XRFI"
+args = "{basename}"
+
+[CLEAN_SUBARRAY]
+prereqs = "XRFI_APPLY"
+args = "{basename}"
+
+[CLEAN_ANT_METRICS]
+args = "{basename}"
+
+[CLEAN_FIRSTCAL]
+prereqs = "OMNICAL"
+args = "{basename}"
+
+[CLEAN_FIRSTCAL_METRICS]
+args = "{basename}"
+
+[CLEAN_OMNICAL]
+prereqs = "XRFI_APPLY"
+args = "{basename}"
+
+[CLEAN_OMNICAL_METRICS]
+args = "{basename}"
+
+[CLEAN_OMNI_APPLY]
+args = "{basename}"
+
+[CLEAN_XRFI]
+args = "{basename}"

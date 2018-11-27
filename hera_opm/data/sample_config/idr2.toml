@@ -1,0 +1,66 @@
+[Options]
+makeflow_type = "analysis"
+pols = ["xx", "xy", "yx", "yy"]
+path_to_do_scripts = "~/hera/RTP/scripts/hera"
+conda_env = "hera"
+ex_ants = "~/hera/hera_cal/hera_cal/calibrations/herahex_ex_ants.txt"
+base_mem = 10000
+base_cpu = 1
+cross_cut = 5
+path_to_abscal_files = "/path/to/files"
+# DELAY_XRFI Options
+standoff = 15
+horizon = 1
+tol = 1e-9
+window = "none"
+skip_wgt = 0.1
+maxiter = 100
+kt_size = 8
+kf_size = 8
+sig_init = 6
+sig_adj = 2
+px_threshold = 0.1
+freq_threshold = 0.5
+time_threshold = 0.05
+
+
+[WorkFlow]
+actions = ["FIRSTCAL", "FIRSTCAL_METRICS", "OMNICAL", "OMNICAL_METRICS", "OMNI_APPLY",
+           "ABSCAL", "DELAY_XRFI", "DELAY_XRFI_APPLY", "CAL_SMOOTH"]
+
+
+[FIRSTCAL]
+args = ["{basename}", "${Options:ex_ants}"]
+
+[FIRSTCAL_METRICS]
+args = "{basename}"
+
+[OMNICAL]
+prereqs = "FIRSTCAL_METRICS"
+args = ["{basename}", "${Options:ex_ants}"]
+
+[OMNICAL_METRICS]
+prereqs = "OMNICAL"
+args = "{basename}"
+
+[OMNI_APPLY]
+prereqs = "OMNICAL_METRICS"
+args = "{basename}"
+
+[ABSCAL]
+prereqs = "OMNI_APPLY"
+args = ["{basename}", "${Options:path_to_abscal_files}"]
+
+[DELAY_XRFI]
+prereqs = "ABSCAL"
+args = ["{basename}", "${Options:standoff}", "${Options:horizon}", "${Options:tol}", "${Options:window}", "${Options:skip_wgt}",
+        "${Options:maxiter}", "${Options:kt_size}", "${Options:kf_size}", "${Options:sig_init}", "${Options:sig_adj}",
+	"${Options:px_threshold}", "${Options:freq_threshold}", "${Options:time_threshold}"]
+
+[DELAY_XRFI_APPLY]
+prereqs = "DELAY_XRFI"
+args = "{basename}"
+
+[CAL_SMOOTH]
+prereqs = "DELAY_XRFI"
+args = "{basename}"
