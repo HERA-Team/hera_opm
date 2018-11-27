@@ -5,10 +5,10 @@ os:
 env:
   global:
     - COVERALLS_PARALLEL=true
-matrix:
-  - PYTHON_VERSION=2.7
-  - PYTHON_VERSION=3.6
-  - PYTHON_VERSION=3.7
+  matrix:
+    - PYTHON_VERSION=2.7
+    - PYTHON_VERSION=3.6
+    - PYTHON_VERSION=3.7
 install:
   - git fetch --unshallow --tags
   - sudo apt-get update
