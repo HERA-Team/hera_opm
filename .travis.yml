@@ -32,7 +32,6 @@ install:
   - conda install nose pip scipy matplotlib six toml astropy ephem pycodestyle coveralls h5py
   - conda install -c conda-forge aipy
   - pip install git+https://github.com/HERA-Team/pyuvdata.git
-  - pip install git+https://github.com/HERA-Team/omnical.git
   - pip install git+https://github.com/HERA-Team/linsolve.git
   - pip install git+https://github.com/HERA-Team/hera_qm.git
   - pip install git+https://github.com/HERA-Team/uvtools.git
