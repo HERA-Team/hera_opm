@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018 The HERA Collaboration
-# Licensed under the BSD 2-clause license
+# Licensed under the 2-clause BSD license
+
+from __future__ import print_function, division, absolute_import
 
 import os
 import six
