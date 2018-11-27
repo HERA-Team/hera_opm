@@ -1,7 +1,9 @@
 # -*- mode: python; coding: utf-8 -*-
 # Copyright (c) 2018 The HERA Collaboration
+# Licensed under the 2-clause BSD License
 
 from __future__ import print_function, division, absolute_import
+
 import os
 import re
 import sys
@@ -11,6 +13,7 @@ import shutil
 import subprocess
 import warnings
 import six
+from six.moves import range, map, zip
 import glob
 import numpy as np
 import toml
@@ -687,7 +690,7 @@ def build_lstbin_makeflow_from_config(config_file, mf_name=None, work_dir=None, 
                 ntimes_per_file = int(get_config_entry(config, 'LSTBIN_OPTS', 'ntimes_per_file', required=True))
 
                 # pre-process files to determine the number of output files
-                _datafiles = map(lambda df: sorted(glob.glob(df)), datafiles)
+                _datafiles = list(map(lambda df: sorted(glob.glob(df)), datafiles))
                 if six.PY2:
                     _datafiles = [[df.encode('utf-8') for df in li] for li in _datafiles]
 
