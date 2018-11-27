@@ -127,7 +127,7 @@ def make_outfile_name(obsid, action, pol_list=[]):
         entry is returned.
     '''
     outfiles = []
-    if len(pol_list) > 1:
+    if len(pol_list) > 1 and pol_list[0] is not None:
         for pol in pol_list:
             of = "{0}.{1}.{2}.out".format(obsid, action, pol)
             outfiles.append(of)
@@ -379,9 +379,9 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
 
     # get general options
     pol_list = get_config_entry(config, 'Options', 'pols', required=False)
-    if len(pol_list) == 0:
+    if pol_list is None:
         # make a dummy list of length 1, to ensure we perform actions later
-        pol_list = ['']
+        pol_list = [None]
     else:
         # make sure that we were only passed in a single polarization in our obsids
         for i, obsid in enumerate(obsids):
@@ -485,7 +485,7 @@ def build_analysis_makeflow_from_config(obsids, config_file, mf_name=None, work_
                 args = get_config_entry(config, action, "args", required=False)
                 if not isinstance(args, list):
                     args = [args]
-                args = ' '.join(args)
+                args = ' '.join(list(map(str, args)))
 
                 # make outfile name
                 outfiles = make_outfile_name(filename, action, pol_list)
