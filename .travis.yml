@@ -40,6 +40,7 @@ install:
 script:
   - nosetests hera_opm --with-coverage --cover-package=hera_opm
   - pycodestyle --ignore=E501,W503
+  - python setup.py install
 after_success:
   - coveralls
 notifications:
