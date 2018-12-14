@@ -37,6 +37,8 @@ setup_args = {
     'package_data': {'hera_opm': data_files},
     'install_requires': ['toml>=0.9.4'],
     'zip_safe': False,
+    'setup_requires': ['pytest-runner', 'toml>=0.9.4'],
+    'tests_require': ['pytest', 'toml>=0.9.4'],
 }
 
 if __name__ == '__main__':

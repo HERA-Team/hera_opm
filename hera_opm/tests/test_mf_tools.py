@@ -1,5 +1,5 @@
 """Tests for mf_tools.py"""
-import nose.tools as nt
+import pytest
 import os
 import shutil
 import gzip
@@ -10,657 +10,701 @@ import six
 import toml
 
 
-class TestMethods(object):
-    def setUp(self):
-        self.config_file = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp.toml')
-        self.config_file_time_neighbors = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_time_neighbors.toml')
-        self.config_file_options = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_options.toml')
-        self.config_file_nopol = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_nopol.toml')
-        self.config_file_lstbin = os.path.join(DATA_PATH, 'sample_config', 'lstbin.toml')
-        self.config_file_lstbin_options = os.path.join(DATA_PATH, 'sample_config', 'lstbin_options.toml')
-        self.bad_config_file = os.path.join(DATA_PATH, 'sample_config', 'bad_example.toml')
-        self.obsids_pol = ['zen.2457698.40355.xx.HH.uvcA', 'zen.2457698.40355.xy.HH.uvcA',
-                           'zen.2457698.40355.yx.HH.uvcA', 'zen.2457698.40355.yy.HH.uvcA']
-        self.obsids_nopol = ['zen.2457698.40355.HH.uvcA']
-        self.obsids_lstbin = [sorted(glob.glob(DATA_PATH + '/zen.245804{}.*.xx.HH.uvXRAA'.format(i))) for i in [3, 4, 5]]
-        self.pols = ['xx', 'xy', 'yx', 'yy']
-        self.obsids_time = ['zen.2457698.30355.xx.HH.uvcA', 'zen.2457698.40355.xx.HH.uvcA',
-                            'zen.2457698.50355.xx.HH.uvcA']
-        return
+@pytest.fixture(scope="module")
+def config_options():
+    config_dict = {}
+    config_dict['config_file'] = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp.toml')
+    config_dict['config_file_time_neighbors'] = os.path.join(DATA_PATH,
+                                                             'sample_config', 'nrao_rtp_time_neighbors.toml')
+    config_dict['config_file_options'] = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_options.toml')
+    config_dict['config_file_nopol'] = os.path.join(DATA_PATH, 'sample_config', 'nrao_rtp_nopol.toml')
+    config_dict['config_file_lstbin'] = os.path.join(DATA_PATH, 'sample_config', 'lstbin.toml')
+    config_dict['config_file_lstbin_options'] = os.path.join(DATA_PATH, 'sample_config', 'lstbin_options.toml')
+    config_dict['bad_config_file'] = os.path.join(DATA_PATH, 'sample_config', 'bad_example.toml')
+    config_dict['obsids_pol'] = ('zen.2457698.40355.xx.HH.uvcA', 'zen.2457698.40355.xy.HH.uvcA',
+                                 'zen.2457698.40355.yx.HH.uvcA', 'zen.2457698.40355.yy.HH.uvcA')
+    config_dict['obsids_nopol'] = ('zen.2457698.40355.HH.uvcA',)
+    config_dict['obsids_lstbin'] = (sorted(glob.glob(DATA_PATH + '/zen.245804{}.*.xx.HH.uvXRAA'.format(i)))
+                                    for i in [3, 4, 5])
+    config_dict['pols'] = ('xx', 'xy', 'yx', 'yy')
+    config_dict['obsids_time'] = ('zen.2457698.30355.xx.HH.uvcA', 'zen.2457698.40355.xx.HH.uvcA',
+                                  'zen.2457698.50355.xx.HH.uvcA')
+    return config_dict
 
-    def test_get_jd(self):
-        # send in a sample file name
-        filename = "zen.2458000.12345.xx.HH.uv"
-        jd = mt.get_jd(filename)
-        nt.assert_true(jd, "2458000")
-        return
 
-    def test_get_config_entry(self):
-        # retreive config
-        config = toml.load(self.config_file)
+def test_get_jd():
+    # send in a sample file name
+    filename = "zen.2458000.12345.xx.HH.uv"
+    jd = mt.get_jd(filename)
+    assert jd == "2458000"
+    return
 
-        # retrieve specific entry
-        header = 'OMNICAL'
-        item = 'prereqs'
-        nt.assert_equal("FIRSTCAL_METRICS", mt.get_config_entry(config, header, item))
 
-        # get nonexistent, but not required, entry
-        header = 'OMNICAL'
-        item = 'blah'
-        nt.assert_equal(None, mt.get_config_entry(config, header, item, required=False))
+def test_get_config_entry(config_options):
+    # retreive config
+    config = toml.load(config_options['config_file'])
 
-        # raise an error for a nonexistent, required entry
-        nt.assert_raises(AttributeError, mt.get_config_entry, config, header, item)
-        return
+    # retrieve specific entry
+    header = 'OMNICAL'
+    item = 'prereqs'
+    assert mt.get_config_entry(config, header, item) == "FIRSTCAL_METRICS"
 
-    def test_make_outfile_name(self):
-        # define args
-        obsid = self.obsids_pol[0]
-        action = 'OMNICAL'
-        pols = self.pols
-        outfiles = set(['zen.2457698.40355.xx.HH.uvcA.OMNICAL.xx.out', 'zen.2457698.40355.xx.HH.uvcA.OMNICAL.xy.out',
-                        'zen.2457698.40355.xx.HH.uvcA.OMNICAL.yx.out', 'zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out'])
-        nt.assert_equal(outfiles, set(mt.make_outfile_name(obsid, action, pols)))
+    # get nonexistent, but not required, entry
+    header = 'OMNICAL'
+    item = 'blah'
+    assert mt.get_config_entry(config, header, item, required=False) is None
 
-        # run for no polarizations
-        pols = []
-        outfiles = ['zen.2457698.40355.xx.HH.uvcA.OMNICAL.out']
-        nt.assert_equal(outfiles, mt.make_outfile_name(obsid, action, pols))
-        return
+    # raise an error for a nonexistent, required entry
+    with pytest.raises(AttributeError):
+        mt.get_config_entry(config, header, item)
+    return
 
-    def test_make_time_neighbor_outfile_name(self):
-        # define args
-        obsid = self.obsids_time[1]
-        action = 'OMNICAL'
-        pol = self.pols[3]
-        outfiles = ['zen.2457698.30355.xx.HH.uvcA.OMNICAL.yy.out',
-                    'zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out',
-                    'zen.2457698.50355.xx.HH.uvcA.OMNICAL.yy.out']
-        nt.assert_equal(set(outfiles), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
 
-        # test asking for "all" neighbors
-        nt.assert_equal(set(outfiles), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol,
-                                                                              n_neighbors='all')))
+def test_make_outfile_name(config_options):
+    # define args
+    obsid = config_options['obsids_pol'][0]
+    action = 'OMNICAL'
+    pols = config_options['pols']
+    outfiles = set(['zen.2457698.40355.xx.HH.uvcA.OMNICAL.xx.out', 'zen.2457698.40355.xx.HH.uvcA.OMNICAL.xy.out',
+                    'zen.2457698.40355.xx.HH.uvcA.OMNICAL.yx.out', 'zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out'])
+    assert set(mt.make_outfile_name(obsid, action, pols)) == outfiles
 
-        # test edge cases
-        obsid = self.obsids_time[0]
-        nt.assert_equal(set(outfiles[:2]), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
-        obsid = self.obsids_time[2]
-        nt.assert_equal(set(outfiles[1:]), set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time, pol)))
+    # run for no polarizations
+    pols = []
+    outfiles = ['zen.2457698.40355.xx.HH.uvcA.OMNICAL.out']
+    assert mt.make_outfile_name(obsid, action, pols) == outfiles
+    return
 
-        # run for no polarizations
-        obsid = self.obsids_time[1]
-        outfiles = set(['zen.2457698.30355.xx.HH.uvcA.OMNICAL.out',
-                        'zen.2457698.40355.xx.HH.uvcA.OMNICAL.out',
-                        'zen.2457698.50355.xx.HH.uvcA.OMNICAL.out'])
-        nt.assert_equal(outfiles, set(mt.make_time_neighbor_outfile_name(obsid, action, self.obsids_time)))
-        return
 
-    def test_make_time_neighbor_outfile_name_errors(self):
-        # test not having the obsid in the supplied list
-        obsid = 'zen.1234567.12345.xx.HH.uvcA'
-        action = 'OMNICAL'
-        nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, obsid, action, self.obsids_time)
+def test_make_time_neighbor_outfile_name(config_options):
+    # define args
+    obsid = config_options['obsids_time'][1]
+    action = 'OMNICAL'
+    pol = config_options['pols'][3]
+    outfiles = ['zen.2457698.30355.xx.HH.uvcA.OMNICAL.yy.out',
+                'zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out',
+                'zen.2457698.50355.xx.HH.uvcA.OMNICAL.yy.out']
+    obsids_time = config_options['obsids_time']
+    assert (set(mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, pol))
+            == set(outfiles))
 
-        # test passing in nonsense for all_neighbors
-        nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, self.obsids_time[0], action,
-                         self.obsids_time, pol='xx', n_neighbors='blah')
+    # test asking for "all" neighbors
+    assert (set(mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, pol, n_neighbors='all'))
+            == set(outfiles))
 
-        # test passing in a negative number of neighbors
-        nt.assert_raises(ValueError, mt.make_time_neighbor_outfile_name, self.obsids_time[0], action,
-                         self.obsids_time, pol='xx', n_neighbors='-1')
+    # test edge cases
+    obsid = obsids_time[0]
+    assert (set(mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, pol))
+            == set(outfiles[:2]))
+    obsid = obsids_time[2]
+    assert (set(mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, pol))
+            == set(outfiles[1:]))
 
-        return
+    # run for no polarizations
+    obsid = obsids_time[1]
+    outfiles = set(['zen.2457698.30355.xx.HH.uvcA.OMNICAL.out',
+                    'zen.2457698.40355.xx.HH.uvcA.OMNICAL.out',
+                    'zen.2457698.50355.xx.HH.uvcA.OMNICAL.out'])
+    assert set(mt.make_time_neighbor_outfile_name(obsid, action, obsids_time)) == outfiles
+    return
 
-    def test_prep_args(self):
-        # define args
-        obsid = self.obsids_pol[0]
-        args = '{basename}'
-        pol = self.pols[3]
-        output = 'zen.2457698.40355.yy.HH.uvcA'
-        nt.assert_equal(output, mt.prep_args(args, obsid, pol))
 
-        # test requesting polarization, but none found in file
-        obsid = 'zen.2457698.40355.uv'
-        nt.assert_equal(obsid, mt.prep_args(args, obsid, pol))
+def test_make_time_neighbor_outfile_name_errors(config_options):
+    # test not having the obsid in the supplied list
+    obsid = 'zen.1234567.12345.xx.HH.uvcA'
+    action = 'OMNICAL'
+    obsids_time = config_options['obsids_time']
+    with pytest.raises(ValueError):
+        mt.make_time_neighbor_outfile_name(obsid, action, obsids_time)
 
-        # test not requesting polarization
-        obsid = self.obsids_pol[0]
-        output = 'zen.2457698.40355.xx.HH.uvcA'
-        nt.assert_equal(output, mt.prep_args(args, obsid))
+    # test passing in nonsense for all_neighbors
+    with pytest.raises(ValueError):
+        mt.make_time_neighbor_outfile_name(obsids_time[0], action,
+                                           obsids_time, pol='xx', n_neighbors='blah')
 
-        # test having time-adjacent keywords
-        obsid = self.obsids_time[1]
-        obsids = self.obsids_time
-        args = '{basename} {prev_basename} {next_basename}'
-        output = 'zen.2457698.40355.xx.HH.uvcA zen.2457698.30355.xx.HH.uvcA zen.2457698.50355.xx.HH.uvcA'
-        nt.assert_equal(output, mt.prep_args(args, obsid, obsids=obsids))
+    # test passing in a negative number of neighbors
+    with pytest.raises(ValueError):
+        mt.make_time_neighbor_outfile_name(obsids_time[0], action,
+                                           obsids_time, pol='xx', n_neighbors='-1')
 
-        # test edge cases
-        obsid = self.obsids_time[0]
-        output = 'zen.2457698.30355.xx.HH.uvcA None zen.2457698.40355.xx.HH.uvcA'
-        nt.assert_equal(output, mt.prep_args(args, obsid, obsids=obsids))
+    return
 
-        obsid = self.obsids_time[2]
-        output = 'zen.2457698.50355.xx.HH.uvcA zen.2457698.40355.xx.HH.uvcA None'
-        nt.assert_equal(output, mt.prep_args(args, obsid, obsids=obsids))
 
-        return
+def test_prep_args(config_options):
+    # define args
+    obsid = config_options['obsids_pol'][0]
+    args = '{basename}'
+    pol = config_options['pols'][3]
+    output = 'zen.2457698.40355.yy.HH.uvcA'
+    assert mt.prep_args(args, obsid, pol) == output
 
-    def test_prep_args_errors(self):
-        # define args
-        obsid = self.obsids_time[0]
-        obsids = self.obsids_pol
-        args = '{basename} {prev_basename}'
-        nt.assert_raises(ValueError, mt.prep_args, args, obsid)
-        nt.assert_raises(ValueError, mt.prep_args, args, obsid, obsids=obsids)
+    # test requesting polarization, but none found in file
+    obsid = 'zen.2457698.40355.uv'
+    assert mt.prep_args(args, obsid, pol) == obsid
 
-        args = '{basename} {next_basename}'
-        nt.assert_raises(ValueError, mt.prep_args, args, obsid)
-        nt.assert_raises(ValueError, mt.prep_args, args, obsid, obsids=obsids)
+    # test not requesting polarization
+    obsid = config_options['obsids_pol'][0]
+    output = 'zen.2457698.40355.xx.HH.uvcA'
+    assert mt.prep_args(args, obsid) == output
 
-        return
+    # test having time-adjacent keywords
+    obsid = config_options['obsids_time'][1]
+    obsids = config_options['obsids_time']
+    args = '{basename} {prev_basename} {next_basename}'
+    output = 'zen.2457698.40355.xx.HH.uvcA zen.2457698.30355.xx.HH.uvcA zen.2457698.50355.xx.HH.uvcA'
+    assert mt.prep_args(args, obsid, obsids=obsids) == output
 
-    def test_process_batch_options(self):
-        # define args
-        mem = 8000
-        ncpu = 1
-        pbs_mail_user = 'youremail@example.org'
-        queue = 'hera'
-        batch_options = mt.process_batch_options(mem, ncpu, pbs_mail_user, queue)
-        nt.assert_true('-l vmem=8000M,mem=8000M' in batch_options)
-        nt.assert_true('nodes=1:ppn=1' in batch_options)
-        nt.assert_true('-M youremail@example.org' in batch_options)
-        nt.assert_true('-q hera' in batch_options)
-        return
+    # test edge cases
+    obsid = config_options['obsids_time'][0]
+    output = 'zen.2457698.30355.xx.HH.uvcA None zen.2457698.40355.xx.HH.uvcA'
+    assert mt.prep_args(args, obsid, obsids=obsids) == output
 
-    def test_build_analysis_makeflow_from_config(self):
-        # define args
-        obsids = self.obsids_pol[:1]
-        config_file = self.config_file
-        work_dir = os.path.join(DATA_PATH, 'test_output')
+    obsid = config_options['obsids_time'][2]
+    output = 'zen.2457698.50355.xx.HH.uvcA zen.2457698.40355.xx.HH.uvcA None'
+    assert mt.prep_args(args, obsid, obsids=obsids) == output
 
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+    return
 
-        # make sure the output files we expected appeared
-        nt.assert_true(os.path.exists(outfile))
 
-        # also make sure the wrapper scripts were made
-        actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
-                   'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
-        pols = self.pols
-        for obsid in obsids:
-            for action in actions:
-                for pol in pols:
-                    wrapper_fn = 'wrapper_' + obsid + '.' + action + '.' + pol + '.sh'
-                    wrapper_fn = os.path.join(work_dir, wrapper_fn)
-                    nt.assert_true(os.path.exists(wrapper_fn))
+def test_prep_args_errors(config_options):
+    # define args
+    obsid = config_options['obsids_time'][0]
+    obsids = config_options['obsids_pol']
+    args = '{basename} {prev_basename}'
+    with pytest.raises(ValueError):
+        mt.prep_args(args, obsid)
+    with pytest.raises(ValueError):
+        mt.prep_args(args, obsid, obsids=obsids)
 
-        # clean up after ourselves
+    args = '{basename} {next_basename}'
+    with pytest.raises(ValueError):
+        mt.prep_args(args, obsid)
+    with pytest.raises(ValueError):
+        mt.prep_args(args, obsid, obsids=obsids)
+
+    return
+
+
+def test_process_batch_options():
+    # define args
+    mem = 8000
+    ncpu = 1
+    pbs_mail_user = "youremail@example.org"
+    queue = "hera"
+    batch_options = mt.process_batch_options(mem, ncpu, pbs_mail_user, queue)
+    assert "-l vmem=8000M,mem=8000M" in batch_options
+    assert "nodes=1:ppn=1" in batch_options
+    assert "-M youremail@example.org" in batch_options
+    assert "-q hera" in batch_options
+    return
+
+
+def test_build_analysis_makeflow_from_config(config_options):
+    # define args
+    obsids = config_options['obsids_pol'][:1]
+    config_file = config_options['config_file']
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
         os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
+    mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
-        # also test providing the name of the output file
-        mf_output = "output.mf"
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_analysis_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
+    # make sure the output files we expected appeared
+    assert os.path.exists(outfile)
 
-        nt.assert_true(os.path.exists(outfile))
-
-        # clean up after ourselves
-        os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
-
-        return
-
-    def test_build_analysis_makeflow_from_config_time_neighbors(self):
-        # define args
-        obsids = self.obsids_time
-        config_file = self.config_file_time_neighbors
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
-
-        # make sure the output files we expected appeared
-        nt.assert_true(os.path.exists(outfile))
-        # also make sure the wrapper scripts were made
-        actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
-                   'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
-        pols = self.pols
-        for obsid in obsids:
-            for action in actions:
-                for pol in pols:
-                    wrapper_fn = 'wrapper_' + obsid + '.' + action + '.' + pol + '.sh'
-                    wrapper_fn = os.path.join(work_dir, wrapper_fn)
-                    nt.assert_true(os.path.exists(wrapper_fn))
-
-        # clean up after ourselves
-        os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
-
-        return
-
-    def test_build_analysis_makeflow_from_config_errors(self):
-        # define args
-        obsids = self.obsids_pol[:2]
-        config_file = self.config_file
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-
-        # raise an error for passing in obsids with different polarizations
-        nt.assert_raises(AssertionError, mt.build_analysis_makeflow_from_config, obsids,
-                         config_file, work_dir=work_dir)
-
-        # raise an error for passing in an obsid with no polarization string
-        obsids = ['zen.2458000.12345.uv']
-        nt.assert_raises(AssertionError, mt.build_analysis_makeflow_from_config, obsids,
-                         config_file, work_dir=work_dir)
-
-        return
-
-    def test_build_analysis_makeflow_from_config_options(self):
-        # define args
-        obsids = self.obsids_pol[:1]
-        config_file = self.config_file_options
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
-
-        # make sure the output files we expected appeared
-        nt.assert_true(os.path.exists(outfile))
-
-        # also make sure the wrapper scripts were made
-        actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
-                   'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
-        pols = self.pols
-        for obsid in obsids:
-            for action in actions:
-                for pol in pols:
-                    wrapper_fn = 'wrapper_' + obsid + '.' + action + '.' + pol + '.sh'
-                    wrapper_fn = os.path.join(work_dir, wrapper_fn)
-                    nt.assert_true(os.path.exists(wrapper_fn))
-
-        # clean up after ourselves
-        os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
-
-        # also test providing the name of the output file
-        mf_output = "output.mf"
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_analysis_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
-
-        nt.assert_true(os.path.exists(outfile))
-
-        # clean up after ourselves
-        os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
-
-        return
-
-    def test_build_analysis_makeflow_from_config_nopol(self):
-        # define args
-        obsids = self.obsids_nopol
-        config_file = self.config_file_nopol
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
-
-        # make sure the output files we expected appeared
-        nt.assert_true(os.path.exists(outfile))
-
-        # also make sure the wrapper scripts were made
-        actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
-                   'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
-        for obsid in obsids:
-            for action in actions:
-                wrapper_fn = 'wrapper_' + obsid + '.' + action + '.sh'
+    # also make sure the wrapper scripts were made
+    actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
+               'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
+    pols = config_options['pols']
+    for obsid in obsids:
+        for action in actions:
+            for pol in pols:
+                wrapper_fn = 'wrapper_' + obsid + '.' + action + '.' + pol + '.sh'
                 wrapper_fn = os.path.join(work_dir, wrapper_fn)
-                nt.assert_true(os.path.exists(wrapper_fn))
+                assert os.path.exists(wrapper_fn)
 
-        # clean up after ourselves
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    # also test providing the name of the output file
+    mf_output = "output.mf"
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
         os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
+    mt.build_analysis_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
 
-        # also test providing the name of the output file
-        mf_output = "output.mf"
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_analysis_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
+    assert os.path.exists(outfile)
 
-        nt.assert_true(os.path.exists(outfile))
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
 
-        # clean up after ourselves
+    return
+
+
+def test_build_analysis_makeflow_from_config_time_neighbors(config_options):
+    # define args
+    obsids = config_options['obsids_time']
+    config_file = config_options['config_file_time_neighbors']
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
         os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
+    mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
-        return
+    # make sure the output files we expected appeared
+    assert os.path.exists(outfile)
+    # also make sure the wrapper scripts were made
+    actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
+               'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
+    pols = config_options['pols']
+    for obsid in obsids:
+        for action in actions:
+            for pol in pols:
+                wrapper_fn = 'wrapper_' + obsid + '.' + action + '.' + pol + '.sh'
+                wrapper_fn = os.path.join(work_dir, wrapper_fn)
+                assert os.path.exists(wrapper_fn)
 
-    def test_build_lstbin_makeflow_from_config(self):
-        # define load in config
-        config_file = self.config_file_lstbin
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
 
-        # setup vars
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(config_file, mf_name='lstbin.mf',
-                                             work_dir=work_dir, parent_dir=DATA_PATH)
+    return
 
-        # make sure the output files we expected appeared
-        nt.assert_true(os.path.exists(outfile))
 
-        # clean up after ourselves
+def test_build_analysis_makeflow_from_config_errors(config_options):
+    # define args
+    obsids = config_options['obsids_pol'][:2]
+    config_file = config_options['config_file']
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+
+    # raise an error for passing in obsids with different polarizations
+    with pytest.raises(AssertionError):
+        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+
+    # raise an error for passing in an obsid with no polarization string
+    obsids = ['zen.2458000.12345.uv']
+    with pytest.raises(AssertionError):
+        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+
+    return
+
+
+def test_build_analysis_makeflow_from_config_options(config_options):
+    # define args
+    obsids = config_options['obsids_pol'][:1]
+    config_file = config_options['config_file_options']
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
         os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
+    mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
-        # also test providing the name of the output file
-        mf_output = "output.mf"
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(config_file, mf_name=outfile, work_dir=work_dir,
-                                             parent_dir=DATA_PATH)
+    # make sure the output files we expected appeared
+    assert os.path.exists(outfile)
 
-        nt.assert_true(os.path.exists(outfile))
+    # also make sure the wrapper scripts were made
+    actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
+               'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
+    pols = config_options['pols']
+    for obsid in obsids:
+        for action in actions:
+            for pol in pols:
+                wrapper_fn = 'wrapper_' + obsid + '.' + action + '.' + pol + '.sh'
+                wrapper_fn = os.path.join(work_dir, wrapper_fn)
+                assert os.path.exists(wrapper_fn)
 
-        # clean up after ourselves
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    # also test providing the name of the output file
+    mf_output = "output.mf"
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
         os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
+    mt.build_analysis_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
 
-        return
+    assert os.path.exists(outfile)
 
-    def test_build_lstbin_makeflow_from_config_options(self):
-        # define load in config
-        config_file = self.config_file_lstbin_options
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
 
-        # setup vars
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(config_file, mf_name=outfile, work_dir=work_dir,
-                                             parent_dir=DATA_PATH)
+    return
 
-        # make sure the output files we expected appeared
-        nt.assert_true(os.path.exists(outfile))
 
-        # clean up after ourselves
+def test_build_analysis_makeflow_from_config_nopol(config_options):
+    # define args
+    obsids = config_options['obsids_nopol']
+    config_file = config_options['config_file_nopol']
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
         os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
+    mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
-        # also test providing the name of the output file
-        mf_output = "output.mf"
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        mt.build_lstbin_makeflow_from_config(config_file, mf_name=outfile, work_dir=work_dir,
-                                             parent_dir=DATA_PATH)
+    # make sure the output files we expected appeared
+    assert os.path.exists(outfile)
 
-        nt.assert_true(os.path.exists(outfile))
+    # also make sure the wrapper scripts were made
+    actions = ['ANT_METRICS', 'FIRSTCAL', 'FIRSTCAL_METRICS', 'OMNICAL', 'OMNICAL_METRICS',
+               'OMNI_APPLY', 'XRFI', 'XRFI_APPLY']
+    for obsid in obsids:
+        for action in actions:
+            wrapper_fn = 'wrapper_' + obsid + '.' + action + '.sh'
+            wrapper_fn = os.path.join(work_dir, wrapper_fn)
+            print('obsid, action: ', obsid, action)
+            print("work_dir: ", work_dir)
+            assert os.path.exists(wrapper_fn)
 
-        # clean up after ourselves
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    # also test providing the name of the output file
+    mf_output = "output.mf"
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
         os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
+    mt.build_analysis_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir)
 
-        return
+    assert os.path.exists(outfile)
 
-    def test_build_makeflow_from_config(self):
-        # define args
-        obsids = self.obsids_pol[:1]
-        config_file = self.config_file
-        work_dir = os.path.join(DATA_PATH, 'test_output')
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
 
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
+    return
+
+
+def test_build_lstbin_makeflow_from_config(config_options):
+    # define load in config
+    config_file = config_options['config_file_lstbin']
+
+    # setup vars
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+    mt.build_lstbin_makeflow_from_config(config_file, mf_name='lstbin.mf',
+                                         work_dir=work_dir, parent_dir=DATA_PATH)
+
+    # make sure the output files we expected appeared
+    assert os.path.exists(outfile)
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    # also test providing the name of the output file
+    mf_output = "output.mf"
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+    mt.build_lstbin_makeflow_from_config(config_file, mf_name=outfile, work_dir=work_dir,
+                                         parent_dir=DATA_PATH)
+
+    assert os.path.exists(outfile)
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    return
+
+
+def test_build_lstbin_makeflow_from_config_options(config_options):
+    # define load in config
+    config_file = config_options['config_file_lstbin_options']
+
+    # setup vars
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+    mt.build_lstbin_makeflow_from_config(config_file, mf_name=outfile, work_dir=work_dir,
+                                         parent_dir=DATA_PATH)
+
+    # make sure the output files we expected appeared
+    assert os.path.exists(outfile)
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    # also test providing the name of the output file
+    mf_output = "output.mf"
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+    mt.build_lstbin_makeflow_from_config(config_file, mf_name=outfile, work_dir=work_dir,
+                                         parent_dir=DATA_PATH)
+
+    assert os.path.exists(outfile)
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    return
+
+
+def test_build_makeflow_from_config(config_options):
+    # define args
+    obsids = config_options['obsids_pol'][:1]
+    config_file = config_options['config_file']
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+    mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+
+    # make sure the output files we expected appeared
+    assert os.path.exists(outfile)
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    # also test lstbin version
+    config_file = config_options['config_file_lstbin_options']
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+
+    mt.build_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir,
+                                  parent_dir=DATA_PATH)
+
+    # make sure the output files we expected appeared
+    assert os.path.exists(outfile)
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    # ensure we raise an error when no makeflow_type is specified
+    config_file = config_options['bad_config_file']
+    with pytest.raises(ValueError):
         mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
-        # make sure the output files we expected appeared
-        nt.assert_true(os.path.exists(outfile))
+    return
 
-        # clean up after ourselves
+
+def test_clean_wrapper_scripts():
+    # define args
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+
+    # make file to remove
+    outfile = os.path.join(work_dir, 'wrapper_test.sh')
+    if os.path.exists(outfile):
         os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
+    open(outfile, 'a').close()
 
-        # also test lstbin version
-        config_file = self.config_file_lstbin_options
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
-        outfile = os.path.join(work_dir, mf_output)
-        if os.path.exists(outfile):
-            os.remove(outfile)
+    # check that it exists
+    assert os.path.exists(outfile)
 
-        mt.build_makeflow_from_config(obsids, config_file, mf_name=outfile, work_dir=work_dir,
-                                      parent_dir=DATA_PATH)
+    # remove it
+    mt.clean_wrapper_scripts(work_dir)
+    assert not os.path.exists(outfile)
+    return
 
-        # make sure the output files we expected appeared
-        nt.assert_true(os.path.exists(outfile))
 
-        # clean up after ourselves
+def test_clean_output_files():
+    # define args
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+
+    # make file to remove
+    outfile = os.path.join(work_dir, 'test_file.out')
+    if os.path.exists(outfile):
         os.remove(outfile)
-        mt.clean_wrapper_scripts(work_dir)
+    open(outfile, 'a').close()
 
-        # ensure we raise an error when no makeflow_type is specified
-        config_file = self.bad_config_file
-        nt.assert_raises(ValueError, mt.build_makeflow_from_config, obsids, config_file, work_dir=work_dir)
+    # check that it exists
+    assert os.path.exists(outfile)
 
-        return
+    # remove it
+    mt.clean_output_files(work_dir)
+    assert not os.path.exists(outfile)
+    return
 
-    def test_clean_wrapper_scripts(self):
-        # define args
-        work_dir = os.path.join(DATA_PATH, 'test_output')
 
-        # make file to remove
-        outfile = os.path.join(work_dir, 'wrapper_test.sh')
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        open(outfile, 'a').close()
+def test_consolidate_logs():
+    # define args
+    input_dir = os.path.join(DATA_PATH, 'test_input')
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+    output_fn = os.path.join(DATA_PATH, 'test_output', 'mf.log')
 
-        # check that it exists
-        nt.assert_true(os.path.exists(outfile))
+    # copy input files over to output directory
+    input_files = [f for f in os.listdir(input_dir) if f[-4:] == '.log']
+    for fn in input_files:
+        abspath = os.path.join(input_dir, fn)
+        shutil.copy(abspath, work_dir)
 
-        # remove it
-        mt.clean_wrapper_scripts(work_dir)
-        nt.assert_false(os.path.exists(outfile))
-        return
-
-    def test_clean_output_files(self):
-        # define args
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-
-        # make file to remove
-        outfile = os.path.join(work_dir, 'test_file.out')
-        if os.path.exists(outfile):
-            os.remove(outfile)
-        open(outfile, 'a').close()
-
-        # check that it exists
-        nt.assert_true(os.path.exists(outfile))
-
-        # remove it
-        mt.clean_output_files(work_dir)
-        nt.assert_false(os.path.exists(outfile))
-        return
-
-    def test_consolidate_logs(self):
-        # define args
-        input_dir = os.path.join(DATA_PATH, 'test_input')
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-        output_fn = os.path.join(DATA_PATH, 'test_output', 'mf.log')
-
-        # copy input files over to output directory
-        input_files = [f for f in os.listdir(input_dir) if f[-4:] == '.log']
-        for fn in input_files:
-            abspath = os.path.join(input_dir, fn)
-            shutil.copy(abspath, work_dir)
-
-        # create single log file from input logs
-        if os.path.exists(output_fn):
-            os.remove(output_fn)
-        mt.consolidate_logs(work_dir, output_fn, remove_original=False, zip_file=False)
-
-        # check that output file exists
-        nt.assert_true(os.path.exists(output_fn))
-
-        # make sure that individual logs' content was transferred over
-        with open(output_fn, 'r') as f_out:
-            out_lines = set(f_out.read().splitlines())
-            for fn in input_files:
-                abspath = os.path.join(input_dir, fn)
-                with open(abspath, 'r') as f_in:
-                    # check log content
-                    in_lines = set(f_in.read().splitlines())
-                    for line in in_lines:
-                        nt.assert_true(line in out_lines)
-                # also check file name
-                nt.assert_true(fn in out_lines)
-
-        # test overwriting file
-        mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=False,
-                            zip_file=False)
-
-        # make sure that individual logs' content was transferred over
-        with open(output_fn, 'r') as f_out:
-            out_lines = set(f_out.read().splitlines())
-            for fn in input_files:
-                abspath = os.path.join(input_dir, fn)
-                with open(abspath, 'r') as f_in:
-                    # check log content
-                    in_lines = set(f_in.read().splitlines())
-                    for line in in_lines:
-                        nt.assert_true(line in out_lines)
-                # also check file name
-                nt.assert_true(fn in out_lines)
-
-        # test making a zip
-        mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=False,
-                            zip_file=True)
-
-        # check that file exists
-        output_gz = output_fn + '.gz'
-        nt.assert_true(os.path.exists(output_gz))
-
-        # make sure that individual logs' content was transferred over
-        with gzip.open(output_gz, 'rb') as f_out:
-            data = f_out.read()
-            if six.PY3:
-                data = data.decode('utf-8')
-            out_lines = set(data.splitlines())
-            print(out_lines)
-            for fn in input_files:
-                abspath = os.path.join(input_dir, fn)
-                with open(abspath, 'r') as f_in:
-                    # check log content
-                    in_lines = set(f_in.read().splitlines())
-                    for line in in_lines:
-                        print(line)
-                        nt.assert_true(line in out_lines)
-                # also check file name
-                nt.assert_true(fn in out_lines)
-
-        # test overwriting a zip
-        mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=False,
-                            zip_file=True)
-        nt.assert_true(os.path.exists(output_gz))
-
-        # test removing input files when a log is made
-        for fn in input_files:
-            abspath = os.path.join(work_dir, fn)
-            nt.assert_true(os.path.exists(abspath))
-
-        mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=True)
-
-        # make sure that original files are now gone
-        for fn in input_files:
-            abspath = os.path.join(work_dir, fn)
-            nt.assert_false(os.path.exists(abspath))
-
-        # clean up after ourselves
+    # create single log file from input logs
+    if os.path.exists(output_fn):
         os.remove(output_fn)
-        os.remove(output_fn + '.gz')
+    mt.consolidate_logs(work_dir, output_fn, remove_original=False, zip_file=False)
 
-        return
+    # check that output file exists
+    assert os.path.exists(output_fn)
 
-    def test_consolidate_logs_errors(self):
-        # define args
-        input_dir = os.path.join(DATA_PATH, 'test_input')
-        work_dir = os.path.join(DATA_PATH, 'test_output')
-        output_fn = os.path.join(DATA_PATH, 'test_output', 'mf.log')
-
-        # copy input files over to output directory
-        input_files = [f for f in os.listdir(input_dir) if f[-4:] == '.log']
+    # make sure that individual logs' content was transferred over
+    with open(output_fn, 'r') as f_out:
+        out_lines = set(f_out.read().splitlines())
         for fn in input_files:
             abspath = os.path.join(input_dir, fn)
-            shutil.copy(abspath, work_dir)
+            with open(abspath, 'r') as f_in:
+                # check log content
+                in_lines = set(f_in.read().splitlines())
+                for line in in_lines:
+                    assert line in out_lines
+            # also check file name
+            assert fn in out_lines
 
-        # create single log file from input logs
-        if os.path.exists(output_fn):
-            os.remove(output_fn)
-        mt.consolidate_logs(work_dir, output_fn, remove_original=False, zip_file=False)
+    # test overwriting file
+    mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=False,
+                        zip_file=False)
 
-        # make sure that we raise an error if we don't pass overwrite=True
-        nt.assert_raises(IOError, mt.consolidate_logs, work_dir, output_fn, overwrite=False)
-
-        # test making a zip
-        mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=False,
-                            zip_file=True)
-
-        # check that file exists
-        output_gz = output_fn + '.gz'
-        nt.assert_true(os.path.exists(output_gz))
-
-        # make sure we get an error if the file exists
-        nt.assert_raises(IOError, mt.consolidate_logs, work_dir, output_fn, overwrite=False,
-                         zip_file=True)
-
-        # clean up after ourselves
+    # make sure that individual logs' content was transferred over
+    with open(output_fn, 'r') as f_out:
+        out_lines = set(f_out.read().splitlines())
         for fn in input_files:
-            abspath = os.path.join(work_dir, fn)
-            os.remove(abspath)
-        os.remove(output_gz)
+            abspath = os.path.join(input_dir, fn)
+            with open(abspath, 'r') as f_in:
+                # check log content
+                in_lines = set(f_in.read().splitlines())
+                for line in in_lines:
+                    assert line in out_lines
+            # also check file name
+            assert fn in out_lines
 
-        return
+    # test making a zip
+    mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=False,
+                        zip_file=True)
 
-    def test_interpolate_config(self):
-        # define and load config file
-        config_file = self.config_file
-        config = toml.load(config_file)
+    # check that file exists
+    output_gz = output_fn + '.gz'
+    assert os.path.exists(output_gz)
 
-        # interpolate config
-        opt = mt._interpolate_config(config, "${Options:ex_ants}")
-        nt.assert_equal(opt, "~/hera/hera_cal/hera_cal/calibrations/herahex_ex_ants.txt")
+    # make sure that individual logs' content was transferred over
+    with gzip.open(output_gz, 'rb') as f_out:
+        data = f_out.read()
+        if six.PY3:
+            data = data.decode('utf-8')
+        out_lines = set(data.splitlines())
+        print(out_lines)
+        for fn in input_files:
+            abspath = os.path.join(input_dir, fn)
+            with open(abspath, 'r') as f_in:
+                # check log content
+                in_lines = set(f_in.read().splitlines())
+                for line in in_lines:
+                    print(line)
+                    assert line in out_lines
+            # also check file name
+            assert fn in out_lines
 
-        # raise error
-        nt.assert_raises(ValueError, mt._interpolate_config, config, "${Bad:interp}")
+    # test overwriting a zip
+    mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=False,
+                        zip_file=True)
+    assert os.path.exists(output_gz)
 
-        return
+    # test removing input files when a log is made
+    for fn in input_files:
+        abspath = os.path.join(work_dir, fn)
+        assert os.path.exists(abspath)
 
-    def test_build_makeflow_from_config_errors(self):
-        # try to pass in something that is not a string
-        nt.assert_raises(ValueError, mt.build_makeflow_from_config, ['obids'], 3)
+    mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=True)
 
-        return
+    # make sure that original files are now gone
+    for fn in input_files:
+        abspath = os.path.join(work_dir, fn)
+        assert not os.path.exists(abspath)
+
+    # clean up after ourselves
+    os.remove(output_fn)
+    os.remove(output_fn + '.gz')
+
+    return
+
+
+def test_consolidate_logs_errors():
+    # define args
+    input_dir = os.path.join(DATA_PATH, 'test_input')
+    work_dir = os.path.join(DATA_PATH, 'test_output')
+    output_fn = os.path.join(DATA_PATH, 'test_output', 'mf.log')
+
+    # copy input files over to output directory
+    input_files = [f for f in os.listdir(input_dir) if f[-4:] == '.log']
+    for fn in input_files:
+        abspath = os.path.join(input_dir, fn)
+        shutil.copy(abspath, work_dir)
+
+    # create single log file from input logs
+    if os.path.exists(output_fn):
+        os.remove(output_fn)
+    mt.consolidate_logs(work_dir, output_fn, remove_original=False, zip_file=False)
+
+    # make sure that we raise an error if we don't pass overwrite=True
+    with pytest.raises(IOError):
+        mt.consolidate_logs(work_dir, output_fn, overwrite=False)
+
+    # test making a zip
+    mt.consolidate_logs(work_dir, output_fn, overwrite=True, remove_original=False,
+                        zip_file=True)
+
+    # check that file exists
+    output_gz = output_fn + '.gz'
+    assert os.path.exists(output_gz)
+
+    # make sure we get an error if the file exists
+    with pytest.raises(IOError):
+        mt.consolidate_logs(work_dir, output_fn, overwrite=False, zip_file=True)
+
+    # clean up after ourselves
+    for fn in input_files:
+        abspath = os.path.join(work_dir, fn)
+        os.remove(abspath)
+    os.remove(output_gz)
+
+    return
+
+
+def test_interpolate_config(config_options):
+    # define and load config file
+    config_file = config_options['config_file']
+    config = toml.load(config_file)
+
+    # interpolate config
+    opt = mt._interpolate_config(config, "${Options:ex_ants}")
+    assert opt == "~/hera/hera_cal/hera_cal/calibrations/herahex_ex_ants.txt"
+
+    # raise error
+    with pytest.raises(ValueError):
+        mt._interpolate_config(config, "${Bad:interp}")
+
+    return
+
+
+def test_build_makeflow_from_config_errors():
+    # try to pass in something that is not a string
+    with pytest.raises(ValueError):
+        mt.build_makeflow_from_config(['obids'], 3)
+
+    return
