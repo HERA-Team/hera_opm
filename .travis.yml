@@ -29,7 +29,7 @@ install:
   # create environment and install dependencies
   - conda create -q -n testenv python="$PYTHON_VERSION"
   - source activate testenv
-  - conda install nose pip scipy matplotlib six toml astropy ephem pycodestyle coveralls h5py
+  - conda install pytest pytest-runner pip scipy matplotlib six toml astropy ephem pycodestyle coveralls h5py
   - conda install -c conda-forge aipy
   - pip install git+https://github.com/HERA-Team/pyuvdata.git
   - pip install git+https://github.com/HERA-Team/linsolve.git
@@ -38,9 +38,8 @@ install:
   - pip install git+https://github.com/HERA-Team/hera_cal.git
   - conda list
 script:
-  - nosetests hera_opm --with-coverage --cover-package=hera_opm
+  - coverage run --source=hera_opm setup.py test
   - pycodestyle --ignore=E501,W503
-  - python setup.py install
 after_success:
   - coveralls
 notifications:

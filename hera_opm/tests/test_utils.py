@@ -1,5 +1,5 @@
 """Tests for utils.py"""
-import nose.tools as nt
+import pytest
 import os
 from hera_opm.data import DATA_PATH
 import hera_opm.utils as utils
@@ -15,17 +15,18 @@ def test_get_makeflow_ArgumentParser():
     parsed_args = a.parse_args(args)
 
     # make sure we got what we expected
-    nt.assert_equal(parsed_args.config, config_file)
-    nt.assert_equal(parsed_args.output, output_file)
+    assert parsed_args.config == config_file
+    assert parsed_args.output == output_file
     for obsid in obsids:
-        nt.assert_true(obsid in parsed_args.files)
+        assert obsid in parsed_args.files
 
     return
 
 
 def test_get_cleaner_ArgumentParser():
     # raise error for requesting unknown function
-    nt.assert_raises(AssertionError, utils.get_cleaner_ArgumentParser, 'blah')
+    with pytest.raises(AssertionError):
+        utils.get_cleaner_ArgumentParser('blah')
 
     # test getting each type of argparser
     # wrapper
@@ -33,22 +34,22 @@ def test_get_cleaner_ArgumentParser():
     work_dir = '/foo/bar'
     args = [work_dir]
     parsed_args = a.parse_args(args)
-    nt.assert_equal(work_dir, parsed_args.directory)
+    assert parsed_args.directory == work_dir
 
     # output
     a = utils.get_cleaner_ArgumentParser('output')
     parsed_args = a.parse_args(args)
-    nt.assert_equal(work_dir, parsed_args.directory)
+    assert parsed_args.directory == work_dir
 
     # logs
     a = utils.get_cleaner_ArgumentParser('logs')
     output_file = "mf.log"
     args = [work_dir, '-o', output_file]
     parsed_args = a.parse_args(args)
-    nt.assert_equal(work_dir, parsed_args.directory)
-    nt.assert_equal(output_file, parsed_args.output)
-    nt.assert_false(parsed_args.overwrite)
-    nt.assert_true(parsed_args.remove_original)
-    nt.assert_false(parsed_args.zip)
+    assert parsed_args.directory == work_dir
+    assert parsed_args.output == output_file
+    assert not parsed_args.overwrite
+    assert parsed_args.remove_original
+    assert not parsed_args.zip
 
     return
