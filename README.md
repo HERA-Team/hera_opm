@@ -42,6 +42,11 @@ and generate a single log file for all jobs in the makeflow.
 
 # Installation
 
+To install the `hera_opm` package, simply:
+```
+python setup.py install
+```
+
 As mentioned above, `hera_opm` uses `makeflow` as the backing pipeline management
 software. As such, `makeflow` must be installed. To install `makeflow` in your
 home directory:
@@ -56,21 +61,22 @@ export PATH=${PATH}:${HOME}/cctools/bin
 For convenience, it is helpful to add the `export` statement to your `.bashrc`
 file, so that the `makeflow` are always on your `PATH`.
 
-`hera_opm` stores workflow configuration files in the [TOML
-format](https://github.com/toml-lang/toml). The [toml
-package](https://github.com/uiri/toml) is required. To install it, either:
-```
-conda install toml
-```
-or
-```
-pip install toml
-```
+## Dependencies
 
-To install the `hera_opm` package, simply:
-```
-python setup.py install
-```
+When installing the package, setuptools will attempt to download and install any
+missing dependencies. If you prefer to manage your own python environment
+(through conda or pip or some other manager), you can install them yourself.
+
+### Required
+
+* toml >= 0.9.4
+
+### Optional
+
+* [hera_cal](https://github.com/HERA-Team/hera_cal)
+
+Generating an `lstbin` pipeline (instead of `analysis`) requires that hera_cal
+be installed. The main package and tests can be run without this requirement.
 
 # Task Scripts and Config Files
 
@@ -78,3 +84,12 @@ For documentation on building task scripts, see [the task scipts docs
 page](docs/task_scripts.md). For documentation on config files, see [the config
 file docs page](docs/config_files.md).
 
+
+# Testing
+
+`hera_opm` uses `pytest` as its testing framework. To run the test suite, do:
+```
+python setup.py test
+```
+This requires `pytest` and `pytest-runner` to be installed, along with the other
+package dependencies.
