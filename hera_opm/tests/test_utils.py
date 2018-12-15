@@ -10,8 +10,8 @@ def test_get_makeflow_ArgumentParser():
     a = utils.get_makeflow_ArgumentParser()
     config_file = "config_file.cfg"
     output_file = "mf.log"
-    obsids = ['zen.2458000.12345.xx.uv', 'zen.2458000.12345.yy.uv']
-    args = ['-c', config_file, '-o', output_file, obsids[0], obsids[1]]
+    obsids = ["zen.2458000.12345.xx.uv", "zen.2458000.12345.yy.uv"]
+    args = ["-c", config_file, "-o", output_file, obsids[0], obsids[1]]
     parsed_args = a.parse_args(args)
 
     # make sure we got what we expected
@@ -26,25 +26,25 @@ def test_get_makeflow_ArgumentParser():
 def test_get_cleaner_ArgumentParser():
     # raise error for requesting unknown function
     with pytest.raises(AssertionError):
-        utils.get_cleaner_ArgumentParser('blah')
+        utils.get_cleaner_ArgumentParser("blah")
 
     # test getting each type of argparser
     # wrapper
-    a = utils.get_cleaner_ArgumentParser('wrapper')
-    work_dir = '/foo/bar'
+    a = utils.get_cleaner_ArgumentParser("wrapper")
+    work_dir = "/foo/bar"
     args = [work_dir]
     parsed_args = a.parse_args(args)
     assert parsed_args.directory == work_dir
 
     # output
-    a = utils.get_cleaner_ArgumentParser('output')
+    a = utils.get_cleaner_ArgumentParser("output")
     parsed_args = a.parse_args(args)
     assert parsed_args.directory == work_dir
 
     # logs
-    a = utils.get_cleaner_ArgumentParser('logs')
+    a = utils.get_cleaner_ArgumentParser("logs")
     output_file = "mf.log"
-    args = [work_dir, '-o', output_file]
+    args = [work_dir, "-o", output_file]
     parsed_args = a.parse_args(args)
     assert parsed_args.directory == work_dir
     assert parsed_args.output == output_file

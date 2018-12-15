@@ -1,6 +1,7 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # -*- mode: python; coding: utf-8 -*-
 # Copyright (c) 2018 The HERA Collaboration
+# Licensed under the 2-clause BSD License
 
 from __future__ import print_function, division, absolute_import
 import os
@@ -13,6 +14,10 @@ obsids = args.files
 config = args.config
 output = args.output
 
-obsid_list = ' '.join(obsids)
-print("Generating makeflow file from config file {0} for obsids {1}".format(config, obsid_list))
+obsid_list = " ".join(obsids)
+print(
+    "Generating makeflow file from config file {0} for obsids {1}".format(
+        config, obsid_list
+    )
+)
 mt.build_makeflow_from_config(obsids, config, output)
