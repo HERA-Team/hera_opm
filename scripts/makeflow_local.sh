@@ -1,5 +1,6 @@
 #!/bin/bash
 # Copyright (c) 2018 The HERA Collaboration
+# Licensed under the 2-clause BSD License
 
 # This command is makeflow_local.sh
 # Use this to run makeflow on a local machine (i.e., on a laptop, or interactively on a cluster node)

@@ -1,13 +1,14 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # -*- mode: python; coding: utf-8 -*-
 # Copyright (c) 2018 The HERA Collaboration
+# Licensed under the 2-clause BSD License
 
 from __future__ import print_function, division, absolute_import
 import os
 from hera_opm import mf_tools as mt
 from hera_opm import utils
 
-a = utils.get_cleaner_ArgumentParser('logs')
+a = utils.get_cleaner_ArgumentParser("logs")
 # change program name to reflect script
 a.prog = "clean_up_makeflow.py"
 args = a.parse_args()
