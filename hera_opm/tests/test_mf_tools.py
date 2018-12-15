@@ -10,6 +10,16 @@ import six
 import toml
 
 
+# define a pytest marker for skipping lstbin tests
+try:
+    import hera_cal
+    hc_installed = True
+except ImportError:
+    hc_installed = False
+hc_skip = pytest.mark.skipif(not hc_installed,
+                             reason="hera_cal must be installed for this test")
+
+
 @pytest.fixture(scope="module")
 def config_options():
     config_dict = {}
@@ -387,6 +397,7 @@ def test_build_analysis_makeflow_from_config_nopol(config_options):
     return
 
 
+@hc_skip
 def test_build_lstbin_makeflow_from_config(config_options):
     # define load in config
     config_file = config_options['config_file_lstbin']
@@ -424,6 +435,7 @@ def test_build_lstbin_makeflow_from_config(config_options):
     return
 
 
+@hc_skip
 def test_build_lstbin_makeflow_from_config_options(config_options):
     # define load in config
     config_file = config_options['config_file_lstbin_options']
@@ -480,7 +492,18 @@ def test_build_makeflow_from_config(config_options):
     os.remove(outfile)
     mt.clean_wrapper_scripts(work_dir)
 
-    # also test lstbin version
+    # ensure we raise an error when no makeflow_type is specified
+    config_file = config_options['bad_config_file']
+    with pytest.raises(ValueError):
+        mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+
+    return
+
+
+@hc_skip
+def test_build_makeflow_from_config_lstbin_options(config_options):
+    # test lstbin version with options
+    obsids = config_options['obsids_pol'][:1]
     config_file = config_options['config_file_lstbin_options']
     work_dir = os.path.join(DATA_PATH, 'test_output')
     mf_output = os.path.splitext(os.path.basename(config_file))[0] + '.mf'
@@ -497,11 +520,6 @@ def test_build_makeflow_from_config(config_options):
     # clean up after ourselves
     os.remove(outfile)
     mt.clean_wrapper_scripts(work_dir)
-
-    # ensure we raise an error when no makeflow_type is specified
-    config_file = config_options['bad_config_file']
-    with pytest.raises(ValueError):
-        mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
     return
 

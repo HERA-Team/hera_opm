@@ -19,12 +19,31 @@ workflow. We list several below, but the list is by no means exhaustive.
 
 ### pols
 
-This lists the polarizations to be used, as a comma-separated list.
+This lists the polarizations to be used, as a comma-separated list. This option
+is not required unless processing polarization-separated files.
 
 ### path_to_do_scripts
 
 This lists the absolute path to the task scripts (also called "do_scripts" due
 to their naming convention).
+
+### conda_env
+
+The name of a conda environment that should be activated before running each
+analysis step.
+
+### base_mem
+
+The default memory requirement for each step in the workflow, in MB. Individual
+steps can request a different amount of memory (e.g., if one step requires
+significantly more memory than the other ones).
+
+### base_cpu
+
+The default number of CPUs for each processing stage. Unless you have explicitly
+made your task parallel (using OpenMP, MPI, or other parallelization framework),
+this should be 1.
+
 
 ## WorkFlow
 
@@ -68,20 +87,18 @@ prerequisites have been met in terms of expected output files being produced.
 
 ### mem
 
-The required memory for each task. This is for scheduling purposes to avoid
-oversaturating computational resources available. However, on local compute
-environments, there is no hard limit imposed (that is, if your task requires
-more memory than the amount specified, it is not killed). That said, it is
-better to overestimate the memory required, to avoid instances of tasks having
-insufficient memory, and terminating early. **NOTE**: This feature is not
-currently implemented.
+The required memory for each task, in MB. This is for scheduling purposes to
+avoid oversaturating computational resources available. However, on local
+compute environments, there is no hard limit imposed (that is, if your task
+requires more memory than the amount specified, it is not killed). That said, it
+is better to overestimate the memory required, to avoid instances of tasks
+having insufficient memory, and terminating early.
 
 ### cpu
 
 The number of CPU cores that should be reserved for a given task. Unless you
 have explicitly made your task parallel (using OpenMP, MPI, or other
-parallelization framework), this should always be 1. **NOTE**: This feature is
-not currently implemented.
+parallelization framework), this should always be 1.
 
 
 ### Replacement
