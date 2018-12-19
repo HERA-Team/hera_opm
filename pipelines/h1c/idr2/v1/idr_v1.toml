@@ -1,9 +1,9 @@
 [Options]
 makeflow_type = "analysis"
 pols = ["xx", "xy", "yx", "yy"]
-path_to_do_scripts = "/users/heramgr/hera_software/hera_opm/pipelines/idr2/v1/task_scripts"
+path_to_do_scripts = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v1/task_scripts"
 conda_env = "hera"
-ex_ants_path = "/users/heramgr/hera_software/hera_opm/pipelines/idr2/v1/bad_ants"
+ex_ants_path = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v1/bad_ants"
 base_mem = 8000
 base_cpu = 1
 timeout = "24h"
