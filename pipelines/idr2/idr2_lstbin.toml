@@ -1,7 +1,7 @@
 [Options]
 makeflow_type = "lstbin"
 pols = ["xx", "xy", "yx", "yy"]
-path_to_do_scripts = "~/hera/hera_opm/hera_opm/data/idr2/task_scripts"
+path_to_do_scripts = "~/hera/hera_opm/pipelines/idr2/task_scripts"
 conda_env = "hera"
 base_mem = 10000
 base_cpu = 1
