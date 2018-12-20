@@ -15,7 +15,6 @@ import warnings
 import six
 from six.moves import range, map, zip
 import glob
-import numpy as np
 import toml
 
 
@@ -349,7 +348,7 @@ def build_makeflow_from_config(
     determine if the config file specifies an "analysis" type or "lstbin" type, and
     call the appropriate funciton below.
     """
-    if isinstance(config_file, (str, np.str)):
+    if isinstance(config_file, str):
         # read in config file
         config = toml.load(config_file)
     else:
