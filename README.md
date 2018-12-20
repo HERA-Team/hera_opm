@@ -61,7 +61,7 @@ make install
 export PATH=${PATH}:${HOME}/cctools/bin
 ```
 For convenience, it is helpful to add the `export` statement to your `.bashrc`
-file, so that the `makeflow` are always on your `PATH`.
+file, so that the `makeflow` commands are always on your `PATH`.
 
 ## Dependencies
 
