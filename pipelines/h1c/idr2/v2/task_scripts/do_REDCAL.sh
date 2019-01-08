@@ -20,7 +20,7 @@ nInt_to_load="${5}"
 
 # get metrics_json filename, removing extension and appending .ant_metrics.json
 nopol_base=$(remove_pol ${fn})
-metrics_f=`echo ${nopol_base%.*}.ant_metrics.json`
+metrics_f=`echo ${nopol_base%.*}.HH.uv.ant_metrics.json`
 
 # assume second argument is location of ex_ants folder
 # extract JD from filename
@@ -33,6 +33,6 @@ jd_int=`echo $jd | awk '{$1=int($1)}1'`
 bad_ants_fn=`echo "${bad_ants_dir}/${jd_int}.txt"`
 exants=$(prep_exants ${bad_ants_fn})
 
-echo redcal_run.py ${fn} --ex_ants=${exants} --ant_metrics_file=${metrics_f}  --ant_z_thresh=${ant_z_thresh} --solar_horizon=${solar_horizon} --nInt_to_load=${nInt_to_load} --clobber --verbose
-redcal_run.py ${fn} --ex_ants=${exants} --ant_metrics_file=${metrics_f}  --ant_z_thresh=${ant_z_thresh} --solar_horizon=${solar_horizon} --nInt_to_load=${nInt_to_load} --clobber --verbose
+echo redcal_run.py ${fn} --ex_ants ${exants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} --nInt_to_load ${nInt_to_load} --clobber --verbose
+redcal_run.py ${fn} --ex_ants ${exants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} --nInt_to_load ${nInt_to_load} --clobber --verbose
 
