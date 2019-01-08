@@ -73,7 +73,7 @@ function prep_exants ()
 # and convert to a comma-separated list
 # taken from https://stackoverflow.com/questions/1251999/how-can-i-replace-a-newline-n-using-sed
 {
-    local csl=$(cat $1 | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/,/g')
+    local csl=$(cat $1 | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g')
     echo "$csl"
 }
 
