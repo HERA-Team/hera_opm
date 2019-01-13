@@ -482,6 +482,7 @@ def test_build_analysis_makeflow_from_config_nopol(config_options):
 
 
 @hc_skip
+@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
 def test_build_lstbin_makeflow_from_config(config_options):
     # define load in config
     config_file = config_options["config_file_lstbin"]
@@ -522,6 +523,7 @@ def test_build_lstbin_makeflow_from_config(config_options):
 
 
 @hc_skip
+@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
 def test_build_lstbin_makeflow_from_config_options(config_options):
     # define load in config
     config_file = config_options["config_file_lstbin_options"]
@@ -589,6 +591,7 @@ def test_build_makeflow_from_config(config_options):
 
 
 @hc_skip
+@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
 def test_build_makeflow_from_config_lstbin_options(config_options):
     # test lstbin version with options
     obsids = config_options["obsids_pol"][:1]
