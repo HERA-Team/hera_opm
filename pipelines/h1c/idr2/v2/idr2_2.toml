@@ -12,6 +12,8 @@ pbs_mail_user = "jsdillon+makeflow@berkeley.edu"
 ant_z_thresh = 4.0
 solar_horizon = 0.0
 nInt_to_load = 8
+flag_nchan_low = 50
+flag_nchan_high = 50
 
 
 [WorkFlow]
@@ -20,4 +22,5 @@ actions = ["REDCAL"]
 [REDCAL]
 prereqs = "FIRSTCAL_METRICS"
 args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
-        "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:nInt_to_load}"]
+        "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}", 
+        "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}"]
