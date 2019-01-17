@@ -17,8 +17,16 @@ flag_nchan_high = 50
 min_bl_cut = 15
 max_bl_cut = 90
 
-# [ABSCAL_OPTS]
-# TODO: UPDATE
+[ABSCAL_OPTS]
+model_files_glob = "/lustre/aoc/projects/hera/nkern/idr3_abscal_models/full_model/zen.2458042.?????.HH.uvRXLS.uvh5"
+filetype = 'uvh5'
+phs_max_iter = 100
+phs_conv_crit = 1e-6
+refant = 53
+max_bl_cut = 100
+edge_cut = 100
+solar_horizon = 0.0
+antflag_thresh = 0.0
 
 # [CAL_XRFI_OPTS]
 # TODO: UPDATE
@@ -55,7 +63,6 @@ alpha = 0.5
 [WorkFlow]
 actions = ["EXTRACT_AUTOS", "REDCAL", # ABSCAL, FIRSTCAL_METRICS, CAL_XRFI, DELAY_XRFI, CAL_SMOOTH, DELAY, NOISE, REFLECTIONS
            ]
-
 [EXTRACT_AUTOS]
 args = ["{basename}"]
 
@@ -65,9 +72,12 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
         "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}"]
 
-# [ABSCAL]
-# prereqs = "REDCAL"
-# args = TODO: UPDATE
+[ABSCAL]
+prereqs = "REDCAL"
+mem = 32000
+args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:filetype}",
+"${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:refant}", "${ABSCAL_OPTS:max_bl_cut}",
+"${ABSCAL_OPTS:edge_cut}", "${ABSCAL_OPTS:solar_horizon}", "${ABSCAL_OPTS:antflag_thresh}"]
 
 # [FIRSTCAL_METRICS]
 # prereqs = "REDCAL"
@@ -110,4 +120,3 @@ args = ["{basename}"]
 # time_prereqs = "CAL_SMOOTH"
 # n_time_neighbors = "all"
 # args = TODO: UPDATE
-
