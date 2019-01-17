@@ -27,8 +27,8 @@ edge_cut="${8}"
 antflag_thresh="${9}"
 
 # make calfits file name
-omni_fn=`echo ${fn}.omni.calfits`
-calfits_fn=`echo ${fn}.abs.calfits`
+omni_fn=`echo ${fn%.*}.omni.calfits`
+calfits_fn=`echo ${fn%.*}.abs.calfits`
 
 # call omni-abscal script; see hera_cal.abscal for more details
 echo omni_abscal_run.py --refant ${refant} --max_bl_cut ${max_bl_cut} --edge_cut ${edge_cut} --antflag_thresh ${antflag_thresh} --avg_dly_slope_cal --delay_slope_cal --phase_slope_cal --TT_phs_cal --abs_amp_cal --phs_max_iter ${phs_max_iter} --phs_conv_crit ${phs_conv_crit} --overwrite --input_cal ${omni_fn} --output_calfits_fname ${calfits_fn} --data_file ${fn} --filetype ${ft} --model_files ${model_files} 
