@@ -1,8 +1,8 @@
 [Options]
 makeflow_type = "analysis"
-path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/hera_opm/H1C_IDR3/bad_ants/"
+path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/pipelines/h1c/idr2/v2/task_scripts"
 conda_env = "hera"
-ex_ants_path = "/users/jsdillon/Libraries/hera_opm/hera_opm/H1C_IDR3/bad_ants"
+ex_ants_path = "/users/jsdillon/Libraries/hera_opm/pipelines/h1c/idr2/v2/bad_ants"
 base_mem = 8000
 base_cpu = 1
 timeout = "24h"
@@ -22,7 +22,7 @@ model_files_glob = "/lustre/aoc/projects/hera/nkern/idr3_abscal_models/full_mode
 filetype = 'uvh5'
 phs_max_iter = 100
 phs_conv_crit = 1e-6
-refant = 53
+refant = 53 #TODO: figure out what to do about this
 max_bl_cut = 100
 edge_cut = 100
 antflag_thresh = 0.0
