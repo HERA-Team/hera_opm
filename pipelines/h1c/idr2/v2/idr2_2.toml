@@ -39,7 +39,7 @@ max_bl_cut = 90
 # antflag_thresh = 0.0
 
 # [DELAY_OPTS]
-# TODO: UPDATE
+# partial_load_Nbls = 100
 # standoff = 15
 # horizon = 1
 # tol = 1e-9
@@ -54,7 +54,7 @@ max_bl_cut = 90
 ############################################################################################################
 
 [WorkFlow]
-actions = ["EXTRACT_AUTOS", "REDCAL", # FIRSTCAL_METRICS, ABSCAL, CAL_XRFI, DELAY_XRFI, CAL_SMOOTH, DELAY, NOISE, REFLECTIONS
+actions = ["EXTRACT_AUTOS", "REDCAL", # ABSCAL, FIRSTCAL_METRICS, CAL_XRFI, DELAY_XRFI, CAL_SMOOTH, DELAY, NOISE, REFLECTIONS
            ]
 
 [EXTRACT_AUTOS]
@@ -66,11 +66,11 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
         "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}"]
 
-# [FIRSTCAL_METRICS]
+# [ABSCAL]
 # prereqs = "REDCAL"
 # args = TODO: UPDATE
 
-# [ABSCAL]
+# [FIRSTCAL_METRICS]
 # prereqs = "REDCAL"
 # args = TODO: UPDATE
 
@@ -97,10 +97,9 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
 # prereqs = "CAL_SMOOTH"
 # time_prereqs = "CAL_SMOOTH"
 # n_time_neighbors = "all"
-# args = TODO: UPDATE
-#         ["{basename}", "${DELAY_OPTS:standoff}", "${DELAY_OPTS:horizon}", "${DELAY_OPTS:tol}",
-#         "${DELAY_OPTS:window}", "${DELAY_OPTS:skip_wgt}", "${DELAY_OPTS:maxiter}",
-#         "${DELAY_OPTS:alpha}"]
+# args = ["{basename}", "${DELAY_OPTS:partial_load_Nbls}", "${DELAY_OPTS:standoff}", 
+#         "${DELAY_OPTS:horizon}", "${DELAY_OPTS:tol}", "${DELAY_OPTS:window}",
+#         "${DELAY_OPTS:skip_wgt}", "${DELAY_OPTS:maxiter}", "${DELAY_OPTS:alpha}"]
 
 # [NOISE]
 # prereqs = "CAL_SMOOTH"
