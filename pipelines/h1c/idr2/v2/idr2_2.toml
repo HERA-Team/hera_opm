@@ -25,7 +25,6 @@ phs_conv_crit = 1e-6
 refant = 53
 max_bl_cut = 100
 edge_cut = 100
-solar_horizon = 0.0
 antflag_thresh = 0.0
 
 # [CAL_XRFI_OPTS]
@@ -77,7 +76,7 @@ prereqs = "REDCAL"
 mem = 32000
 args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:filetype}",
 "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:refant}", "${ABSCAL_OPTS:max_bl_cut}",
-"${ABSCAL_OPTS:edge_cut}", "${ABSCAL_OPTS:solar_horizon}", "${ABSCAL_OPTS:antflag_thresh}"]
+"${ABSCAL_OPTS:edge_cut}", "${ABSCAL_OPTS:antflag_thresh}"]
 
 # [FIRSTCAL_METRICS]
 # prereqs = "REDCAL"
