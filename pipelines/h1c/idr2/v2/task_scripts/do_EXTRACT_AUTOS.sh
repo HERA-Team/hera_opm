@@ -10,7 +10,7 @@ source ${src_dir}/_common.sh
 # 1 - filename
 fn="${1}"
 
-# get metrics_json filename, removing extension and appending .ant_metrics.json
+# get outfilename, removing extension and appending .autos.uvh5
 autos_file=`echo ${fn%.*}.autos.uvh5`
 
 echo extract_autos.py ${fn} ${autos_file} --clobber
