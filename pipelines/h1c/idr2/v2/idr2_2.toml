@@ -48,9 +48,6 @@ max_bl_cut = 90
 # maxiter = 100
 # alpha = 0.5
 
-# [NOISE_OPTS]
-# TODO: UPDATE
-
 # [REFLECTIONS_OPTS]
 # TODO: UPDATE
 
@@ -105,11 +102,11 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
 #         "${DELAY_OPTS:window}", "${DELAY_OPTS:skip_wgt}", "${DELAY_OPTS:maxiter}",
 #         "${DELAY_OPTS:alpha}"]
 
-# [REFLECTIONS]
+# [NOISE]
 # prereqs = "CAL_SMOOTH"
 # time_prereqs = "CAL_SMOOTH"
 # n_time_neighbors = "all"
-# args = TODO: UPDATE
+# args = ["{basename}"]
 
 # [REFLECTIONS]
 # prereqs = "CAL_SMOOTH"
