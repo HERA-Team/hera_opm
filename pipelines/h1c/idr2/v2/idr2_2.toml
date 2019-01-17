@@ -60,7 +60,7 @@ alpha = 0.5
 ############################################################################################################
 
 [WorkFlow]
-actions = ["EXTRACT_AUTOS", "REDCAL", # ABSCAL, FIRSTCAL_METRICS, CAL_XRFI, DELAY_XRFI, CAL_SMOOTH, DELAY, NOISE, REFLECTIONS
+actions = ["EXTRACT_AUTOS", "REDCAL", "ABSCAL", #FIRSTCAL_METRICS, CAL_XRFI, DELAY_XRFI, CAL_SMOOTH, DELAY, NOISE, REFLECTIONS
            ]
 [EXTRACT_AUTOS]
 args = ["{basename}"]
