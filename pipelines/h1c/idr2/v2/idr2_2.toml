@@ -18,8 +18,8 @@ min_bl_cut = 15
 max_bl_cut = 90
 
 [ABSCAL_OPTS]
-model_files_glob = "/lustre/aoc/projects/hera/nkern/idr3_abscal_models/full_model/zen.2458042.*.HH.uvRXLS.uvh5"
-filetype = 'uvh5'
+model_files_glob = "'/lustre/aoc/projects/hera/nkern/idr3_abscal_models/full_model/zen.2458042.*.HH.uvRXLS.uvh5'"
+filetype = "uvh5"
 phs_max_iter = 100
 phs_conv_crit = 1e-6
 refant = 53 #TODO: figure out what to do about this
