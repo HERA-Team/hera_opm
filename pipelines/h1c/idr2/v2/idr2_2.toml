@@ -75,8 +75,8 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
 prereqs = "REDCAL"
 mem = 32000
 args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:filetype}",
-"${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:refant}", "${ABSCAL_OPTS:max_bl_cut}",
-"${ABSCAL_OPTS:edge_cut}", "${ABSCAL_OPTS:antflag_thresh}"]
+        "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:refant}", "${ABSCAL_OPTS:max_bl_cut}",
+        "${ABSCAL_OPTS:edge_cut}", "${ABSCAL_OPTS:antflag_thresh}"]
 
 # [FIRSTCAL_METRICS]
 # prereqs = "REDCAL"
