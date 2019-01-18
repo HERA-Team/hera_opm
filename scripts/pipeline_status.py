@@ -11,8 +11,7 @@ from __future__ import print_function, division, absolute_import
 import numpy as np
 import glob
 from hera_opm.mf_tools import get_config_entry
-import ConfigParser as configparser
-from configparser import ConfigParser, ExtendedInterpolation
+import toml
 import os
 from datetime import datetime
 import argparse
@@ -44,8 +43,7 @@ if np.all([not os.path.isdir(wdir) for wdir in args.working_dir]):
     raise ValueError("You must supply at least one directory using --working_dir")
 
 # Read makeflow config file
-config = ConfigParser(interpolation=ExtendedInterpolation())
-config.read(args.config_file)
+config = toml.load(args.config_file)
 workflow = get_config_entry(config, "WorkFlow", "actions")
 try:
     timeout = get_config_entry(config, "Options", "timeout")[0]
