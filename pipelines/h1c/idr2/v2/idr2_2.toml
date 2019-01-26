@@ -19,13 +19,12 @@ max_bl_cut = 90
 
 [ABSCAL_OPTS]
 model_files_glob = "'/lustre/aoc/projects/hera/nkern/idr3_abscal_models/full_model/zen.2458042.*.HH.uvRXLS.uvh5'"
-filetype = "uvh5"
+nInt_to_load = 6
+min_bl_cut = 1.0
+max_bl_cut = 100.0
 phs_max_iter = 100
 phs_conv_crit = 1e-6
-refant = 53 #TODO: figure out what to do about this
-max_bl_cut = 100
 edge_cut = 100
-antflag_thresh = 0.0
 
 # [CAL_XRFI_OPTS]
 # TODO: UPDATE
@@ -73,10 +72,9 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
 
 [ABSCAL]
 prereqs = "REDCAL"
-mem = 32000
-args = ["{basename}", "${ABSCAL_OPTS:filetype}", "${ABSCAL_OPTS:model_files_glob}", 
-        "${ABSCAL_OPTS:phs_max_iter}", "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:refant}", 
-        "${ABSCAL_OPTS:max_bl_cut}", "${ABSCAL_OPTS:edge_cut}", "${ABSCAL_OPTS:antflag_thresh}"]
+args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_load}", 
+        "${ABSCAL_OPTS:min_bl_cut}", "${ABSCAL_OPTS:max_bl_cut}", "${ABSCAL_OPTS:phs_max_iter}", 
+        "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:edge_cut}"]
 
 # [FIRSTCAL_METRICS]
 # prereqs = "REDCAL"
