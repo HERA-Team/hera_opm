@@ -26,11 +26,33 @@ phs_max_iter = 100
 phs_conv_crit = 1e-6
 edge_cut = 100
 
-# [CAL_XRFI_OPTS]
-# TODO: UPDATE
+[CAL_XRFI_OPTS]
+metrics_ext = 'cal_xrfi_metrics.h5'
+flags_ext = 'cal_flags.h5'
+kt_size = 8
+kf_size = 8
+sig_init = 6.0
+sig_adj = 2.0
+freq_threshold = 0.3
+time_threshold = 0.35
 
-# [DELAY_XRFI_OPTS]
-# TODO: UPDATE
+[DELAY_XRFI_OPTS]
+standoff = 15.0
+horizon = 1.0
+tol = 1e-7
+window = 'tukey'
+skip_wgt = 0.1
+maxiter = 100
+alpha = 0.5
+metrics_ext = 'delay_xrfi_metrics.h5'
+flags_ext = 'final_flags.h5'
+cal_ext = 'flagged_abs'
+kt_size = 8
+kf_size = 8
+sig_init = 6.0
+sig_adj = 2.0
+freq_threshold = 0.3
+time_treshold = 0.35
 
 [CAL_SMOOTH_OPTS]
 freq_scale = 10
@@ -66,27 +88,38 @@ args = ["{basename}"]
 
 [REDCAL]
 args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
-        "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}", 
+        "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
         "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
         "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}"]
 
 [ABSCAL]
 prereqs = "REDCAL"
-args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_load}", 
-        "${ABSCAL_OPTS:min_bl_cut}", "${ABSCAL_OPTS:max_bl_cut}", "${ABSCAL_OPTS:phs_max_iter}", 
+args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_load}",
+        "${ABSCAL_OPTS:min_bl_cut}", "${ABSCAL_OPTS:max_bl_cut}", "${ABSCAL_OPTS:phs_max_iter}",
         "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:edge_cut}"]
 
 # [FIRSTCAL_METRICS]
 # prereqs = "REDCAL"
 # args = TODO: UPDATE
 
-# [CAL_XRFI]
-# prereqs = "ABSCAL"
-# args = TODO: UPDATE
+[CAL_XRFI]
+prereqs = "ABSCAL"
+args = ["{basename}", "${CAL_XRFI_OPTS:metrics_ext}", "${CAL_XRFI_OPTS:flags_ext}",
+        "${CAL_XRFI_OPTS:kt_size}", "${CAL_XRFI_OPTS:kf_size}", "${CAL_XRFI_OPTS:sig_init}",
+        "${CAL_XRFI_OPTS:sig_adj}", "${CAL_XRFI_OPTS:freq_threshold}",
+        "${CAL_XRFI_OPTS:time_threshold}", "${Options:ex_ants_path}"]
 
-# [DELAY_XRFI]
-# prereqs = "CAL_XRFI"
-# args = TODO: UPDATE
+[DELAY_XRFI]
+prereqs = "CAL_XRFI"
+args = ["{basename}", "${DELAY_XRFI_OPTS:standoff}", "${DELAY_XRFI_OPTS:horizon}",
+        "${DELAY_XRFI_OPTS:tol}", "${DELAY_XRFI_OPTS:window}",
+        "${DELAY_XRFI_OPTS:skip_wgt}", "${DELAY_XRFI_OPTS:maxiter}",
+        "${DELAY_XRFI_OPTS:alpha}", "${DELAY_XRFI_OPTS:metrics_ext}",
+        "${DELAY_XRFI_OPTS:flags_ext}", "${DELAY_XRFI_OPTS:cal_ext}",
+        "${DELAY_XRFI_OPTS:kt_size}", "${DELAY_XRFI_OPTS:kf_size}",
+        "${DELAY_XRFI_OPTS:sig_init}", "${DELAY_XRFI_OPTS:sig_adj}",
+        "${DELAY_XRFI_OPTS:freq_threshold}", "${DELAY_XRFI_OPTS:time_treshold}",
+        "${Options:ex_ants_path}"]
 
 [CAL_SMOOTH]
 prereqs = "DELAY_XRFI"
@@ -102,7 +135,7 @@ args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_s
 prereqs = "CAL_SMOOTH"
 time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
-args = ["{basename}", "${DELAY_OPTS:partial_load_Nbls}", "${DELAY_OPTS:standoff}", 
+args = ["{basename}", "${DELAY_OPTS:partial_load_Nbls}", "${DELAY_OPTS:standoff}",
         "${DELAY_OPTS:horizon}", "${DELAY_OPTS:tol}", "${DELAY_OPTS:window}",
         "${DELAY_OPTS:skip_wgt}", "${DELAY_OPTS:maxiter}", "${DELAY_OPTS:alpha}"]
 
