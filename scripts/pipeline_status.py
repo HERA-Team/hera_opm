@@ -153,7 +153,7 @@ for job in workflow:
     for wdir in args.working_dir:
         if os.path.isdir(wdir):
             total += glob.glob(os.path.join(wdir, "wrapper_*." + job + ".*sh"))
-            logged += glob.glob(os.path.join(wdir, "*." + job + ".*log"))
+            logged += glob.glob(os.path.join(wdir, "*." + job + ".*log*"))
             done += glob.glob(os.path.join(wdir, "*." + job + ".*out"))
     average_runtime, nRunning, nTimedOut = inspect_log_files(logged, done)
     nErrored = len(logged) - (len(done) + nRunning + nTimedOut)
