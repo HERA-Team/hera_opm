@@ -107,7 +107,7 @@ prereqs = "ABSCAL"
 args = ["{basename}", "${CAL_XRFI_OPTS:metrics_ext}", "${CAL_XRFI_OPTS:flags_ext}",
         "${CAL_XRFI_OPTS:kt_size}", "${CAL_XRFI_OPTS:kf_size}", "${CAL_XRFI_OPTS:sig_init}",
         "${CAL_XRFI_OPTS:sig_adj}", "${CAL_XRFI_OPTS:freq_threshold}",
-        "${CAL_XRFI_OPTS:time_threshold}", "${Options:ex_ants_path}"]
+        "${CAL_XRFI_OPTS:time_threshold}"]
 
 [DELAY_XRFI]
 prereqs = "CAL_XRFI"
@@ -118,8 +118,7 @@ args = ["{basename}", "${DELAY_XRFI_OPTS:standoff}", "${DELAY_XRFI_OPTS:horizon}
         "${DELAY_XRFI_OPTS:flags_ext}", "${DELAY_XRFI_OPTS:cal_ext}",
         "${DELAY_XRFI_OPTS:kt_size}", "${DELAY_XRFI_OPTS:kf_size}",
         "${DELAY_XRFI_OPTS:sig_init}", "${DELAY_XRFI_OPTS:sig_adj}",
-        "${DELAY_XRFI_OPTS:freq_threshold}", "${DELAY_XRFI_OPTS:time_treshold}",
-        "${Options:ex_ants_path}"]
+        "${DELAY_XRFI_OPTS:freq_threshold}", "${DELAY_XRFI_OPTS:time_treshold}"]
 
 [CAL_SMOOTH]
 prereqs = "DELAY_XRFI"
