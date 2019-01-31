@@ -40,5 +40,5 @@ cal_flags=`echo ${fn%.*}.cal_flags.h5`
 input_cal=`echo ${fn%.*}.abs.calfits`
 
 # Run on visibilities
-echo delay_xrfi_run.py --vis_file=${fn} --cal_metrics=${cal_metrics} --cal_flags=${cal_flags} --input_cal=${input_cal} --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --alpha=${8} --metrics_ext=${9} --flags_ext=${10} --cal_ext=${11} --kt_size=${12} --kf_size=${13} --sig_init=${14} --sig_adj=${15} --freq_threshold=${16} --time_threshold=${17}
-delay_xrfi_run.py --vis_file=${fn} --cal_metrics=${cal_metrics} --cal_flags=${cal_flags} --input_cal=${input_cal} --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --alpha=${8} --metrics_ext=${9} --flags_ext=${10} --cal_ext=${11} --kt_size=${12} --kf_size=${13} --sig_init=${14} --sig_adj=${15} --freq_threshold=${16} --time_threshold=${17}
+echo delay_xrfi_run.py --input_cal=${input_cal} --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --alpha=${8} --metrics_ext=${9} --flags_ext=${10} --cal_ext=${11} --kt_size=${12} --kf_size=${13} --sig_init=${14} --sig_adj=${15} --freq_threshold=${16} --time_threshold=${17} ${fn} ${cal_metrics} ${cal_flags}
+delay_xrfi_run.py --input_cal=${input_cal} --standoff=${2} --horizon=${3} --tol=${4} --window=${5} --skip_wgt=${6} --maxiter=${7} --alpha=${8} --metrics_ext=${9} --flags_ext=${10} --cal_ext=${11} --kt_size=${12} --kf_size=${13} --sig_init=${14} --sig_adj=${15} --freq_threshold=${16} --time_threshold=${17} ${fn} ${cal_metrics} ${cal_flags}
