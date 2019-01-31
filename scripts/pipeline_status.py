@@ -46,7 +46,7 @@ if np.all([not os.path.isdir(wdir) for wdir in args.working_dir]):
 config = toml.load(args.config_file)
 workflow = get_config_entry(config, "WorkFlow", "actions")
 try:
-    timeout = get_config_entry(config, "Options", "timeout")[0]
+    timeout = get_config_entry(config, "Options", "timeout")
     timeout = (
         float(
             eval(
