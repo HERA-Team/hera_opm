@@ -156,10 +156,10 @@ def filter_errors(log_files):
     for log_file in unique_bases:
         err_file = log_file.replace('.log', '.log.error')
         if err_file in log_files and log_file in log_files:  # both an error file and a log file
-            with open(log_file, "r") as f:
+            with open(err_file, "r") as f:
                 err_lines = f.readlines()
                 err_start = dateparser.parse(err_lines[0], ignoretz=True)
-            with open(err_file, "r") as f:
+            with open(log_file, "r") as f:
                 log_lines = f.readlines()
                 log_start = dateparser.parse(log_lines[0], ignoretz=True)
             if err_start < log_start:
