@@ -35,7 +35,7 @@ bn=$(basename ${1})  # Basename
 # 17 - time_threshold
 # 18 - bad_ants_dir
 
-cal_metrics=`echo ${fn%.*}.cal_metrics.h5`
+cal_metrics=`echo ${fn%.*}.cal_xrfi_metrics.h5`
 cal_flags=`echo ${fn%.*}.cal_flags.h5`
 input_cal=`echo ${fn%.*}.abs.calfits`
 
