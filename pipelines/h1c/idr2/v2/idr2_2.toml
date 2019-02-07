@@ -57,10 +57,13 @@ alpha = 0.5
 # TODO: UPDATE
 
 [IMAGING_OPTS]
+casa = "/home/casa/packages/RHEL7/release/casa-release-5.1.0-68/bin/casa"
 casa_imaging_scripts = "/lustre/aoc/projects/hera/nkern/Software/casa_imaging/scripts"
 spw = "0:100~924"
 pxsize = 300
 imsize = 512
+niter = 0
+threshold = '0mJy'
 
 ############################################################################################################
 
@@ -126,4 +129,4 @@ args = ["{basename}"]
 
 [IMAGING]
 prereqs = "NOISE"
-args = ["{basename}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:spw}", "${IMAGING_OPTS:pxsize}", "${IMAGING_OPTS:imsize}"]
+args = ["{basename}", "${IMAGING_OPTS:casa}" "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:spw}", "${IMAGING_OPTS:pxsize}", "${IMAGING_OPTS:imsize}", "${IMAGING_OPTS:niter}", "${IMAGING_OPTS:threshold}"]
