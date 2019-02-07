@@ -56,10 +56,15 @@ alpha = 0.5
 # [REFLECTIONS_OPTS]
 # TODO: UPDATE
 
+[IMAGING_OPTS]
+spw = "0:100~924"
+pxsize = 300
+imsize = 512
+
 ############################################################################################################
 
 [WorkFlow]
-actions = ["EXTRACT_AUTOS", "REDCAL", "ABSCAL", #FIRSTCAL_METRICS, CAL_XRFI, DELAY_XRFI, CAL_SMOOTH, DELAY, NOISE, REFLECTIONS
+actions = ["EXTRACT_AUTOS", "REDCAL", "ABSCAL", #FIRSTCAL_METRICS, CAL_XRFI, DELAY_XRFI, CAL_SMOOTH, DELAY, NOISE, REFLECTIONS, IMAGING
            ]
 [EXTRACT_AUTOS]
 args = ["{basename}"]
@@ -117,3 +122,7 @@ args = ["{basename}"]
 # time_prereqs = "CAL_SMOOTH"
 # n_time_neighbors = "all"
 # args = TODO: UPDATE
+
+[IMAGING]
+prereqs = "NOISE"
+args = ["{basename}", "${IMAGING_OPTS:spw}", "${IMAGING_OPTS:pxsize}", "${IMAGING_OPTS:imsize}"]
