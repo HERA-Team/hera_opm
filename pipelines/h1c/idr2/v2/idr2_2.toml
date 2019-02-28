@@ -26,33 +26,18 @@ phs_max_iter = 100
 phs_conv_crit = 1e-6
 edge_cut = 100
 
-[CAL_XRFI_OPTS]
-metrics_ext = 'cal_xrfi_metrics.h5'
-flags_ext = 'cal_flags.h5'
+[XRFI_OPTS]
+init_metrics_ext = 'init_xrfi_metrics.h5'
+init_flags_ext = 'init_flags.h5'
+final_metrics_ext = 'final_xrfi_metrics.h5'
+final_flags_ext = 'final_flags.h5'
 kt_size = 8
 kf_size = 8
-sig_init = 6.0
+sig_init = 5.0
 sig_adj = 2.0
-freq_threshold = 0.3
-time_threshold = 0.35
-
-[DELAY_XRFI_OPTS]
-standoff = 15.0
-horizon = 1.0
-tol = 1e-7
-window = 'tukey'
-skip_wgt = 0.1
-maxiter = 100
-alpha = 0.5
-metrics_ext = 'delay_xrfi_metrics.h5'
-flags_ext = 'final_flags.h5'
+freq_threshold = 0.35
+time_threshold = 0.5
 cal_ext = 'flagged_abs'
-kt_size = 8
-kf_size = 8
-sig_init = 6.0
-sig_adj = 2.0
-freq_threshold = 0.3
-time_treshold = 0.35
 
 [CAL_SMOOTH_OPTS]
 freq_scale = 10
@@ -102,23 +87,13 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 # prereqs = "REDCAL"
 # args = TODO: UPDATE
 
-[CAL_XRFI]
+[XRFI]
 prereqs = "ABSCAL"
-args = ["{basename}", "${CAL_XRFI_OPTS:metrics_ext}", "${CAL_XRFI_OPTS:flags_ext}",
+args = ["{basename}", "${CAL_XRFI_OPTS:init_metrics_ext}", "${CAL_XRFI_OPTS:init_flags_ext}",
+        "${CAL_XRFI_OPTS:final_metrics_ext}", "${CAL_XRFI_OPTS:final_flags_ext}",
         "${CAL_XRFI_OPTS:kt_size}", "${CAL_XRFI_OPTS:kf_size}", "${CAL_XRFI_OPTS:sig_init}",
         "${CAL_XRFI_OPTS:sig_adj}", "${CAL_XRFI_OPTS:freq_threshold}",
-        "${CAL_XRFI_OPTS:time_threshold}"]
-
-[DELAY_XRFI]
-prereqs = "CAL_XRFI"
-args = ["{basename}", "${DELAY_XRFI_OPTS:standoff}", "${DELAY_XRFI_OPTS:horizon}",
-        "${DELAY_XRFI_OPTS:tol}", "${DELAY_XRFI_OPTS:window}",
-        "${DELAY_XRFI_OPTS:skip_wgt}", "${DELAY_XRFI_OPTS:maxiter}",
-        "${DELAY_XRFI_OPTS:alpha}", "${DELAY_XRFI_OPTS:metrics_ext}",
-        "${DELAY_XRFI_OPTS:flags_ext}", "${DELAY_XRFI_OPTS:cal_ext}",
-        "${DELAY_XRFI_OPTS:kt_size}", "${DELAY_XRFI_OPTS:kf_size}",
-        "${DELAY_XRFI_OPTS:sig_init}", "${DELAY_XRFI_OPTS:sig_adj}",
-        "${DELAY_XRFI_OPTS:freq_threshold}", "${DELAY_XRFI_OPTS:time_treshold}"]
+        "${CAL_XRFI_OPTS:time_threshold}", "${CAL_XRFI_OPTS:cal_ext}"]
 
 [CAL_SMOOTH]
 prereqs = "DELAY_XRFI"
