@@ -131,4 +131,4 @@ args = ["{basename}"]
 
 [IMAGING]
 prereqs = "NOISE"
-args = ["{basename}", "${IMAGING_OPTS:calibration}" "${IMAGING_OPTS:casa}" "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:spw}", "${IMAGING_OPTS:pxsize}", "${IMAGING_OPTS:imsize}", "${IMAGING_OPTS:niter}", "${IMAGING_OPTS:threshold}", "${IMAGING_OPTS:stokes}"]
+args = ["{basename}", "${IMAGING_OPTS:calibration}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:spw}", "${IMAGING_OPTS:pxsize}", "${IMAGING_OPTS:imsize}", "${IMAGING_OPTS:niter}", "${IMAGING_OPTS:threshold}", "${IMAGING_OPTS:stokes}"]

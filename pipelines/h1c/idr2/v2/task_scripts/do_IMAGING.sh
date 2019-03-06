@@ -8,7 +8,7 @@ source ${src_dir}/_common.sh
 # Parameters are set in the configuration file, here we define their positions,
 # which must be consistent with the config.
 # 1 - data filename
-# 2 - calfits filename
+# 2 - calfits suffix
 # 3 - path to casa executable
 # 4 - casa imaging scripts dir
 # 5 - spw selection
@@ -32,10 +32,10 @@ stokes="${10}"
 if [ ! -z "${calibration}" ]
 then
     # parse calibration suffix
-    cal_file="${filename%.uvh5}."${calibration}
+    cal_file="${filename%.uvh5}.${calibration}"
     echo apply_cal.py ${filename} ${filename}.calibrated --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5
     apply_cal.py ${filename} ${filename}.cal --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5
-    filename="$filename".calibrated
+    filename="${filename}.calibrated"
 fi
 
 # convert file to uvfits
@@ -59,7 +59,7 @@ rm ${uvfits_file}
 rm -r ${image_outdir}/${ms_file}
 
 # remove calibrated visibility
-if [ ! -z "${calibration}" ]
+if [ ! -z "${filename}" ]
 then
     rm filename
 fi
