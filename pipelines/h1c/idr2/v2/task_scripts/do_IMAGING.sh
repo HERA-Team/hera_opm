@@ -34,7 +34,7 @@ then
     # parse calibration suffix
     cal_file="${filename%.uvh5}.${calibration}"
     echo apply_cal.py ${filename} ${filename}.calibrated --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5
-    apply_cal.py ${filename} ${filename}.cal --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5
+    apply_cal.py ${filename} ${filename}.calibrated --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5
     filename="${filename}.calibrated"
 fi
 
@@ -59,7 +59,7 @@ rm ${uvfits_file}
 rm -r ${image_outdir}/${ms_file}
 
 # remove calibrated visibility
-if [ ! -z "${filename}" ]
+if [ ! -z "${calibration}" ]
 then
     rm filename
 fi
