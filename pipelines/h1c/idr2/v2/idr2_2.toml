@@ -66,7 +66,7 @@ alpha = 0.5
 ############################################################################################################
 
 [WorkFlow]
-actions = ["EXTRACT_AUTOS", "REDCAL", "ABSCAL", "CAL_XRFI", "DELAY_XRFI", "CAL_SMOOTH", "DELAY", "NOISE", #FIRSTCAL_METRICS, REFLECTIONS
+actions = ["EXTRACT_AUTOS", "REDCAL", "ABSCAL", "XRFI", "CAL_SMOOTH", "DELAY", "NOISE", #FIRSTCAL_METRICS, REFLECTIONS
            ]
 [EXTRACT_AUTOS]
 args = ["{basename}"]
@@ -89,11 +89,11 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 
 [XRFI]
 prereqs = "ABSCAL"
-args = ["{basename}", "${CAL_XRFI_OPTS:init_metrics_ext}", "${CAL_XRFI_OPTS:init_flags_ext}",
-        "${CAL_XRFI_OPTS:final_metrics_ext}", "${CAL_XRFI_OPTS:final_flags_ext}",
-        "${CAL_XRFI_OPTS:kt_size}", "${CAL_XRFI_OPTS:kf_size}", "${CAL_XRFI_OPTS:sig_init}",
-        "${CAL_XRFI_OPTS:sig_adj}", "${CAL_XRFI_OPTS:freq_threshold}",
-        "${CAL_XRFI_OPTS:time_threshold}", "${CAL_XRFI_OPTS:cal_ext}"]
+args = ["{basename}", "${XRFI_OPTS:init_metrics_ext}", "${XRFI_OPTS:init_flags_ext}",
+        "${XRFI_OPTS:final_metrics_ext}", "${XRFI_OPTS:final_flags_ext}",
+        "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
+        "${XRFI_OPTS:sig_adj}", "${XRFI_OPTS:freq_threshold}",
+        "${XRFI_OPTS:time_threshold}", "${XRFI_OPTS:cal_ext}"]
 
 [CAL_SMOOTH]
 prereqs = "DELAY_XRFI"
