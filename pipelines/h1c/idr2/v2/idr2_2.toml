@@ -66,7 +66,7 @@ alpha = 0.5
 ############################################################################################################
 
 [WorkFlow]
-actions = ["EXTRACT_AUTOS", "REDCAL", "ABSCAL", "XRFI", "CAL_SMOOTH", "DELAY", "NOISE", #FIRSTCAL_METRICS, REFLECTIONS
+actions = ["EXTRACT_AUTOS", "REDCAL", "ABSCAL", "XRFI", "CAL_SMOOTH", "DELAY", "NOISE", "FIRSTCAL_METRICS", #REFLECTIONS
            ]
 [EXTRACT_AUTOS]
 args = ["{basename}"]
@@ -83,9 +83,9 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
         "${ABSCAL_OPTS:min_bl_cut}", "${ABSCAL_OPTS:max_bl_cut}", "${ABSCAL_OPTS:phs_max_iter}",
         "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:edge_cut}"]
 
-# [FIRSTCAL_METRICS]
-# prereqs = "REDCAL"
-# args = TODO: UPDATE
+[FIRSTCAL_METRICS]
+prereqs = "REDCAL"
+args = "{basename}"
 
 [XRFI]
 prereqs = "ABSCAL"
