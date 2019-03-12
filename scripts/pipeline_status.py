@@ -13,7 +13,7 @@ import glob
 from hera_opm.mf_tools import get_config_entry
 import toml
 import os
-from datetime import datetime
+from dateutil import parser as dateparser
 import argparse
 
 # Parse arguments
@@ -46,7 +46,7 @@ if np.all([not os.path.isdir(wdir) for wdir in args.working_dir]):
 config = toml.load(args.config_file)
 workflow = get_config_entry(config, "WorkFlow", "actions")
 try:
-    timeout = get_config_entry(config, "Options", "timeout")[0]
+    timeout = get_config_entry(config, "Options", "timeout")
     timeout = (
         float(
             eval(
@@ -74,11 +74,11 @@ def elapsed_time(log_lines):
             If the file has no start time, returns -2
     """
     try:
-        start = datetime.strptime(log_lines[0], "%a %b %d %H:%M:%S %Z %Y ")
+        start = dateparser.parse(log_lines[0], ignoretz=True)
     except BaseException:
         start = None
     try:
-        end = datetime.strptime(log_lines[-1], "%a %b %d %H:%M:%S %Z %Y ")
+        end = dateparser.parse(log_lines[-1], ignoretz=True)
     except BaseException:
         end = None
 
@@ -100,10 +100,12 @@ def inspect_log_files(log_files, out_files):
     Returns:
         average_runtime: average runtime of all finished jobs that took longer than a second, in minutes
         nRunning: number of jobs believed to be running (start time with no stop time)
+        nErrored: number of jobs believed to have been terminated for errors ()
         nTimedOut: number of jobs that terminated within 1% of the wall-time specified for timeouts
     """
     error_warned = False
     runtimes = []
+    errored_logs = []
     timed_out_logs = []
     for log_file in log_files:
         with open(log_file, "r") as f:
@@ -113,12 +115,14 @@ def inspect_log_files(log_files, out_files):
         # It timed out
         if (
             timeout is not None
-            and (1.0 * np.abs(runtimes[-1] - timeout) / timeout < 0.01)
+            and (np.abs(runtimes[-1]) > .99 * timeout)
             and (log_file.replace(".log", ".out") not in out_files)
+            and (log_file.replace(".log.error", ".out") not in out_files)
         ):
             timed_out_logs.append(log_file)
         # It ran but there's no .out, so it errored
-        elif (runtimes[-1] > 0) and (log_file.replace(".log", ".out") not in out_files):
+        elif ".log.error" in log_file:
+            errored_logs.append(log_file)
             if error_warned:
                 print("Errors also suspected in", log_file)
             else:
@@ -136,13 +140,37 @@ def inspect_log_files(log_files, out_files):
         print("\n")
 
     runtimes = np.array(runtimes)
-    finished_runtimes = runtimes[runtimes > 1 / 60.0]
+    finished_runtimes = runtimes[runtimes > 10. / 60.0]
     if len(finished_runtimes) > 0:
         average_runtime = np.mean(finished_runtimes)
     else:
         average_runtime = np.nan
 
-    return average_runtime, np.sum(runtimes == -1), len(timed_out_logs)
+    return average_runtime, np.sum(runtimes == -1), len(errored_logs), len(timed_out_logs)
+
+
+def filter_errors(log_files):
+    '''If there are both error and log files, pick the newer one.'''
+    newest_log_files = []
+    unique_bases = np.unique([f.replace('.log.error', '.log') for f in log_files])
+    for log_file in unique_bases:
+        err_file = log_file.replace('.log', '.log.error')
+        if err_file in log_files and log_file in log_files:  # both an error file and a log file
+            with open(err_file, "r") as f:
+                err_lines = f.readlines()
+                err_start = dateparser.parse(err_lines[0], ignoretz=True)
+            with open(log_file, "r") as f:
+                log_lines = f.readlines()
+                log_start = dateparser.parse(log_lines[0], ignoretz=True)
+            if err_start < log_start:
+                newest_log_files.append(log_file)
+            else:
+                newest_log_files.append(err_file)
+        elif err_file in log_files:  # just an error file
+            newest_log_files.append(err_file)
+        else:  # just a log file
+            newest_log_files.append(log_file)
+    return newest_log_files
 
 
 # Run pipeline report
@@ -153,12 +181,12 @@ for job in workflow:
     for wdir in args.working_dir:
         if os.path.isdir(wdir):
             total += glob.glob(os.path.join(wdir, "wrapper_*." + job + ".*sh"))
-            logged += glob.glob(os.path.join(wdir, "*." + job + ".*log"))
+            logged += glob.glob(os.path.join(wdir, "*." + job + ".*log*"))
             done += glob.glob(os.path.join(wdir, "*." + job + ".*out"))
-    average_runtime, nRunning, nTimedOut = inspect_log_files(logged, done)
-    nErrored = len(logged) - (len(done) + nRunning + nTimedOut)
+    logged = filter_errors(logged)
+    average_runtime, nRunning, nErrored, nTimedOut = inspect_log_files(logged, done)
 
-    print("Average (non-zero) runtime:", average_runtime, "minutes")
+    print("Average (non-trivial) runtime:", average_runtime, "minutes")
     print(
         len(total),
         "\t|\t",
