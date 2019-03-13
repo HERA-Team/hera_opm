@@ -9,5 +9,5 @@ fn="${1}"
 calfile=`echo ${fn%.*}.first.calfits`
 
 
-echo firstcal_metrics_run.py ${metrics_f}
-firstcal_metrics_run.py ${metrics_f}
+echo firstcal_metrics_run.py ${calfile}
+firstcal_metrics_run.py ${calfile}
