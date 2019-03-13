@@ -66,7 +66,7 @@ alpha = 0.5
 ############################################################################################################
 
 [WorkFlow]
-actions = ["EXTRACT_AUTOS", "REDCAL", "ABSCAL", "XRFI", "CAL_SMOOTH", "DELAY", "NOISE", "FIRSTCAL_METRICS", #REFLECTIONS
+actions = ["EXTRACT_AUTOS", "REDCAL", "FIRSTCAL_METRICS", "ABSCAL", "XRFI", "CAL_SMOOTH", "DELAY", "NOISE", #REFLECTIONS
            ]
 [EXTRACT_AUTOS]
 args = ["{basename}"]
@@ -77,15 +77,15 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
         "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}"]
 
+[FIRSTCAL_METRICS]
+prereqs = "REDCAL"
+args = "{basename}"
+
 [ABSCAL]
 prereqs = "REDCAL"
 args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_load}",
         "${ABSCAL_OPTS:min_bl_cut}", "${ABSCAL_OPTS:max_bl_cut}", "${ABSCAL_OPTS:phs_max_iter}",
         "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:edge_cut}"]
-
-[FIRSTCAL_METRICS]
-prereqs = "REDCAL"
-args = "{basename}"
 
 [XRFI]
 prereqs = "ABSCAL"
