@@ -33,14 +33,14 @@ antflag_thresh="${10}"
 # get list of all calfiles for a day
 jd=$(get_jd $fn)
 int_jd=${jd:0:7}
-calfiles=`echo zen.${int_jd}.*.abs.calfits`
+calfiles=`echo zen.${int_jd}.*.flagged_abs.calfits`
 
 # make the name of this calfits file for --run_if_first option
-this_calfile=`echo ${fn%.*}.abs.calfits`
+this_calfile=`echo ${fn%.*}.flagged_abs.calfits`
 
-echo ${calfiles} --infile_replace .abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} --pick_refant \
-     --run_if_first ${this_calfile} --time_scale ${time_scale} --freq_scale ${freq_scale} --tol ${tol} --filter_mode ${filter_mode} \
-    --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha}
-smooth_cal_run.py ${calfiles} --infile_replace .abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} --pick_refant \
+echo $smooth_cal_run.py ${calfiles} --infile_replace .flagged_abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} --pick_refant \
+                  --run_if_first ${this_calfile} --time_scale ${time_scale} --freq_scale ${freq_scale} --tol ${tol} --filter_mode ${filter_mode} \
+                  --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha}
+smooth_cal_run.py ${calfiles} --infile_replace .flagged_abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} --pick_refant \
                   --run_if_first ${this_calfile} --time_scale ${time_scale} --freq_scale ${freq_scale} --tol ${tol} --filter_mode ${filter_mode} \
                   --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha}

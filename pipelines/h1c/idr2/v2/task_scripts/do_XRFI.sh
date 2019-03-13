@@ -24,11 +24,10 @@ bn=$(basename ${1})  # Basename
 # 9 - sig_adj
 # 10 - freq_threshold
 # 11 - time_treshold
-# 12 - cal_ext
 
 ocalfits_file=`echo ${fn%.*}.omni.calfits`
 acalfits_file=`echo ${fn%.*}.abs.calfits`
 model_file=`echo ${fn%.*}.omni_vis.uvh5`
 
-echo xrfi_run.py --ocalfits_file=${omni_calfits_file} --acalfits_file=${abs_calfits_file} --model_file=${model_file} --data_file=${fn} --init_metrics_ext=${2} --init_flags_ext=${3} --final_metrics_ext=${4} --final_flags_ext=${5} --kt_size=${6} --kf_size=${7} --sig_init=${8} --sig_adj=${9} --freq_threshold=${10} --time_threshold=${11} --cal_ext=${12}
-xrfi_run.py --ocalfits_file=${omni_calfits_file} --acalfits_file=${abs_calfits_file} --model_file=${model_file} --data_file=${fn} --init_metrics_ext=${2} --init_flags_ext=${3} --final_metrics_ext=${4} --final_flags_ext=${5} --kt_size=${6} --kf_size=${7} --sig_init=${8} --sig_adj=${9} --freq_threshold=${10} --time_threshold=${11} --cal_ext=${12}
+echo xrfi_run.py --ocalfits_file=${omni_calfits_file} --acalfits_file=${abs_calfits_file} --model_file=${model_file} --data_file=${fn} --init_metrics_ext=${2} --init_flags_ext=${3} --final_metrics_ext=${4} --final_flags_ext=${5} --kt_size=${6} --kf_size=${7} --sig_init=${8} --sig_adj=${9} --freq_threshold=${10} --time_threshold=${11}
+xrfi_run.py --ocalfits_file=${omni_calfits_file} --acalfits_file=${abs_calfits_file} --model_file=${model_file} --data_file=${fn} --init_metrics_ext=${2} --init_flags_ext=${3} --final_metrics_ext=${4} --final_flags_ext=${5} --kt_size=${6} --kf_size=${7} --sig_init=${8} --sig_adj=${9} --freq_threshold=${10} --time_threshold=${11}

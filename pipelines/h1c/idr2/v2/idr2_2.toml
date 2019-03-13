@@ -37,7 +37,6 @@ sig_init = 5.0
 sig_adj = 2.0
 freq_threshold = 0.35
 time_threshold = 0.5
-cal_ext = 'flagged_abs'
 
 [CAL_SMOOTH_OPTS]
 freq_scale = 10
@@ -92,8 +91,7 @@ prereqs = "ABSCAL"
 args = ["{basename}", "${XRFI_OPTS:init_metrics_ext}", "${XRFI_OPTS:init_flags_ext}",
         "${XRFI_OPTS:final_metrics_ext}", "${XRFI_OPTS:final_flags_ext}",
         "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
-        "${XRFI_OPTS:sig_adj}", "${XRFI_OPTS:freq_threshold}",
-        "${XRFI_OPTS:time_threshold}", "${XRFI_OPTS:cal_ext}"]
+        "${XRFI_OPTS:sig_adj}", "${XRFI_OPTS:freq_threshold}", "${XRFI_OPTS:time_threshold}"]
 
 [CAL_SMOOTH]
 prereqs = "XRFI"
