@@ -96,8 +96,8 @@ args = ["{basename}", "${XRFI_OPTS:init_metrics_ext}", "${XRFI_OPTS:init_flags_e
         "${XRFI_OPTS:time_threshold}", "${XRFI_OPTS:cal_ext}"]
 
 [CAL_SMOOTH]
-prereqs = "DELAY_XRFI"
-time_prereqs = "DELAY_XRFI"
+prereqs = "XRFI"
+time_prereqs = "XRFI"
 n_time_neighbors = "all"
 mem = 32000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
