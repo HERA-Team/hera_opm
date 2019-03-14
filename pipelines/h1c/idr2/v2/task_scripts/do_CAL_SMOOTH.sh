@@ -14,10 +14,9 @@ source ${src_dir}/_common.sh
 # 4 - tol
 # 5 - filter_mode
 # 6 - window
-# 7 - skip_wgt
-# 8 - maxiter
-# 9 - alpha
-# 10 - antflag_thresh
+# 7 - maxiter
+# 8 - alpha
+# 9 - antflag_thresh
 
 fn="${1}"
 freq_scale="${2}"
@@ -25,10 +24,9 @@ time_scale="${3}"
 tol="${4}"
 filter_mode="${5}"
 window="${6}"
-skip_wgt="${7}"
-maxiter="${8}"
-alpha="${9}"
-antflag_thresh="${10}"
+maxiter="${7}"
+alpha="${8}"
+antflag_thresh="${9}"
 
 # get list of all calfiles for a day
 jd=$(get_jd $fn)
@@ -38,9 +36,9 @@ calfiles=`echo zen.${int_jd}.*.flagged_abs.calfits`
 # make the name of this calfits file for --run_if_first option
 this_calfile=`echo ${fn%.*}.flagged_abs.calfits`
 
-echo $smooth_cal_run.py ${calfiles} --infile_replace .flagged_abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} --pick_refant \
-                  --run_if_first ${this_calfile} --time_scale ${time_scale} --freq_scale ${freq_scale} --tol ${tol} --filter_mode ${filter_mode} \
-                  --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha}
-smooth_cal_run.py ${calfiles} --infile_replace .flagged_abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} --pick_refant \
-                  --run_if_first ${this_calfile} --time_scale ${time_scale} --freq_scale ${freq_scale} --tol ${tol} --filter_mode ${filter_mode} \
-                  --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha}
+echo smooth_cal_run.py ${calfiles} --infile_replace .flagged_abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} \
+                  --pick_refant --run_if_first ${this_calfile} --time_scale ${time_scale} --freq_scale ${freq_scale} --tol ${tol} \
+                  --filter_mode ${filter_mode} --window ${window} --maxiter ${maxiter} --alpha ${alpha}
+smooth_cal_run.py ${calfiles} --infile_replace .flagged_abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} \
+                  --pick_refant --run_if_first ${this_calfile} --time_scale ${time_scale} --freq_scale ${freq_scale} --tol ${tol} \
+                  --filter_mode ${filter_mode} --window ${window} --maxiter ${maxiter} --alpha ${alpha}
