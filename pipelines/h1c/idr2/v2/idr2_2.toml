@@ -137,6 +137,7 @@ args = ["{basename}"]
 [REFLECTIONS]
 prereqs = "CAL_SMOOTH"
 time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
 args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:window}", "${REFLECTIONS_OPTS:alpha}", 
         "${REFLECTIONS_OPTS:tol}", "${REFLECTIONS_OPTS:gain}", "${REFLECTIONS_OPTS:maxiter}", 
         "${REFLECTIONS_OPTS:skip_wgt}", "${REFLECTIONS_OPTS:edgecut_low}", "${REFLECTIONS_OPTS:edgecut_hi}", 
@@ -145,4 +146,6 @@ args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:wind
 
 [IMAGING]
 prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
