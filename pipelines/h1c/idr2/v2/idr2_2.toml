@@ -59,9 +59,8 @@ maxiter = 100
 alpha = 0.5
 
 [REFLECTIONS_OPTS]
-time_avg = False
-dly_ranges = "1000,1500"
-input_cal = "smooth_abs.calfits"
+time_avg = "False"
+dly_ranges = "1000,1500" # note, no space is the correct syntax
 window = "tukey"
 alpha = 0.2
 tol = 1e-7
@@ -139,7 +138,11 @@ args = ["{basename}"]
 [REFLECTIONS]
 prereqs = "CAL_SMOOTH"
 time_prereqs = "CAL_SMOOTH"
-args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:input_cal}", "${REFLECTIONS_OPTS:window}", "${REFLECTIONS_OPTS:alpha}", "${REFLECTIONS_OPTS:tol}", "${REFLECTIONS_OPTS:gain}", "${REFLECTIONS_OPTS:maxiter}", "${REFLECTIONS_OPTS:skip_wgt}", "${REFLECTIONS_OPTS:edgecut_low}", "${REFLECTIONS_OPTS:edgecut_hi}", "${REFLECTIONS_OPTS:zeropad}", "${REFLECTIONS_OPTS:min_dly}", "${REFLECTIONS_OPTS:time_avg}", "${REFLECTIONS_OPTS:opt_maxiter}", "${REFLECTIONS_OPTS:opt_method}", "${REFLECTIONS_OPTS:opt_tol}"]
+args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:window}", "${REFLECTIONS_OPTS:alpha}", 
+        "${REFLECTIONS_OPTS:tol}", "${REFLECTIONS_OPTS:gain}", "${REFLECTIONS_OPTS:maxiter}", 
+        "${REFLECTIONS_OPTS:skip_wgt}", "${REFLECTIONS_OPTS:edgecut_low}", "${REFLECTIONS_OPTS:edgecut_hi}", 
+        "${REFLECTIONS_OPTS:zeropad}", "${REFLECTIONS_OPTS:min_dly}", "${REFLECTIONS_OPTS:time_avg}", 
+        "${REFLECTIONS_OPTS:opt_maxiter}", "${REFLECTIONS_OPTS:opt_method}", "${REFLECTIONS_OPTS:opt_tol}"]
 
 [IMAGING]
 prereqs = "CAL_SMOOTH"
