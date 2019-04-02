@@ -58,8 +58,23 @@ skip_wgt = 0.1
 maxiter = 100
 alpha = 0.5
 
-# [REFLECTIONS_OPTS]
-# TODO: UPDATE
+[REFLECTIONS_OPTS]
+time_avg = False
+dly_ranges = "1000,1500"
+input_cal = "smooth_abs.calfits"
+window = "tukey"
+alpha = 0.2
+tol = 1e-7
+gain = 1e-1
+maxiter = 100
+skip_wgt = 0.1
+edgecut_low = 100
+edgecut_hi = 75
+zeropad = 512
+min_dly = 500
+opt_maxiter = 10
+opt_method = "BFGS"
+opt_tol = 1e-3
 
 [IMAGING_OPTS]
 casa = "/home/casa/packages/RHEL7/release/casa-release-5.1.0-68/bin/casa"
@@ -69,8 +84,7 @@ calibration = "smooth_abs.calfits"
 ############################################################################################################
 
 [WorkFlow]
-actions = ["EXTRACT_AUTOS", "REDCAL", "FIRSTCAL_METRICS", "ABSCAL", "XRFI", "CAL_SMOOTH", "DELAY", "NOISE", #REFLECTIONS
-           ]
+actions = ["EXTRACT_AUTOS", "REDCAL", "FIRSTCAL_METRICS", "ABSCAL", "XRFI", "CAL_SMOOTH", "DELAY", "NOISE", "REFLECTIONS"]
 [EXTRACT_AUTOS]
 args = ["{basename}"]
 
@@ -122,11 +136,10 @@ time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
 args = ["{basename}"]
 
-# [REFLECTIONS]
-# prereqs = "CAL_SMOOTH"
-# time_prereqs = "CAL_SMOOTH"
-# n_time_neighbors = "all"
-# args = TODO: UPDATE
+[REFLECTIONS]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:input_cal}", "${REFLECTIONS_OPTS:window}", "${REFLECTIONS_OPTS:alpha}", "${REFLECTIONS_OPTS:tol}", "${REFLECTIONS_OPTS:gain}", "${REFLECTIONS_OPTS:maxiter}", "${REFLECTIONS_OPTS:skip_wgt}", "${REFLECTIONS_OPTS:edgecut_low}", "${REFLECTIONS_OPTS:edgecut_hi}", "${REFLECTIONS_OPTS:zeropad}", "${REFLECTIONS_OPTS:min_dly}", "${REFLECTIONS_OPTS:time_avg}", "${REFLECTIONS_OPTS:opt_maxiter}", "${REFLECTIONS_OPTS:opt_method}", "${REFLECTIONS_OPTS:opt_tol}"]
 
 [IMAGING]
 prereqs = "CAL_SMOOTH"
