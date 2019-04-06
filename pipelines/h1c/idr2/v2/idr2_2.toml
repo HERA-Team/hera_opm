@@ -41,7 +41,7 @@ time_threshold = 0.5
 [CAL_SMOOTH_OPTS]
 freq_scale = 10
 time_scale = 1800
-tol = 1e-9
+tol = 1e-6
 filter_mode = "rect"
 window = "tukey"
 maxiter = 100

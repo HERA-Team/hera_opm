@@ -38,7 +38,7 @@ this_calfile=`echo ${fn%.*}.flagged_abs.calfits`
 
 echo smooth_cal_run.py ${calfiles} --infile_replace .flagged_abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} \
                   --pick_refant --run_if_first ${this_calfile} --time_scale ${time_scale} --freq_scale ${freq_scale} --tol ${tol} \
-                  --filter_mode ${filter_mode} --window ${window} --maxiter ${maxiter} --alpha ${alpha}
+                  --filter_mode ${filter_mode} --window ${window} --maxiter ${maxiter} --alpha ${alpha} --verbose
 smooth_cal_run.py ${calfiles} --infile_replace .flagged_abs. --outfile_replace .smooth_abs. --clobber --antflag_thresh ${antflag_thresh} \
                   --pick_refant --run_if_first ${this_calfile} --time_scale ${time_scale} --freq_scale ${freq_scale} --tol ${tol} \
-                  --filter_mode ${filter_mode} --window ${window} --maxiter ${maxiter} --alpha ${alpha}
+                  --filter_mode ${filter_mode} --window ${window} --maxiter ${maxiter} --alpha ${alpha} --verbose
