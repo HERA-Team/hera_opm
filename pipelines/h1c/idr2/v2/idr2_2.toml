@@ -83,7 +83,8 @@ calibration = "smooth_abs.calfits"
 ############################################################################################################
 
 [WorkFlow]
-actions = ["EXTRACT_AUTOS", "REDCAL", "FIRSTCAL_METRICS", "ABSCAL", "XRFI", "CAL_SMOOTH", "DELAY", "NOISE", "REFLECTIONS"]
+actions = ["EXTRACT_AUTOS", "REDCAL", "FIRSTCAL_METRICS", "ABSCAL", "XRFI", "CAL_SMOOTH", "DELAY", "NOISE", "REFLECTIONS", "IMAGING"]
+
 [EXTRACT_AUTOS]
 args = ["{basename}"]
 

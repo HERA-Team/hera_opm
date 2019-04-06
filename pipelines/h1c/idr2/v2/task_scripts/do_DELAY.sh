@@ -34,5 +34,5 @@ res_outfilename=`echo ${fn%.*}.OCRSD.uvh5`
 smooth_cal=`echo ${fn%.*}.smooth_abs.calfits`
 
 # run the command
-echo delay_filter_run.py ${fn} --calfile ${smooth_cal} --partial_load_Nbls --res_outfilename ${res_outfilename} --filetype=uvh5 --clobber --standoff=${standoff} --horizon=${horizon} --tol=${tol} --window=${window} --skip_wgt=${skip_wgt} --maxiter=${maxiter} --alpha=${alpha}
-delay_filter_run.py ${fn} --calfile ${smooth_cal} --partial_load_Nbls --res_outfilename ${res_outfilename} --filetype=uvh5 --clobber --standoff=${standoff} --horizon=${horizon} --tol=${tol} --window=${window} --skip_wgt=${skip_wgt} --maxiter=${maxiter} --alpha=${alpha}
+echo delay_filter_run.py ${fn} --calfile ${smooth_cal} --partial_load_Nbls ${partial_load_Nbls} --res_outfilename ${res_outfilename} --filetype_in uvh5 --filetype_out uvh5 --clobber --standoff ${standoff} --horizon ${horizon} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha}
+delay_filter_run.py ${fn} --calfile ${smooth_cal} --partial_load_Nbls ${partial_load_Nbls} --res_outfilename ${res_outfilename} --filetype_in uvh5 --filetype_out uvh5 --clobber --standoff ${standoff} --horizon ${horizon} --tol ${tol} --window ${window} --skip_wgt ${skip_wgt} --maxiter ${maxiter} --alpha ${alpha}
