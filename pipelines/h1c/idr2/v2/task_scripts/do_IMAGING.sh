@@ -22,9 +22,9 @@ fi
 if [ ! -z "${calibration}" ]; then
     # parse calibration suffix
     cal_file="${filename%.uvh5}.${calibration}"
-    echo apply_cal.py ${filename} ${filename%.uvh5}.calibrated_for_imaging.uvh5 --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5 --clobber
-    apply_cal.py ${filename} ${filename%.uvh5}.calibrated_for_imaging.uvh5 --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5 --clobber
-    filename="${filename%.uvh5}.calibrated_for_imaging.uvh5"
+    echo apply_cal.py ${filename} ${filename%.uvh5}.calibrated.uvh5 --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5 --clobber
+    apply_cal.py ${filename} ${filename%.uvh5}.calibrated.uvh5 --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5 --clobber
+    filename="${filename%.uvh5}.calibrated.uvh5"
 fi
 
 # convert file to uvfits
