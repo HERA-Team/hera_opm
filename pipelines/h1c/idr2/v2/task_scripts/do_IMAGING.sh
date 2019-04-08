@@ -28,8 +28,8 @@ if [ ! -z "${calibration}" ]; then
 fi
 
 # convert file to uvfits
-echo convert_to_uvfits.py ${filename} --overwrite
-convert_to_uvfits.py ${filename} --overwrite
+echo convert_to_uvfits.py ${filename} --output_filename ${filename%.uvh5}.uvfits --overwrite
+convert_to_uvfits.py ${filename} --output_filename ${filename%.uvh5}.uvfits --overwrite
 
 # get uvfits and ms filename
 uvfits_file="${filename%.uvh5}.uvfits"
