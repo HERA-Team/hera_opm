@@ -53,9 +53,9 @@ cd ${cwd}
 echo rm ${uvfits_file}
 rm ${uvfits_file}
 echo rm ${ms_file}
-rm -r ${ms_file}
+rm -r ${ms_file} || echo "No ${ms_file} to remove."
 
 # remove calibrated visibility
 if [ ! -z "${calibration}" ]; then
-    rm filename
+    rm ${filename}
 fi
