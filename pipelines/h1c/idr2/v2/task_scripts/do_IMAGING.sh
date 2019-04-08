@@ -45,8 +45,8 @@ mkdir -p ${image_outdir}
 cd ${image_outdir}
 
 # call sky_image.py from CASA_IMAGING package
-echo ${casa} -c ${casa_imaging_scripts}/rtp_imaging.py --uvfitsname ${cwd}/${uvfits_file} --image ${uvfits_file_out}
-${casa} -c ${casa_imaging_scripts}/rtp_imaging.py --uvfitsname ${cwd}/${uvfits_file} --image ${uvfits_file_out}
+echo ${casa} -c ${casa_imaging_scripts}/opm_imaging.py --uvfitsname ${cwd}/${uvfits_file} --image ${uvfits_file_out}
+${casa} -c ${casa_imaging_scripts}/opm_imaging.py --uvfitsname ${cwd}/${uvfits_file} --image ${uvfits_file_out}
 
 # erase uvfits and MS file
 cd ${cwd}
