@@ -34,7 +34,7 @@ convert_to_uvfits.py ${filename} --output_filename ${filename%.uvh5}.uvfits --ov
 # get uvfits and ms filename
 uvfits_file="${filename%.uvh5}.uvfits"
 uvfits_file_out="${filename}.image"
-ms_file="${filename}.ms"
+ms_file="${filename%.uvh5}.ms"
 
 # get current directory
 cwd=`pwd`
