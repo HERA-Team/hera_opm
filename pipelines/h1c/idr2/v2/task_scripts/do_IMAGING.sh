@@ -24,7 +24,7 @@ if [ ! -z "${calibration}" ]; then
     cal_file="${filename%.uvh5}.${calibration}"
     echo apply_cal.py ${filename} ${filename}.calibrated --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5
     apply_cal.py ${filename} ${filename}.calibrated --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5
-    filename="${filename}.calibrated"
+    filename="${filename%.uvh5}.calibrated_for_imaging.uvh5"
 fi
 
 # convert file to uvfits
@@ -32,7 +32,7 @@ echo convert_to_uvfits.py ${filename} --overwrite
 convert_to_uvfits.py ${filename} --overwrite
 
 # get uvfits and ms filename
-uvfits_file="${filename}.uvfits"
+uvfits_file="${filename%.uvh5}.uvfits"
 uvfits_file_out="${filename}.image"
 ms_file="${filename}.ms"
 
