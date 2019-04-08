@@ -149,5 +149,5 @@ args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:wind
 prereqs = "CAL_SMOOTH"
 time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
-mem = 16000
+mem = 32000
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
