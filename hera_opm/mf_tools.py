@@ -602,7 +602,7 @@ def build_analysis_makeflow_from_config(
                     with open(wrapper_script, "w") as f2:
                         print("#!/bin/bash", file=f2)
                         if conda_env is not None:
-                            print("source activate {}".format(conda_env), file=f2)
+                            print("conda activate {}".format(conda_env), file=f2)
                         print("date", file=f2)
                         print("cd {}".format(parent_dir), file=f2)
                         if timeout is not None:
