@@ -1,6 +1,7 @@
 [Options]
 makeflow_type = "analysis"
 path_to_do_scripts = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v2/task_scripts"
+source_script = "~/.bashrc"
 conda_env = "hera3"
 ex_ants_path = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v2/bad_ants"
 base_mem = 8000
