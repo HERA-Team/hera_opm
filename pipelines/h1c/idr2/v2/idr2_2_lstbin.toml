@@ -18,12 +18,12 @@ lst_start = 0.0
 fixed_lst_start = True
 vis_units = "Jy"
 parallelize = True
-file_ext = "grp1.of1.{}.{}.{:7.5f}.HH.OCRS.uvh5"
+file_ext = "grp1.of1.{type}.{time:7.5f}.HH.OCRS.uvh5"
 outdir = "./"
 parent_dir = "./"
-data_files = ["data/zen.2458043.*.HH.OCRS.uvh5",
-              "data/zen.2458044.*.HH.OCRS.uvh5",
-              "data/zen.2458045.*.HH.OCRS.uvh5"]
+data_files = ["data/zen.2458043.*.HH.uvh5",
+              "data/zen.2458044.*.HH.uvh5",
+              "data/zen.2458045.*.HH.uvh5"]
 calibration = "smooth_abs.calfits"
 
 [WorkFlow]
