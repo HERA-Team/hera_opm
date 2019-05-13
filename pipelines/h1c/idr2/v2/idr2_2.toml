@@ -47,7 +47,9 @@ filter_mode = "rect"
 window = "tukey"
 maxiter = 100
 alpha = 0.3
-antflag_thresh = 0.0
+freq_threshold = 0.35
+time_threshold = 0.5
+ant_threshold = 0.5
 
 [DELAY_OPTS]
 partial_load_Nbls = 100
@@ -120,7 +122,8 @@ n_time_neighbors = "all"
 mem = 32000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
-        "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:antflag_thresh}"]
+        "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}", 
+        "${CAL_SMOOTH_OPTS:time_threshold}", "${CAL_SMOOTH_OPTS:ant_threshold}"]
 
 [DELAY]
 prereqs = "CAL_SMOOTH"
