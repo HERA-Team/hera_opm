@@ -48,12 +48,17 @@ cd ${image_outdir}
 echo ${casa} -c ${casa_imaging_scripts}/opm_imaging.py --uvfitsname ${cwd}/${uvfits_file} --image ${uvfits_file_out}
 ${casa} -c ${casa_imaging_scripts}/opm_imaging.py --uvfitsname ${cwd}/${uvfits_file} --image ${uvfits_file_out}
 
-# erase uvfits and MS file
+# erase uvfits file
 cd ${cwd}
 echo rm ${uvfits_file}
 rm ${uvfits_file}
-echo rm ${ms_file}
-rm -r ${ms_file} || echo "No ${ms_file} to remove."
+
+# keep ms files for 2458098
+JD=`get_jd "${1}" | cut -c 1-7`
+if [ $JD -ne 2458098 ]; then
+    echo rm ${ms_file}
+    rm -r ${ms_file} || echo "No ${ms_file} to remove."
+fi
 
 # remove calibrated visibility
 if [ ! -z "${calibration}" ]; then

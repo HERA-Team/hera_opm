@@ -1,12 +1,13 @@
 [Options]
 makeflow_type = "analysis"
-path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/pipelines/h1c/idr2/v2/task_scripts"
-conda_env = "hera"
-ex_ants_path = "/users/jsdillon/Libraries/hera_opm/pipelines/h1c/idr2/v2/bad_ants"
+path_to_do_scripts = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v2/task_scripts"
+source_script = "~/.bashrc"
+conda_env = "hera3"
+ex_ants_path = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v2/bad_ants"
 base_mem = 8000
 base_cpu = 1
 timeout = "24h"
-pbs_mail_user = "jsdillon+makeflow@berkeley.edu"
+pbs_mail_user = "plaplant@sas.upenn.edu"
 
 [REDCAL_OPTS]
 ant_z_thresh = 4.0
@@ -152,5 +153,5 @@ args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:wind
 prereqs = "CAL_SMOOTH"
 time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
-mem = 32000
+mem = 24000
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]

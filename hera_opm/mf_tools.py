@@ -443,6 +443,7 @@ def build_analysis_makeflow_from_config(
 
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
+    source_script = get_config_entry(config, "Options", "source_script", required=False)
     pbs_mail_user = get_config_entry(config, "Options", "pbs_mail_user", required=False)
     timeout = get_config_entry(config, "Options", "timeout", required=False)
     if timeout is not None:
@@ -601,8 +602,10 @@ def build_analysis_makeflow_from_config(
                     wrapper_script = os.path.join(work_dir, wrapper_script)
                     with open(wrapper_script, "w") as f2:
                         print("#!/bin/bash", file=f2)
+                        if source_script is not None:
+                            print("source {}".format(source_script), file=f2)
                         if conda_env is not None:
-                            print("source activate {}".format(conda_env), file=f2)
+                            print("conda activate {}".format(conda_env), file=f2)
                         print("date", file=f2)
                         print("cd {}".format(parent_dir), file=f2)
                         if timeout is not None:
@@ -682,6 +685,7 @@ def build_lstbin_makeflow_from_config(
         pol_list = [pol_list]
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
+    source_script = get_config_entry(config, "Options", "source_scriopt", required=False)
     timeout = get_config_entry(config, "Options", "timeout", required=False)
     if timeout is not None:
         # check that the `timeout' command exists on the system
@@ -821,8 +825,10 @@ def build_lstbin_makeflow_from_config(
                 wrapper_script = os.path.join(work_dir, wrapper_script)
                 with open(wrapper_script, "w") as f2:
                     print("#!/bin/bash", file=f2)
+                    if source_script is not None:
+                        print("source {}".format(source_script, file=f2))
                     if conda_env is not None:
-                        print("source activate {}".format(conda_env), file=f2)
+                        print("conda activate {}".format(conda_env), file=f2)
                     print("date", file=f2)
                     print("cd {}".format(parent_dir), file=f2)
                     if timeout is not None:
