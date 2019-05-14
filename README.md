@@ -94,5 +94,9 @@ file docs page](docs/config_files.md).
 ```
 python setup.py test
 ```
-This requires `pytest` and `pytest-runner` to be installed, along with the other
-package dependencies.
+or
+```
+pytest
+```
+from the root repo directory. This requires `pytest` and `pytest-runner` to be
+installed, along with the other package dependencies.
