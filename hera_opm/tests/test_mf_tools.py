@@ -4,7 +4,7 @@ import os
 import shutil
 import gzip
 import glob
-from hera_opm.data import DATA_PATH
+from ..data import DATA_PATH
 from hera_opm import mf_tools as mt
 import six
 import toml
