@@ -520,11 +520,11 @@ def test_build_lstbin_makeflow_from_config(config_options):
     mt.clean_wrapper_scripts(work_dir)
 
     # test v2 LSTBIN pipe with no pols provided
+    outfile = os.path.join(work_dir, mf_output)
     if os.path.exists(outfile):
         os.remove(outfile)
     mt.build_lstbin_makeflow_from_config(config_file.replace("lstbin", "lstbin_v2"), mf_name="lstbin.mf",
-        work_dir=work_dir, parent_dir=DATA_PATH
-    )
+                                         work_dir=work_dir, parent_dir=DATA_PATH)
 
     # make sure the output files we expected appeared
     assert os.path.exists(outfile)
