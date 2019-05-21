@@ -4,7 +4,7 @@ import os
 import shutil
 import gzip
 import glob
-from ..data import DATA_PATH
+from hera_opm.data import DATA_PATH
 from hera_opm import mf_tools as mt
 import six
 import toml
@@ -513,6 +513,21 @@ def test_build_lstbin_makeflow_from_config(config_options):
         config_file, mf_name=outfile, work_dir=work_dir, parent_dir=DATA_PATH
     )
 
+    assert os.path.exists(outfile)
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    # test v2 LSTBIN pipe with no pols provided
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+    mt.build_lstbin_makeflow_from_config(config_file.replace("lstbin", "lstbin_v2"), mf_name="lstbin.mf",
+                                         work_dir=work_dir, parent_dir=DATA_PATH)
+
+    # make sure the output files we expected appeared
     assert os.path.exists(outfile)
 
     # clean up after ourselves

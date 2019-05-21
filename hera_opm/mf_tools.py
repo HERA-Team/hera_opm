@@ -680,7 +680,7 @@ def build_lstbin_makeflow_from_config(
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
 
     # get general options
-    pol_list = get_config_entry(config, "Options", "pols", required=True)
+    pol_list = get_config_entry(config, "Options", "pols", required=False)
     if not isinstance(pol_list, list):
         pol_list = [pol_list]
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
@@ -705,6 +705,11 @@ def build_lstbin_makeflow_from_config(
     else:
         base, ext = os.path.splitext(cf)
         fn = "{0}.mf".format(base)
+
+    # get filetypes
+    filetype = get_config_entry(config, "LSTBIN_OPTS", "filetype", required=False)
+    if filetype is None:
+        filetype = 'uvh5'
 
     # determine whether or not to parallelize
     parallelize = get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)
@@ -744,7 +749,8 @@ def build_lstbin_makeflow_from_config(
             datafiles = get_config_entry(
                 config, "LSTBIN_OPTS", "data_files", required=True
             )
-            datafiles = [df.format(pol=pol) for df in datafiles]
+            if pol is not None:
+                datafiles = [df.format(pol=pol) for df in datafiles]
             datafiles = [os.path.join(parent_dir, df) for df in datafiles]
 
             # get number of output files for this pol
@@ -782,6 +788,7 @@ def build_lstbin_makeflow_from_config(
                     lst_start=lst_start,
                     fixed_lst_start=fixed_lst_start,
                     ntimes_per_file=ntimes_per_file,
+                    filetype=filetype,
                 )
                 nfiles = len(output[3])
             else:
@@ -794,8 +801,12 @@ def build_lstbin_makeflow_from_config(
                     config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
 
                 # make outfile list
-                outfile = "lstbin_outfile_{}.{}.{}.out".format(
-                    output_file_index, "LSTBIN", pol
+                if pol is not None:
+                    polstr = ".{}".format(pol)
+                else:
+                    polstr = ""
+                outfile = "lstbin_outfile_{}.{}{}.out".format(
+                    output_file_index, "LSTBIN", polstr
                 )
 
                 # get args list for lst-binning step

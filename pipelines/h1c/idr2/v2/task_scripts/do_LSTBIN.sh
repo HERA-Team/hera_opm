@@ -18,9 +18,10 @@ source ${src_dir}/_common.sh
 # 9 - vis_units
 # 10 - output_file_select
 # 11 - file_ext
-# 12 - outdir
-# 13 - calibration
-# 14+ - series of glob-parsable search strings (in quotations!) to files to LSTBIN
+# 12 - filetype
+# 13 - outdir
+# 14 - calibration
+# 15+ - series of glob-parsable search strings (in quotations!) to files to LSTBIN
 
 # get positional arguments
 sig_clip=${1}
@@ -34,10 +35,11 @@ dlst=${8}
 vis_units=${9}
 output_file_select=${10}
 file_ext=${11}
-outdir=${12}
-calibration=${13}
+filetype=${12}
+outdir=${13}
+calibration=${14}
 data_files=($@)
-data_files=(${data_files[*]:13})
+data_files=(${data_files[*]:14})
 
 # if calibration suffix is not empty, parse it and apply it
 if [ ! -z "${calibration}" ]; then
@@ -65,5 +67,5 @@ else
     fixed_lst_start=""
 fi
 
-echo lstbin_run.py --dlst ${dlst} --file_ext ${file_ext} --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} ${rephase} ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} ${fixed_lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} --input_cals ${input_cals[@]} --overwrite ${data_files[@]}
-lstbin_run.py --dlst ${dlst} --file_ext ${file_ext} --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} ${rephase} ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} ${fixed_lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} --input_cals ${input_cals[@]} --overwrite ${data_files[@]}
+echo lstbin_run.py --dlst ${dlst} --file_ext ${file_ext} --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} ${rephase} ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} ${fixed_lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} --filetype ${filetype} --input_cals ${input_cals[@]} --overwrite ${data_files[@]}
+lstbin_run.py --dlst ${dlst} --file_ext ${file_ext} --outdir ${outdir} --ntimes_per_file ${ntimes_per_file} ${rephase} ${sig_clip} --sigma ${sigma} --min_N ${min_N} --lst_start ${lst_start} ${fixed_lst_start} --vis_units ${vis_units} --output_file_select ${output_file_select} --filetype ${filetype} --input_cals ${input_cals[@]} --overwrite ${data_files[@]}
