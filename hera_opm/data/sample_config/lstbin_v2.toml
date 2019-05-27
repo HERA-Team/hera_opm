@@ -9,6 +9,7 @@ base_cpu = 1
 
 [LSTBIN_OPTS]
 sig_clip = true
+Nbls_to_load = "None"
 sigma = 5
 min_N = 5
 rephase = false
@@ -19,13 +20,12 @@ fixed_lst_start = false
 vis_units = "Jy"
 parallelize = true
 file_ext = "grp1.of2.{type}.{time:7.5f}.uvcA"
-filetype = "miriad"
 outdir = "../data"
 parent_dir = "../data"
-data_files = ["zen.2457698.40355.HH.uvcA",
-              "zen.2457698.40355.HH.uvcA"]
+data_files = ["zen.2458043.40141.xx.HH.uvh5",
+              "zen.2458043.40887.xx.HH.uvh5"]
 
 [LSTBIN]
 args = ["sig_clip", "sigma", "min_N", "rephase", "ntimes_per_file", "lst_start",
         "fixed_lst_start", "dlst", "vis_units", "output_file_select", "file_ext",
-        "filetype", "outdir"]
+        "outdir", "Nbls_to_load"]

@@ -706,11 +706,6 @@ def build_lstbin_makeflow_from_config(
         base, ext = os.path.splitext(cf)
         fn = "{0}.mf".format(base)
 
-    # get filetypes
-    filetype = get_config_entry(config, "LSTBIN_OPTS", "filetype", required=False)
-    if filetype is None:
-        filetype = 'uvh5'
-
     # determine whether or not to parallelize
     parallelize = get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)
     if "parent_dir" in kwargs:
@@ -788,9 +783,8 @@ def build_lstbin_makeflow_from_config(
                     lst_start=lst_start,
                     fixed_lst_start=fixed_lst_start,
                     ntimes_per_file=ntimes_per_file,
-                    filetype=filetype,
                 )
-                nfiles = len(output[3])
+                nfiles = len(output[2])
             else:
                 nfiles = 1
 
