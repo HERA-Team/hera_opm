@@ -24,8 +24,9 @@ outdir = "../data"
 parent_dir = "../data"
 data_files = ["'zen.2458043.40141.xx.HH.uvh5'",
               "'zen.2458043.40887.xx.HH.uvh5'"]
+calibration = ""
 
 [LSTBIN]
 args = ["sig_clip", "sigma", "min_N", "rephase", "ntimes_per_file", "lst_start",
         "fixed_lst_start", "dlst", "vis_units", "output_file_select", "file_ext",
-        "outdir", "Nbls_to_load"]
+        "outdir", "Nbls_to_load", "calibration"]
