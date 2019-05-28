@@ -46,7 +46,7 @@ if [ ! -z "${calibration}" ]; then
     # parse calibration suffix for each nested list in data_files
     input_cals=()
     for df in "${data_files[@]}"; do
-        input_cals+=("${df%.uvh5}.${calibration}")
+        input_cals+=("${df%.uvh5*}.${calibration}")
     done
 fi
 

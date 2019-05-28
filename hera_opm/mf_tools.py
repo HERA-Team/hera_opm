@@ -746,7 +746,8 @@ def build_lstbin_makeflow_from_config(
             )
             if pol is not None:
                 datafiles = [df.format(pol=pol) for df in datafiles]
-            datafiles = ['"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'"))) for df in datafiles]
+            # encapsulate in double quotes
+            datafiles = ["'{}'".format('"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'")))) for df in datafiles]
 
             # get number of output files for this pol
             if parallelize:
