@@ -744,11 +744,9 @@ def build_lstbin_makeflow_from_config(
             datafiles = get_config_entry(
                 config, "LSTBIN_OPTS", "data_files", required=True
             )
-            # strip extra quotations if present
-            datafiles = [df.strip("'").strip('"') for df in datafiles]
             if pol is not None:
                 datafiles = [df.format(pol=pol) for df in datafiles]
-            datafiles = [os.path.join(parent_dir, df) for df in datafiles]
+            datafiles = ['"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'"))) for df in datafiles]
 
             # get number of output files for this pol
             if parallelize:
@@ -773,7 +771,7 @@ def build_lstbin_makeflow_from_config(
                 )
 
                 # pre-process files to determine the number of output files
-                _datafiles = [sorted(glob.glob(df)) for df in datafiles]
+                _datafiles = [sorted(glob.glob(df.strip('"').strip("'"))) for df in datafiles]
                 if six.PY2:
                     _datafiles = [
                         [df.encode("utf-8") for df in li] for li in _datafiles
