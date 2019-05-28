@@ -22,8 +22,8 @@ parallelize = true
 file_ext = "grp1.of2.{type}.{time:7.5f}.uvcA"
 outdir = "../data"
 parent_dir = "../data"
-data_files = ["zen.2458043.40141.xx.HH.uvh5",
-              "zen.2458043.40887.xx.HH.uvh5"]
+data_files = ["'zen.2458043.40141.xx.HH.uvh5'",
+              "'zen.2458043.40887.xx.HH.uvh5'"]
 
 [LSTBIN]
 args = ["sig_clip", "sigma", "min_N", "rephase", "ntimes_per_file", "lst_start",
