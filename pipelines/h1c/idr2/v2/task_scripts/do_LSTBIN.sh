@@ -46,7 +46,13 @@ if [ ! -z "${calibration}" ]; then
     # parse calibration suffix for each nested list in data_files
     input_cals=()
     for df in "${data_files[@]}"; do
-        input_cals+=("${df%.uvh5*}.${calibration}")
+        # remove brackets
+        ic=$(sed -e 's/^"//' -e 's/"$//' <<< $df)
+        ic=$(sed -e "s/^'//" -e "s/'$//" <<< $ic)
+        # replace with calibration
+        ic="'${ic%.uvh5*}.${calibration}'"
+        # add brackets
+        input_cals+=("$ic")
     done
 fi
 
