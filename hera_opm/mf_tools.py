@@ -771,7 +771,7 @@ def build_lstbin_makeflow_from_config(
                 )
 
                 # pre-process files to determine the number of output files
-                _datafiles = list(map(lambda df: sorted(glob.glob(df)), datafiles))
+                _datafiles = [sorted(glob.glob(df.stirp("'").strip('"'))) for df in datafiles]
                 if six.PY2:
                     _datafiles = [
                         [df.encode("utf-8") for df in li] for li in _datafiles
