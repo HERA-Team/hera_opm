@@ -4,8 +4,8 @@ import os
 import shutil
 import gzip
 import glob
-from hera_opm.data import DATA_PATH
-from hera_opm import mf_tools as mt
+from ..data import DATA_PATH
+from .. import mf_tools as mt
 import six
 import toml
 
@@ -289,6 +289,14 @@ def test_build_analysis_makeflow_from_config(config_options):
                 wrapper_fn = os.path.join(work_dir, wrapper_fn)
                 assert os.path.exists(wrapper_fn)
 
+                # check that the wrapper scripts have the right lines in them
+                with open(wrapper_fn) as infile:
+                    lines = infile.readlines()
+                assert lines[0].strip() == "#!/bin/bash"
+                assert lines[1].strip() == "source ~/.bashrc"
+                assert lines[2].strip() == "conda activate hera"
+                assert lines[3].strip() == "date"
+
     # clean up after ourselves
     os.remove(outfile)
     mt.clean_wrapper_scripts(work_dir)
@@ -515,6 +523,17 @@ def test_build_lstbin_makeflow_from_config(config_options):
 
     assert os.path.exists(outfile)
 
+    # check that the wrapper scripts have the right lines in them
+    wrapper_scripts = [
+        f for f in sorted(os.listdir(work_dir)) if f.startswith("wrapper_")
+    ]
+    with open(os.path.join(work_dir, wrapper_scripts[0])) as infile:
+        lines = infile.readlines()
+    assert lines[0].strip() == "#!/bin/bash"
+    assert lines[1].strip() == "source ~/.bashrc"
+    assert lines[2].strip() == "conda activate hera"
+    assert lines[3].strip() == "date"
+
     # clean up after ourselves
     os.remove(outfile)
     mt.clean_wrapper_scripts(work_dir)
@@ -524,8 +543,12 @@ def test_build_lstbin_makeflow_from_config(config_options):
     outfile = os.path.join(work_dir, mf_output)
     if os.path.exists(outfile):
         os.remove(outfile)
-    mt.build_lstbin_makeflow_from_config(config_file.replace("lstbin", "lstbin_v2"), mf_name="lstbin.mf",
-                                         work_dir=work_dir, parent_dir=DATA_PATH)
+    mt.build_lstbin_makeflow_from_config(
+        config_file.replace("lstbin", "lstbin_v2"),
+        mf_name="lstbin.mf",
+        work_dir=work_dir,
+        parent_dir=DATA_PATH,
+    )
 
     # make sure the output files we expected appeared
     assert os.path.exists(outfile)
