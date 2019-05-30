@@ -115,7 +115,7 @@ def inspect_log_files(log_files, out_files):
         # It timed out
         if (
             timeout is not None
-            and (np.abs(runtimes[-1]) > .99 * timeout)
+            and (np.abs(runtimes[-1]) > 0.99 * timeout)
             and (log_file.replace(".log", ".out") not in out_files)
             and (log_file.replace(".log.error", ".out") not in out_files)
         ):
@@ -140,22 +140,29 @@ def inspect_log_files(log_files, out_files):
         print("\n")
 
     runtimes = np.array(runtimes)
-    finished_runtimes = runtimes[runtimes > 10. / 60.0]
+    finished_runtimes = runtimes[runtimes > 10.0 / 60.0]
     if len(finished_runtimes) > 0:
         average_runtime = np.mean(finished_runtimes)
     else:
         average_runtime = np.nan
 
-    return average_runtime, np.sum(runtimes == -1), len(errored_logs), len(timed_out_logs)
+    return (
+        average_runtime,
+        np.sum(runtimes == -1),
+        len(errored_logs),
+        len(timed_out_logs),
+    )
 
 
 def filter_errors(log_files):
-    '''If there are both error and log files, pick the newer one.'''
+    """If there are both error and log files, pick the newer one."""
     newest_log_files = []
-    unique_bases = np.unique([f.replace('.log.error', '.log') for f in log_files])
+    unique_bases = np.unique([f.replace(".log.error", ".log") for f in log_files])
     for log_file in unique_bases:
-        err_file = log_file.replace('.log', '.log.error')
-        if err_file in log_files and log_file in log_files:  # both an error file and a log file
+        err_file = log_file.replace(".log", ".log.error")
+        if (
+            err_file in log_files and log_file in log_files
+        ):  # both an error file and a log file
             with open(err_file, "r") as f:
                 err_lines = f.readlines()
                 err_start = dateparser.parse(err_lines[0], ignoretz=True)
