@@ -14,20 +14,16 @@ bn=$(basename ${1})  # Basename
 # which must be consistent with the config.
 # 1 - filename
 ### XRFI parameters - see hera_qm.utils for details
-# 2 - init_metrics_ext
-# 3 - init_flags_ext
-# 4 - final_metrics_ext
-# 5 - final_flags_ext
-# 6 - kt_size
-# 7 - kf_size
-# 8 - sig_init
-# 9 - sig_adj
-# 10 - freq_threshold
-# 11 - time_treshold
+# 2 - kt_size
+# 3 - kf_size
+# 4 - sig_init
+# 5 - sig_adj
+# 6 - freq_threshold
+# 7 - time_treshold
 
 ocalfits_file=`echo ${fn%.*}.omni.calfits`
 acalfits_file=`echo ${fn%.*}.abs.calfits`
 model_file=`echo ${fn%.*}.omni_vis.uvh5`
 
-echo xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --init_metrics_ext=${2} --init_flags_ext=${3} --final_metrics_ext=${4} --final_flags_ext=${5} --kt_size=${6} --kf_size=${7} --sig_init=${8} --sig_adj=${9} --freq_threshold=${10} --time_threshold=${11} --clobber
-xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --init_metrics_ext=${2} --init_flags_ext=${3} --final_metrics_ext=${4} --final_flags_ext=${5} --kt_size=${6} --kf_size=${7} --sig_init=${8} --sig_adj=${9} --freq_threshold=${10} --time_threshold=${11} --clobber
+echo xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --freq_threshold=${6} --time_threshold=${7} --clobber
+xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --freq_threshold=${6} --time_threshold=${7} --clobber

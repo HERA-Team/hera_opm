@@ -28,10 +28,6 @@ phs_conv_crit = 1e-6
 edge_cut = 100
 
 [XRFI_OPTS]
-init_metrics_ext = 'init_xrfi_metrics.h5'
-init_flags_ext = 'init_flags.h5'
-final_metrics_ext = 'final_xrfi_metrics.h5'
-final_flags_ext = 'final_flags.h5'
 kt_size = 8
 kf_size = 8
 sig_init = 5.0
@@ -110,9 +106,7 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 [XRFI]
 prereqs = "ABSCAL"
 mem = 32000  #TODO: lower this
-args = ["{basename}", "${XRFI_OPTS:init_metrics_ext}", "${XRFI_OPTS:init_flags_ext}",
-        "${XRFI_OPTS:final_metrics_ext}", "${XRFI_OPTS:final_flags_ext}",
-        "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
+args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
         "${XRFI_OPTS:sig_adj}", "${XRFI_OPTS:freq_threshold}", "${XRFI_OPTS:time_threshold}"]
 
 [CAL_SMOOTH]
@@ -122,7 +116,7 @@ n_time_neighbors = "all"
 mem = 32000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
-        "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}", 
+        "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}",
         "${CAL_SMOOTH_OPTS:time_threshold}", "${CAL_SMOOTH_OPTS:ant_threshold}"]
 
 [DELAY]
@@ -143,10 +137,10 @@ args = ["{basename}"]
 prereqs = "CAL_SMOOTH"
 time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
-args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:window}", "${REFLECTIONS_OPTS:alpha}", 
-        "${REFLECTIONS_OPTS:tol}", "${REFLECTIONS_OPTS:gain}", "${REFLECTIONS_OPTS:maxiter}", 
-        "${REFLECTIONS_OPTS:skip_wgt}", "${REFLECTIONS_OPTS:edgecut_low}", "${REFLECTIONS_OPTS:edgecut_hi}", 
-        "${REFLECTIONS_OPTS:zeropad}", "${REFLECTIONS_OPTS:min_dly}", "${REFLECTIONS_OPTS:time_avg}", 
+args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:window}", "${REFLECTIONS_OPTS:alpha}",
+        "${REFLECTIONS_OPTS:tol}", "${REFLECTIONS_OPTS:gain}", "${REFLECTIONS_OPTS:maxiter}",
+        "${REFLECTIONS_OPTS:skip_wgt}", "${REFLECTIONS_OPTS:edgecut_low}", "${REFLECTIONS_OPTS:edgecut_hi}",
+        "${REFLECTIONS_OPTS:zeropad}", "${REFLECTIONS_OPTS:min_dly}", "${REFLECTIONS_OPTS:time_avg}",
         "${REFLECTIONS_OPTS:opt_maxiter}", "${REFLECTIONS_OPTS:opt_method}", "${REFLECTIONS_OPTS:opt_tol}"]
 
 [IMAGING]
