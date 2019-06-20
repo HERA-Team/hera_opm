@@ -28,10 +28,6 @@ phs_conv_crit = 1e-6
 edge_cut = 100
 
 [XRFI_OPTS]
-init_metrics_ext = 'init_xrfi_metrics.h5'
-init_flags_ext = 'init_flags.h5'
-final_metrics_ext = 'final_xrfi_metrics.h5'
-final_flags_ext = 'final_flags.h5'
 kt_size = 8
 kf_size = 8
 sig_init = 5.0
@@ -109,10 +105,8 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 
 [XRFI]
 prereqs = "ABSCAL"
-mem = 32000  #TODO: lower this
-args = ["{basename}", "${XRFI_OPTS:init_metrics_ext}", "${XRFI_OPTS:init_flags_ext}",
-        "${XRFI_OPTS:final_metrics_ext}", "${XRFI_OPTS:final_flags_ext}",
-        "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
+mem = 32000
+args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
         "${XRFI_OPTS:sig_adj}", "${XRFI_OPTS:freq_threshold}", "${XRFI_OPTS:time_threshold}"]
 
 [CAL_SMOOTH]
