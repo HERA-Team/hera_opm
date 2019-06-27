@@ -32,8 +32,13 @@ kt_size = 8
 kf_size = 8
 sig_init = 5.0
 sig_adj = 2.0
-freq_threshold = 0.35
-time_threshold = 0.5
+
+[XRFI_DAY_THRESHOLD_OPTS]
+kt_size = 8
+kf_size = 8
+nsig_f = 5.0
+nsig_t = 5.0
+cal_ext = "flagged_abs"
 
 [CAL_SMOOTH_OPTS]
 freq_scale = 10
@@ -107,11 +112,19 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 prereqs = "ABSCAL"
 mem = 32000
 args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
-        "${XRFI_OPTS:sig_adj}", "${XRFI_OPTS:freq_threshold}", "${XRFI_OPTS:time_threshold}"]
+        "${XRFI_OPTS:sig_adj}"]
 
-[CAL_SMOOTH]
+[XRFI_DAY_THRESHOLD]
 prereqs = "XRFI"
 time_prereqs = "XRFI"
+n_time_neighbors = "all"
+args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:kt_size}", "${XRFI_DAY_THRESHOLD_OPTS:kf_size}",
+        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
+        "${XRFI_DAY_THRESHOLD_OPTS:cal_ext}"]
+
+[CAL_SMOOTH]
+prereqs = "XRFI_DAY_THRESHOLD"
+time_prereqs = "XRFI_DAY_THRESHOLD"
 n_time_neighbors = "all"
 mem = 32000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",

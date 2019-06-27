@@ -18,12 +18,10 @@ bn=$(basename ${1})  # Basename
 # 3 - kf_size
 # 4 - sig_init
 # 5 - sig_adj
-# 6 - freq_threshold
-# 7 - time_treshold
 
 ocalfits_file=`echo ${fn%.*}.omni.calfits`
 acalfits_file=`echo ${fn%.*}.abs.calfits`
 model_file=`echo ${fn%.*}.omni_vis.uvh5`
 
-echo xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --freq_threshold=${6} --time_threshold=${7} --clobber
-xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --freq_threshold=${6} --time_threshold=${7} --clobber
+echo xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --clobber
+xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --clobber
