@@ -105,7 +105,7 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 
 [XRFI]
 prereqs = "ABSCAL"
-mem = 32000  #TODO: lower this
+mem = 32000
 args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
         "${XRFI_OPTS:sig_adj}", "${XRFI_OPTS:freq_threshold}", "${XRFI_OPTS:time_threshold}"]
 
