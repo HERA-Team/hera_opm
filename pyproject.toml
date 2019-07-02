@@ -1,3 +1,6 @@
+[build-system]
+requires = ["setuptools", "wheel", "six", "toml>=0.9.4"]
+
 [tool.black]
 line-length = 88
 py36 = false
