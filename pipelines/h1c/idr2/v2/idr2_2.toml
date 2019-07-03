@@ -47,8 +47,8 @@ filter_mode = "rect"
 window = "tukey"
 maxiter = 100
 alpha = 0.3
-freq_threshold = 0.35
-time_threshold = 0.5
+freq_threshold = 1.0
+time_threshold = 1.0
 ant_threshold = 0.5
 
 [DELAY_OPTS]
