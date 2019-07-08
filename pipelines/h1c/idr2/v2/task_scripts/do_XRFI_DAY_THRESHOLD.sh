@@ -13,9 +13,9 @@ source ${src_dir}/_common.sh
 # 3 - kf_size
 # 4 - nsig_f
 # 5 - nsig_t
-# 6 - cal_ext
+
 fn="${1}"
 data_files=`echo ${fn%.*}.uvh5`
 
-echo xrfi_day_threshold.py ${data_files} --kt_size=${2} --kf_size=${3} --nsig_f=${4} --nsig_t=${5} --cal_ext=${6} --run_if_first ${fn}
-xrfi_day_threshold.py ${data_files} --kt_size=${2} --kf_size=${3} --nsig_f=${4} --nsig_t=${5} --cal_ext=${6} --run_if_first ${fn}
+echo xrfi_day_threshold.py ${data_files} --kt_size=${2} --kf_size=${3} --nsig_f=${4} --nsig_t=${5} --run_if_first ${fn}
+xrfi_day_threshold.py ${data_files} --kt_size=${2} --kf_size=${3} --nsig_f=${4} --nsig_t=${5} --run_if_first ${fn}
