@@ -41,14 +41,14 @@ nsig_t = 5.0
 
 [CAL_SMOOTH_OPTS]
 freq_scale = 10
-time_scale = 1800
+time_scale = 21600
 tol = 1e-6
 filter_mode = "rect"
 window = "tukey"
 maxiter = 100
 alpha = 0.3
-freq_threshold = 0.35
-time_threshold = 0.5
+freq_threshold = 1.0
+time_threshold = 1.0
 ant_threshold = 0.5
 
 [DELAY_OPTS]
@@ -86,7 +86,7 @@ calibration = "smooth_abs.calfits"
 ############################################################################################################
 
 [WorkFlow]
-actions = ["EXTRACT_AUTOS", "REDCAL", "FIRSTCAL_METRICS", "ABSCAL", "XRFI", "XRFI_DAY_THRESHOLD_OPTS", "CAL_SMOOTH", "DELAY", "NOISE", "REFLECTIONS", "IMAGING"]
+actions = ["EXTRACT_AUTOS", "REDCAL", "FIRSTCAL_METRICS", "ABSCAL", "XRFI", "XRFI_DAY_THRESHOLD", "CAL_SMOOTH", "UPDATE_OMNISOL", "NOISE", "REFLECTIONS", "IMAGING", "DELAY"]
 
 [EXTRACT_AUTOS]
 args = ["{basename}"]
@@ -130,13 +130,11 @@ args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_s
         "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}",
         "${CAL_SMOOTH_OPTS:time_threshold}", "${CAL_SMOOTH_OPTS:ant_threshold}"]
 
-[DELAY]
+[UPDATE_OMNISOL]
 prereqs = "CAL_SMOOTH"
 time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
-args = ["{basename}", "${DELAY_OPTS:partial_load_Nbls}", "${DELAY_OPTS:standoff}",
-        "${DELAY_OPTS:horizon}", "${DELAY_OPTS:tol}", "${DELAY_OPTS:window}",
-        "${DELAY_OPTS:skip_wgt}", "${DELAY_OPTS:maxiter}", "${DELAY_OPTS:alpha}"]
+args = ["{basename}"]
 
 [NOISE]
 prereqs = "CAL_SMOOTH"
@@ -160,3 +158,11 @@ time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
 mem = 32000
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
+
+[DELAY]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
+args = ["{basename}", "${DELAY_OPTS:partial_load_Nbls}", "${DELAY_OPTS:standoff}",
+        "${DELAY_OPTS:horizon}", "${DELAY_OPTS:tol}", "${DELAY_OPTS:window}",
+        "${DELAY_OPTS:skip_wgt}", "${DELAY_OPTS:maxiter}", "${DELAY_OPTS:alpha}"]
