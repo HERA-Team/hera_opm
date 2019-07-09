@@ -1,10 +1,12 @@
-from setuptools import setup
-from glob import glob
-import os, sys
 import json
+import os
+import sys
+from glob import glob
+
+from setuptools import setup
 
 sys.path.append("hera_opm")
-import version
+import version # noqa
 
 data = [
     version.git_origin,
