@@ -1,8 +1,10 @@
 from setuptools import setup
 from glob import glob
-import os
-from hera_opm import version
+import os, sys
 import json
+
+sys.path.append("hera_opm")
+import version
 
 data = [
     version.git_origin,
