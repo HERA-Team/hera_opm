@@ -87,15 +87,15 @@ git_branch = version_info["git_branch"]
 hera_opm_version_str = "hera_opm version: " + version + "."
 if git_hash is not "":
     hera_opm_version_str += (
-            "  Git origin: "
-            + git_origin
-            + ".  Git hash: "
-            + git_hash
-            + ".  Git branch: "
-            + git_branch
-            + ".  Git description: "
-            + git_description
-            + "."
+        "  Git origin: "
+        + git_origin
+        + ".  Git hash: "
+        + git_hash
+        + ".  Git branch: "
+        + git_branch
+        + ".  Git description: "
+        + git_description
+        + "."
     )
 
 
