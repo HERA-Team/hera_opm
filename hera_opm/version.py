@@ -4,10 +4,12 @@
 
 from __future__ import print_function, division, absolute_import
 
-import os
-import six
-import subprocess
 import json
+import os
+import subprocess
+import sys
+
+PY2 = sys.version_info < (3, 0)
 
 
 def construct_version_info():
@@ -26,12 +28,12 @@ def construct_version_info():
 
         data = data.strip()
 
-        if six.PY2:
+        if PY2:
             return data
         return data.decode("utf-8")
 
     def unicode_to_str(u):
-        if six.PY2:
+        if PY2:
             return u.encode("utf-8")
         return u
 
@@ -85,15 +87,15 @@ git_branch = version_info["git_branch"]
 hera_opm_version_str = "hera_opm version: " + version + "."
 if git_hash is not "":
     hera_opm_version_str += (
-        "  Git origin: "
-        + git_origin
-        + ".  Git hash: "
-        + git_hash
-        + ".  Git branch: "
-        + git_branch
-        + ".  Git description: "
-        + git_description
-        + "."
+            "  Git origin: "
+            + git_origin
+            + ".  Git hash: "
+            + git_hash
+            + ".  Git branch: "
+            + git_branch
+            + ".  Git description: "
+            + git_description
+            + "."
     )
 
 
