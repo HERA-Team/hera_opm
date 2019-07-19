@@ -34,10 +34,10 @@ sig_init = 5.0
 sig_adj = 2.0
 
 [XRFI_DAY_THRESHOLD_OPTS]
-kt_size = 8
-kf_size = 8
-nsig_f = 5.0
-nsig_t = 5.0
+nsig_f = 7.0
+nsig_t = 7.0
+nsig_f_adj = 3.0
+nsig_t_adj = 3.0
 
 [CAL_SMOOTH_OPTS]
 freq_scale = 10
@@ -117,8 +117,8 @@ args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OP
 prereqs = "XRFI"
 time_prereqs = "XRFI"
 n_time_neighbors = "all"
-args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:kt_size}", "${XRFI_DAY_THRESHOLD_OPTS:kf_size}",
-        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}"]
+args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
+        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}"]
 
 [CAL_SMOOTH]
 prereqs = "XRFI_DAY_THRESHOLD"
