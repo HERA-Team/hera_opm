@@ -3,14 +3,14 @@ makeflow_type = "lstbin"
 path_to_do_scripts = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v2/task_scripts"
 source_script = "~/.bashrc"
 conda_env = "hera3"
-base_mem = 32000
-base_cpu = 2
-timeout = "24h"
+base_mem = 80000
+base_cpu = 4
+timeout = "48h"
 pbs_mail_user = "jsdillon+nrao@berkeley.edu"
 
 [LSTBIN_OPTS]
 sig_clip = "True"
-Nbls_to_load = 30
+Nbls_to_load = 150
 sigma = 5
 min_N = 5
 rephase = "True"
