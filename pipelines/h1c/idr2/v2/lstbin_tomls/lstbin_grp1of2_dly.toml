@@ -3,8 +3,8 @@ makeflow_type = "lstbin"
 path_to_do_scripts = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v2/task_scripts"
 source_script = "~/.bashrc"
 conda_env = "hera3"
-base_mem = 40000
-base_cpu = 2
+base_mem = 64000
+base_cpu = 4
 timeout = "48h"
 pbs_mail_user = "jsdillon+nrao@berkeley.edu"
 
