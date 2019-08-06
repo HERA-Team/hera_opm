@@ -1,0 +1,42 @@
+[Options]
+makeflow_type = "analysis"
+path_to_do_scripts = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr3/v1/task_scripts"
+source_script = "~/.bashrc"
+conda_env = "hera3"
+ex_ants_path = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr3/v1/bad_ants"
+base_mem = 8000
+base_cpu = 1
+timeout = "24h"
+pbs_mail_user = "plaplant@sas.upenn.edu"
+
+[REDCAL_OPTS]
+ant_z_thresh = 4.0
+solar_horizon = 0.0
+nInt_to_load = 8
+flag_nchan_low = 50
+flag_nchan_high = 50
+min_bl_cut = 15
+max_bl_cut = 90
+
+############################################################################################################
+
+[WorkFlow]
+actions = ["STAGE_FILES", "MAKE_UVH5", "REDCAL", "UPLOAD_FILES", "CLEAN_FILES"]
+
+[STAGE_FILES]
+args = ["{basename}"]
+
+[MAKE_UVH5]
+args = ["{basename}"]
+
+[REDCAL]
+args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
+        "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
+        "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
+        "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}"]
+
+[UPLOAD_FILES]
+args = ["{basename}"]
+
+[CLEAN_FILES]
+args = ["{basename}"]
