@@ -414,6 +414,8 @@ def build_analysis_makeflow_from_config(
     """
     config = toml.load(config_file)
     workflow = get_config_entry(config, "WorkFlow", "actions")
+    # make workflow options uppercase
+    workflow = [w.upper() for w in workflow]
 
     # get general options
     pol_list = get_config_entry(config, "Options", "pols", required=False)
@@ -440,6 +442,22 @@ def build_analysis_makeflow_from_config(
                             "Polarizations do not match for"
                             " obsids {} and {}".format(obsid, obsid2)
                         )
+
+    # make sure that SETUP and TEARDOWN are in the right spots, if they are in the workflow
+    try:
+        idx = workflow.index("SETUP")
+    except ValueError:
+        pass
+    else:
+        if idx != 0:
+            raise ValueError("SETUP must be first entry of workflow")
+    try:
+        idx = workflow.index("TEARDOWN")
+    except ValueError:
+        pass
+    else:
+        if idx != len(workflow) - 1:
+            raise ValueError("TEARDOWN must be last entry of workflow")
 
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
@@ -485,6 +503,73 @@ def build_analysis_makeflow_from_config(
         base_mem = get_config_entry(config, "Options", "base_mem", required=True)
         base_cpu = get_config_entry(config, "Options", "base_cpu", required=False)
 
+        # if we have a setup step, add it here
+        if "SETUP" in workflow:
+            infiles = []
+            command = "do_SETUP.sh".format(action)
+            command = os.path.join(path_to_do_scripts, command)
+            infiles.append(command)
+            args = get_config_entry(config, "SETUP", "args", required=False)
+            if args is not None:
+                if not isinstance(args, list):
+                    args = [args]
+                args = " ".join(list(map(str, args)))
+            else:
+                args = ""
+            outfile = "setup.out"
+            mem = get_config_entry(config, action, "mem", required=False)
+            ncpu = get_config_entry(config, action, "ncpu", required=False)
+            if mem is None:
+                mem = base_mem
+            if ncpu is None:
+                if base_cpu is not None:
+                    ncpu = base_cpu
+            batch_options = process_batch_options(mem, ncpu, pbs_mail_user)
+            print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
+
+            # define the logfile
+            logfile = re.sub(r"\.out", ".log", outfile)
+            logfile = os.path.join(work_dir, logfile)
+
+            # make a small wrapper script that will run the actual command
+            # can't embed if; then statements in makeflow script
+            wrapper_script = re.sub(r"\.out", ".sh", outfile)
+            wrapper_script = "wrapper_{}".format(wrapper_script)
+            wrapper_script = os.path.join(work_dir, wrapper_script)
+            with open(wrapper_script, "w") as f2:
+                print("#!/bin/bash", file=f2)
+                if source_script is not None:
+                    print("source {}".format(source_script), file=f2)
+                if conda_env is not None:
+                    print("conda activate {}".format(conda_env), file=f2)
+                print("date", file=f2)
+                print("cd {}".format(parent_dir), file=f2)
+                if timeout is not None:
+                    print("timeout {0} {1} {2}".format(timeout, command, args), file=f2)
+                else:
+                    print("{0} {1}".format(command, args), file=f2)
+                print("if [ $? -eq 0 ]; then", file=f2)
+                print("  cd {}".format(work_dir), file=f2)
+                print("  touch {}".format(outfile), file=f2)
+                print("else", file=f2)
+                print("  mv {0} {1}".format(logfile, logfile + ".error"), file=f2)
+                print("fi", file=f2)
+                print("date", file=f2)
+            # make file executable
+            os.chmod(wrapper_script, 0o755)
+
+            # first line lists target file to make (dummy output file), and requirements
+            # second line is "build rule", which runs the shell script and makes the output file
+            infiles = " ".join(infiles)
+            line1 = "{0}: {1}".format(outfile, infiles)
+            line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
+            print(line1, file=f)
+            print(line2, file=f)
+
+            # save outfile as prereq for first step
+            outfiles_prev = [outfile]
+
+        # main loop over actual data files
         for obsid in obsids:
             # get parent directory
             abspath = os.path.abspath(obsid)
@@ -493,6 +578,8 @@ def build_analysis_makeflow_from_config(
 
             # loop over actions for this obsid
             for ia, action in enumerate(workflow):
+                if action == "SETUP" or action == "TEARDOWN":
+                    continue
                 # start list of input files
                 infiles = []
 
@@ -639,6 +726,84 @@ def build_analysis_makeflow_from_config(
 
                 # save previous outfiles for next time
                 outfiles_prev = outfiles
+
+        # if we have a teardown step, add it here
+        if "TEARDOWN" in workflow:
+            # assume that we wait for all other steps of the pipeline to finish
+            infiles = []
+            command = "do_TEARDOWN.sh".format(action)
+            command = os.path.join(path_to_do_scripts, command)
+            infiles.append(command)
+
+            # add the final outfiles for the last per-file step for all obsids
+            prereq = workflow[-2]
+            for obsid in obsids:
+                abspath = os.path.abspath(obsid)
+                parent_dir = os.path.dirname(abspath)
+                filename = os.path.basename(abspath)
+                outfiles = make_outfile_name(filename, prereq, pol_list)
+                for of in outfiles:
+                    infiles.append(of)
+
+            args = get_config_entry(config, "TEARDOWN", "args", required=False)
+            if args is not None:
+                if not isinstance(args, list):
+                    args = [args]
+                args = " ".join(list(map(str, args)))
+            else:
+                args = ""
+            outfile = "teardown.out"
+            mem = get_config_entry(config, action, "mem", required=False)
+            ncpu = get_config_entry(config, action, "ncpu", required=False)
+            if mem is None:
+                mem = base_mem
+            if ncpu is None:
+                if base_cpu is not None:
+                    ncpu = base_cpu
+            batch_options = process_batch_options(mem, ncpu, pbs_mail_user)
+            print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
+
+            # define the logfile
+            logfile = re.sub(r"\.out", ".log", outfile)
+            logfile = os.path.join(work_dir, logfile)
+
+            # make a small wrapper script that will run the actual command
+            # can't embed if; then statements in makeflow script
+            wrapper_script = re.sub(r"\.out", ".sh", outfile)
+            wrapper_script = "wrapper_{}".format(wrapper_script)
+            wrapper_script = os.path.join(work_dir, wrapper_script)
+            with open(wrapper_script, "w") as f2:
+                print("#!/bin/bash", file=f2)
+                if source_script is not None:
+                    print("source {}".format(source_script), file=f2)
+                if conda_env is not None:
+                    print("conda activate {}".format(conda_env), file=f2)
+                print("date", file=f2)
+                print("cd {}".format(parent_dir), file=f2)
+                if timeout is not None:
+                    print(
+                        "timeout {0} {1} {2}".format(timeout, command, prepped_args),
+                        file=f2,
+                    )
+                else:
+                    print("{0} {1}".format(command, prepped_args), file=f2)
+                print("if [ $? -eq 0 ]; then", file=f2)
+                print("  cd {}".format(work_dir), file=f2)
+                print("  touch {}".format(outfile), file=f2)
+                print("else", file=f2)
+                print("  mv {0} {1}".format(logfile, logfile + ".error"), file=f2)
+                print("fi", file=f2)
+                print("date", file=f2)
+            # make file executable
+            os.chmod(wrapper_script, 0o755)
+
+            # first line lists target file to make (dummy output file), and requirements
+            # second line is "build rule", which runs the shell script and makes the output file
+            infiles = " ".join(infiles)
+            line1 = "{0}: {1}".format(outfile, infiles)
+            line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
+            print(line1, file=f)
+            print(line2, file=f)
 
     return
 
