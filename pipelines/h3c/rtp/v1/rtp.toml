@@ -1,0 +1,14 @@
+[Options]
+makeflow_type = "analysis"
+path_to_do_scripts = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/task_scripts"
+source_script = "~/.bashrc"
+conda_env = "RTP"
+
+[WorkFlow]
+actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "TEARDOWN"]
+
+[EXTRACT_HH]
+args = ["{basename}"]
+
+[UPLOAD_HH]
+args = ["{basename}"]
