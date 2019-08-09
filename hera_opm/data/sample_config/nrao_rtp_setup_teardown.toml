@@ -17,6 +17,9 @@ actions = ["SETUP", "ANT_METRICS", "FIRSTCAL", "FIRSTCAL_METRICS",
            "OMNICAL", "OMNICAL_METRICS", "OMNI_APPLY", "XRFI",
            "XRFI_APPLY", "TEARDOWN"]
 
+[SETUP]
+args = "foo"
+
 [ANT_METRICS]
 args = "{basename}"
 
@@ -71,3 +74,6 @@ args = "{basename}"
 
 [CLEAN_XRFI]
 args = "{basename}"
+
+[TEARDOWN]
+args = "bar"

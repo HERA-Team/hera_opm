@@ -13,8 +13,8 @@ timeout = "1m"
 pbs_mail_user = "heramgr@nrao.edu"
 
 [WorkFlow]
-actions = ["ANT_METRICS", "FIRSTCAL", "FIRSTCAL_METRICS", "OMNICAL",
-           "OMNICAL_METRICS", "OMNI_APPLY", "XRFI", "XRFI_APPLY"]
+actions = ["SETUP", "ANT_METRICS", "FIRSTCAL", "FIRSTCAL_METRICS", "OMNICAL",
+           "OMNICAL_METRICS", "OMNI_APPLY", "XRFI", "XRFI_APPLY", "TEARDOWN"]
 
 [ANT_METRICS]
 args = "{basename}"
