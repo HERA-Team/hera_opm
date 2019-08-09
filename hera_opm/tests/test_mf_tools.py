@@ -4,11 +4,12 @@ import os
 import shutil
 import gzip
 import glob
-from ..data import DATA_PATH
-from .. import mf_tools as mt
 import six
 import toml
 
+from . import BAD_CONFIG_PATH
+from ..data import DATA_PATH
+from .. import mf_tools as mt
 
 # define a pytest marker for skipping lstbin tests
 try:
@@ -43,8 +44,15 @@ def config_options():
     config_dict["config_file_lstbin_options"] = os.path.join(
         DATA_PATH, "sample_config", "lstbin_options.toml"
     )
-    config_dict["bad_config_file"] = os.path.join(
-        DATA_PATH, "sample_config", "bad_example.toml"
+    config_dict["config_file_setup_teardown"] = os.path.join(
+        DATA_PATH, "sample_config", "nrao_rtp_setup_teardown.toml"
+    )
+    config_dict["bad_config_file"] = os.path.join(BAD_CONFIG_PATH, "bad_example.toml")
+    config_dict["bad_setup_config_file"] = os.path.join(
+        BAD_CONFIG_PATH, "bad_setup_example.toml"
+    )
+    config_dict["bad_teardown_config_file"] = os.path.join(
+        BAD_CONFIG_PATH, "bad_teardown_example.toml"
     )
     config_dict["obsids_pol"] = (
         "zen.2457698.40355.xx.HH.uvcA",
@@ -485,6 +493,93 @@ def test_build_analysis_makeflow_from_config_nopol(config_options):
     # clean up after ourselves
     os.remove(outfile)
     mt.clean_wrapper_scripts(work_dir)
+
+    return
+
+
+def test_build_analysis_makeflow_from_config_setup_teardown(config_options):
+    # define args
+    obsids = config_options["obsids_pol"][:1]
+    config_file = config_options["config_file_setup_teardown"]
+    work_dir = os.path.join(DATA_PATH, "test_output")
+
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+    mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+
+    # make sure the output files we expected appeared
+    assert os.path.exists(outfile)
+
+    # also make sure the wrapper scripts were made
+    actions = [
+        "ANT_METRICS",
+        "FIRSTCAL",
+        "FIRSTCAL_METRICS",
+        "OMNICAL",
+        "OMNICAL_METRICS",
+        "OMNI_APPLY",
+        "XRFI",
+        "XRFI_APPLY",
+    ]
+    # make sure there is just a single setup and teardown scriot
+    wrapper_fn_setup = os.path.join(work_dir, "wrapper_setup.sh")
+    wrapper_fn_teardown = os.path.join(work_dir, "wrapper_teardown.sh")
+    assert os.path.exists(wrapper_fn_setup)
+    assert os.path.exists(wrapper_fn_teardown)
+    pols = config_options["pols"]
+    for obsid in obsids:
+        for action in actions:
+            for pol in pols:
+                wrapper_fn = "wrapper_" + obsid + "." + action + "." + pol + ".sh"
+                wrapper_fn = os.path.join(work_dir, wrapper_fn)
+                print("wrapper_fn: ", wrapper_fn)
+                assert os.path.exists(wrapper_fn)
+
+                # check that the wrapper scripts have the right lines in them
+                with open(wrapper_fn) as infile:
+                    lines = infile.readlines()
+                assert lines[0].strip() == "#!/bin/bash"
+                assert lines[1].strip() == "source ~/.bashrc"
+                assert lines[2].strip() == "conda activate hera"
+                assert lines[3].strip() == "date"
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    # also test providing the name of the output file
+    mf_output = "output.mf"
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+    mt.build_analysis_makeflow_from_config(
+        obsids, config_file, mf_name=outfile, work_dir=work_dir
+    )
+
+    assert os.path.exists(outfile)
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    return
+
+
+def test_setup_teardown_errors(config_options):
+    # define config to load
+    config_file = config_options["bad_setup_config_file"]
+    obsids = config_options["obsids_pol"][:1]
+
+    # test bad setup location
+    with pytest.raises(ValueError):
+        mt.build_analysis_makeflow_from_config(obsids, config_file)
+
+    # test bad teardown location
+    config_file = config_options["bad_teardown_config_file"]
+    with pytest.raises(ValueError):
+        mt.build_analysis_makeflow_from_config(obsids, config_file)
 
     return
 
