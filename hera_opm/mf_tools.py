@@ -94,7 +94,7 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
     entries -- a list of entries contained in the config file. If item is not present, and
         required is False, an empty list is returned.
     """
-    if item in config[header]:
+    try:
         entries = config[header][item]
         if interpolate:
             # if we have a list, interpolate for each element
@@ -104,7 +104,7 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
             else:
                 entries = _interpolate_config(config, entries)
         return entries
-    else:
+    except KeyError:
         if not required:
             return None
         else:
@@ -505,8 +505,13 @@ def build_analysis_makeflow_from_config(
 
         # if we have a setup step, add it here
         if "SETUP" in workflow:
+            # set parent_dir to correspond to the directory of the first obsid
+            abspath = os.path.abspath(obsids[0])
+            parent_dir = os.path.dirname(abspath)
+            filename = os.path.basename(abspath)
+
             infiles = []
-            command = "do_SETUP.sh".format(action)
+            command = "do_SETUP.sh"
             command = os.path.join(path_to_do_scripts, command)
             infiles.append(command)
             args = get_config_entry(config, "SETUP", "args", required=False)
@@ -517,8 +522,8 @@ def build_analysis_makeflow_from_config(
             else:
                 args = ""
             outfile = "setup.out"
-            mem = get_config_entry(config, action, "mem", required=False)
-            ncpu = get_config_entry(config, action, "ncpu", required=False)
+            mem = get_config_entry(config, "SETUP", "mem", required=False)
+            ncpu = get_config_entry(config, "SETUP", "ncpu", required=False)
             if mem is None:
                 mem = base_mem
             if ncpu is None:
@@ -729,9 +734,14 @@ def build_analysis_makeflow_from_config(
 
         # if we have a teardown step, add it here
         if "TEARDOWN" in workflow:
+            # set parent_dir to correspond to the directory of the last obsid
+            abspath = os.path.abspath(obsids[-1])
+            parent_dir = os.path.dirname(abspath)
+            filename = os.path.basename(abspath)
+
             # assume that we wait for all other steps of the pipeline to finish
             infiles = []
-            command = "do_TEARDOWN.sh".format(action)
+            command = "do_TEARDOWN.sh"
             command = os.path.join(path_to_do_scripts, command)
             infiles.append(command)
 
@@ -753,8 +763,8 @@ def build_analysis_makeflow_from_config(
             else:
                 args = ""
             outfile = "teardown.out"
-            mem = get_config_entry(config, action, "mem", required=False)
-            ncpu = get_config_entry(config, action, "ncpu", required=False)
+            mem = get_config_entry(config, "TEARDOWN", "mem", required=False)
+            ncpu = get_config_entry(config, "TEARDOWN", "ncpu", required=False)
             if mem is None:
                 mem = base_mem
             if ncpu is None:
