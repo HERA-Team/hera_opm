@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018 The HERA Collaboration
 # Licensed under the 2-clause BSD license
+"""Module for generating version info."""
 
 from __future__ import print_function, division, absolute_import
 
@@ -13,12 +14,38 @@ PY2 = sys.version_info < (3, 0)
 
 
 def construct_version_info():
+    """Make version info using git.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    version_info : dict
+        Dictionary containing version information as key-value pairs.
+
+    """
     hera_opm_dir = os.path.dirname(os.path.realpath(__file__))
 
     def get_git_output(args, capture_stderr=False):
-        """Get output from Git, ensuring that it is of the ``str`` type,
-        not bytes."""
+        """Get output from Git.
 
+        This function ensures that it is of the ``str`` type, not bytes.
+
+        Parameters
+        ----------
+        args : list of str
+            A list of arguments to be passed to `git`.
+        capture_stderr : bool
+            Whether to capture standard error as part of the call to git.
+
+        Returns
+        -------
+        data : str
+            The output of the git command as `str` type.
+
+        """
         argv = ["git", "-C", hera_opm_dir] + args
 
         if capture_stderr:
@@ -100,6 +127,17 @@ if git_hash is not "":
 
 
 def main():  # pragma: no cover
+    """Print version information then exit.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    """
     print("Version = {0}".format(version))
     print("git origin = {0}".format(git_origin))
     print("git branch = {0}".format(git_branch))

@@ -2,6 +2,7 @@
 # -*- mode: python; coding: utf-8 -*-
 # Copyright (c) 2018 The HERA Collaboration
 # Licensed under the 2-clause BSD License
+"""Script for generating a makeflow from a config and list of files."""
 
 from __future__ import print_function, division, absolute_import
 import os
