@@ -1,3 +1,4 @@
+"""Script for installing hera_opm."""
 import json
 import os
 import sys
@@ -19,8 +20,21 @@ with open(os.path.join("hera_opm", "GIT_INFO"), "w") as outfile:
 
 
 def package_files(package_dir, subdirectory):
-    # walk the input package_dir/subdirectory
-    # return a package_data list
+    """Walk the input package_dir/subdirectory to generate a package_data list.
+
+    Parameters
+    ----------
+    package_dir : str
+        Path to the package directory.
+    subdirectory : str
+        The subdirectory to investigate.
+
+    Returns
+    -------
+    paths : list of str
+        A list containing all of the relevant package_data.
+    
+    """
     paths = []
     directory = os.path.join(package_dir, subdirectory)
     for (path, directories, filenames) in os.walk(directory):

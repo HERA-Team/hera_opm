@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018 The HERA Collaboration
 # Licensed under the 2-clause BSD Licnse
-
-"""Script for checking the status of a HERA makeflow pipeline.
-"""
+"""Script for checking the status of a HERA makeflow pipeline."""
 
 from __future__ import print_function, division, absolute_import
 
@@ -65,13 +63,16 @@ except BaseException:
 def elapsed_time(log_lines):
     """Take a list of lines in a log file and calculates the elapsed time in minutes.
 
-    Arguments:
-        log_lines: list of lines in a log file, like that produced by [file].readlines()
+    Parameters
+    ----------
+    log_lines : list of str
+        List of lines in a log file, like that produced by [file].readlines().
 
-    Returns:
-        runtime: runtime in minutes.
-            If the file has a start time but no end time, returns -1
-            If the file has no start time, returns -2
+    Returns
+    -------
+    runtime : float or int
+        The runtime in minutes. If the file has a start time but no end time,
+        returns -1. If the file has no start time, returns -2.
     """
     try:
         start = dateparser.parse(log_lines[0], ignoretz=True)
@@ -93,15 +94,24 @@ def elapsed_time(log_lines):
 def inspect_log_files(log_files, out_files):
     """Look at log files, compute the average non-zero runtime, and print example errors.
 
-    Arguments:
-        log_files: list of .log files
-        out_files: list of .out files
+    Parameters
+    ----------
+    log_files : list of str
+        A list of the .log files.
+    out_files : list of str
+        A list of the .out files.
 
-    Returns:
-        average_runtime: average runtime of all finished jobs that took longer than a second, in minutes
-        nRunning: number of jobs believed to be running (start time with no stop time)
-        nErrored: number of jobs believed to have been terminated for errors ()
-        nTimedOut: number of jobs that terminated within 1% of the wall-time specified for timeouts
+    Returns
+    -------
+    average_runtime : float
+        The average runtime of all finished jobs that took longer than a second, in minutes.
+    nRunning : int
+        The number of jobs believed to be running (start time with no stop time).
+    nErrored : int
+        The number of jobs believed to have been terminated for errors ().
+    nTimedOut : int
+        The number of jobs that terminated within 1% of the wall-time specified for timeouts.
+
     """
     error_warned = False
     runtimes = []
@@ -155,7 +165,19 @@ def inspect_log_files(log_files, out_files):
 
 
 def filter_errors(log_files):
-    """If there are both error and log files, pick the newer one."""
+    """Choose the newer of the log or error files.
+
+    Parameters
+    ----------
+    log_files : list of str
+        The list of log files to check.
+
+    Returns
+    -------
+    newest_log_files : list of str
+        The list of files containing the newest entry for each file.
+
+    """
     newest_log_files = []
     unique_bases = np.unique([f.replace(".log.error", ".log") for f in log_files])
     for log_file in unique_bases:

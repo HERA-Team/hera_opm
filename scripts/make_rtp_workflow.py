@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Daemon script for automatically generating a makeflow for new raw data."""
+
 from __future__ import print_function, division, absolute_import
 
 import os

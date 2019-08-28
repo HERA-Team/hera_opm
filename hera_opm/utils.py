@@ -1,6 +1,7 @@
 # -*- mode: python; coding: utf-8 -*-
 # Copyright (c) 2018 The HERA Collaboration
 # Licensed under the 2-clause BSD License
+"""Module for generating ArgumentParsers."""
 
 from __future__ import print_function, division, absolute_import
 
