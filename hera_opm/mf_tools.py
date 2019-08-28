@@ -149,6 +149,7 @@ def make_outfile_name(obsid, action, pol_list=[]):
         corresponding to `obsid`. For multiple polarizations, contains one
         string per polarization. For one or no polarizations, just a list with
         a single entry is returned.
+
     """
     outfiles = []
     if len(pol_list) > 1 and pol_list[0] is not None:
@@ -191,6 +192,7 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
         Raised if the specified obsid is not present in the full list, if
         `n_neighbors` cannot be parsed as an int, or if `n_neighbors` is
         not positive.
+
     """
     outfiles = []
 
@@ -244,11 +246,7 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
 
 
 def process_batch_options(
-        mem,
-        ncpu=None,
-        mail_user="youremail@example.org",
-        queue="hera",
-        batch_system="pbs"
+    mem, ncpu=None, mail_user="youremail@example.org", queue="hera", batch_system="pbs"
 ):
     """Form a series of batch options to be passed to makeflow.
 
@@ -277,6 +275,7 @@ def process_batch_options(
     ------
     ValueError
         Raised if batch_system is not a valid option.
+
     """
     if batch_system is None:
         batch_system = "pbs"
@@ -297,8 +296,10 @@ def process_batch_options(
         if queue is not None:
             batch_options += " -p {}".format(queue)
     else:
-        raise ValueError("Unrecognized batch system {}; must be one of: "
-                         "pbs, slurm".format(batch_system))
+        raise ValueError(
+            "Unrecognized batch system {}; must be one of: "
+            "pbs, slurm".format(batch_system)
+        )
     return batch_options
 
 
@@ -306,17 +307,23 @@ def prep_args(args, obsid, pol=None, obsids=None):
     """
     Substitute the polarization string in a filename/obsid with the specified one.
 
-    Args:
-    ====================
-    args (str) -- string containing the arguments where polarization and mini-language
-        is to be substituted.
-    obsid (str) -- string of filename/obsid.
-    pol (str) -- polarization to substitute for the one found in obsid.
-    obsids -- full list of obsids; optional, but required when time-adjacent neighbors are desired.
+    Parameters
+    ----------
+    args : str
+        String containing the arguments where polarization and mini-language is
+        to be substituted.
+    obsid : str
+        Filename/obsid to be substituted.
+    pol : str, optional
+        Polarization to substitute for the one found in obsid.
+    obsids : list of str, optional
+        Full list of obsids. Required when time-adjacent neighbors are desired.
 
-    Returns:
-    ====================
-    output (str) -- `args` string with mini-language and polarization substitutions.
+    Returns
+    -------
+    output : str
+        `args` string with mini-language and polarization substitutions.
+
     """
     if pol is not None:
         # replace pol if present
@@ -386,28 +393,38 @@ def prep_args(args, obsid, pol=None, obsids=None):
 def build_makeflow_from_config(
     obsids, config_file, mf_name=None, work_dir=None, **kwargs
 ):
-    """
-    Function for constructing a makeflow from a config file.
+    """Construct a makeflow from a config file.
 
-    Args:
-    ====================
-    obsids (str) -- list of paths to obsids/filenames for processing
-    config_file (str) -- path to configuration file (str)
-    mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
-        specified.
-    work_dir (str) -- path to the "work directory" where all of the wrapper scripts and log
-        files will be made. Defaults to the current directory.
+    Parameters
+    ----------
+    obsids : list of str
+        List of paths to obsids/filenames for processing.
+    config_file : str
+        Full path to configuration file.
+    mf_name : str
+        The name of the makeflow file. Defaults to "<config_file_basename>.mf"
+        if not specified.
+    work_dir : str
+        The full path to the "work directory" where all of the wrapper scripts
+        and log files will be made. Defaults to the current directory.
 
-    Returns:
-    ====================
+    Returns
+    -------
     None
 
 
-    Notes:
-    ====================
-    This function will read the "makeflow_type" entry under the "[Options]" header to
-    determine if the config file specifies an "analysis" type or "lstbin" type, and
-    call the appropriate funciton below.
+    Raises
+    ------
+    ValueError
+        Raised if the config file cannot be read, or if "makeflow_type" in the
+        config file is not a valid choice ("analysis" or "lstbin").
+
+    Notes
+    -----
+    This function will read the "makeflow_type" entry under the "[Options]"
+    header to determine if the config file specifies an "analysis" type or
+    "lstbin" type, and call the appropriate funciton below.
+
     """
     if isinstance(config_file, str):
         # read in config file
@@ -437,26 +454,39 @@ def build_makeflow_from_config(
 def build_analysis_makeflow_from_config(
     obsids, config_file, mf_name=None, work_dir=None
 ):
-    """
-    Construct a makeflow file from a config file.
+    """Construct a makeflow file from a config file.
 
-    Args:
-    ====================
-    obsids (str) -- list of paths to obsids/filenames for processing
-    config_file (str) -- path to configuration file
-    mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
+    Parameters
+    ----------
+    obsids : list of str
+        A list of paths to obsids/filenames for processing.
+    config_file : str
+        The full path to configuration file.
+    mf_name : str
+        The name of makeflow file. Defaults to "<config_file_basename>.mf" if not
         specified.
-    work_dir (str) -- path to the "work directory" where all of the wrapper scripts and log
+    work_dir : str
+        The full path to the "work directory" where all of the wrapper scripts and log
         files will be made. Defaults to the current directory.
 
-    Returns:
-    ====================
+    Returns
+    -------
     None
 
+    Raises
+    ------
+    AssertionError
+        This is raised if a polarization list is specified, and no polarization
+        is detected for the input files, or if not all input obsids have the
+        same polarization.
+    ValueError
+        This is raised if the SETUP entry in the workflow is specified, but is
+        not the first entry. Similarly, it is raised if the TEARDOWN is in the
+        workflow, but not the last entry. It is also raised if a prereq for a
+        step is specified that is not in the workflow.
 
-    Notes:
-    ====================
-
+    Notes
+    -----
     Config file structure:
 
     [STAGENAME]
@@ -469,8 +499,8 @@ def build_analysis_makeflow_from_config(
     Mini-language for replacement (example):
     "{basename}" = "zen.2458000.12345.uv"
 
-    "{prev_basename}" and "{next_basename}" are previous and subsequent files adjacent to
-    "{basename}", useful for specifying prereqs in time
+    "{prev_basename}" and "{next_basename}" are previous and subsequent files
+    adjacent to "{basename}", useful for specifying prereqs in time
 
     """
     config = toml.load(config_file)
@@ -524,7 +554,6 @@ def build_analysis_makeflow_from_config(
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
     source_script = get_config_entry(config, "Options", "source_script", required=False)
     mail_user = get_config_entry(config, "Options", "mail_user", required=False)
-    
     batch_system = get_config_entry(config, "Options", "batch_system", required=False)
     timeout = get_config_entry(config, "Options", "timeout", required=False)
     if timeout is not None:
@@ -565,6 +594,11 @@ def build_analysis_makeflow_from_config(
         # add resource information
         base_mem = get_config_entry(config, "Options", "base_mem", required=True)
         base_cpu = get_config_entry(config, "Options", "base_cpu", required=False)
+        default_queue = get_config_entry(
+            config, "Options", "default_queue", required=False
+        )
+        if default_queue is None:
+            default_queue = "hera"
 
         # if we have a setup step, add it here
         if "SETUP" in workflow:
@@ -595,7 +629,11 @@ def build_analysis_makeflow_from_config(
             if ncpu is None:
                 if base_cpu is not None:
                     ncpu = base_cpu
-            batch_options = process_batch_options(mem, ncpu, mail_user, queue, batch_system)
+            if queue is None:
+                queue = default_queue
+            batch_options = process_batch_options(
+                mem, ncpu, mail_user, queue, batch_system
+            )
             print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
             # define the logfile
@@ -697,13 +735,17 @@ def build_analysis_makeflow_from_config(
                 # get processing options
                 mem = get_config_entry(config, action, "mem", required=False)
                 ncpu = get_config_entry(config, action, "ncpu", required=False)
+                queue = get_config_entry(config, action, "queue", required=False)
                 if mem is None:
                     mem = base_mem
                 if ncpu is None:
                     if base_cpu is not None:
                         ncpu = base_cpu
-
-                batch_options = process_batch_options(mem, ncpu, mail_user, queue, batch_system)
+                if queue is None:
+                    queue = default_queue
+                batch_options = process_batch_options(
+                    mem, ncpu, mail_user, queue, batch_system
+                )
                 print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
                 # make rules
@@ -831,12 +873,17 @@ def build_analysis_makeflow_from_config(
             outfile = "teardown.out"
             mem = get_config_entry(config, "TEARDOWN", "mem", required=False)
             ncpu = get_config_entry(config, "TEARDOWN", "ncpu", required=False)
+            queue = get_config_entry(config, "TEARDOWN", "queue", required=False)
             if mem is None:
                 mem = base_mem
             if ncpu is None:
                 if base_cpu is not None:
                     ncpu = base_cpu
-            batch_options = process_batch_options(mem, ncpu, mail_user)
+            if queue is None:
+                queue = default_queue
+            batch_options = process_batch_options(
+                mem, ncpu, mail_user, queue, batch_system
+            )
             print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
             # define the logfile
@@ -887,25 +934,28 @@ def build_analysis_makeflow_from_config(
 def build_lstbin_makeflow_from_config(
     config_file, mf_name=None, work_dir=None, **kwargs
 ):
-    """
-    Function for constructing an LST-binning makeflow file from input data and a config_file.
+    """Construct an LST-binning makeflow file from input data and a config_file.
 
-    Arguments:
-    ====================
-    config_file (str) -- path to config file containing options
-    mf_name (str) -- name of makeflow file. Defaults to "<config_file_basename>.mf" if not
+    Parameters
+    ----------
+    config_file : str
+        Full path to config file containing options.
+    mf_name : str
+        The name of makeflow file. Defaults to "<config_file_basename>.mf" if not
         specified.
 
-    Returns:
-    ====================
+    Returns
+    -------
     None
 
 
-    Notes:
-    ====================
-    The major difference between this function and the one above is the use of the `config_lst_bin_files`
-    function from hera_cal, which is used to determine the number of output files, which are parallelized
-    over in the makeflow.
+    Notes
+    -----
+    The major difference between this function and the one above is the use of
+    the `config_lst_bin_files` function from hera_cal, which is used to
+    determine the number of output files, which are parallelized over in the
+    makeflow.
+
     """
     # import hera_cal
     from hera_cal import lstbin
@@ -974,10 +1024,15 @@ def build_lstbin_makeflow_from_config(
         # add resource information
         base_mem = get_config_entry(config, "Options", "base_mem", required=True)
         base_cpu = get_config_entry(config, "Options", "base_cpu", required=False)
-        mail_user = get_config_entry(
-            config, "Options", "mail_user", required=False
+        mail_user = get_config_entry(config, "Options", "mail_user", required=False)
+        default_queue = get_config_entry(
+            config, "Options", "default_queue", required=False
         )
-        batch_options = process_batch_options(base_mem, base_cpu, mail_user, batch_system)
+        if default_queue is None:
+            default_queue = "hera"
+        batch_options = process_batch_options(
+            base_mem, base_cpu, mail_user, default_queue, batch_system
+        )
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
         # loop over polarizations
@@ -1112,20 +1167,21 @@ def build_lstbin_makeflow_from_config(
 
 
 def clean_wrapper_scripts(work_dir):
-    """
-    Clean up wrapper scripts from work directory.
+    """Clean up wrapper scripts from work directory.
 
-    This script removes any files in the specified directory that begin with "wrapper_",
-    which is how the scripts are named in the 'build_makeflow_from_config' function above.
-    It also removes files that end in ".wrapper", which is how makeflow labels wrapper
-    scripts for batch processing.
+    This script removes any files in the specified directory that begin with
+    "wrapper_", which is how the scripts are named in the
+    'build_makeflow_from_config' function above.  It also removes files that end
+    in ".wrapper", which is how makeflow labels wrapper scripts for batch
+    processing.
 
-    Arguments:
-    ====================
-    work_dir (str) -- the full path to the work directory
+    Parameters
+    ----------
+    work_dir : str
+        The full path to the work directory.
 
-    Returns:
-    ====================
+    Returns
+    -------
     None
 
     """
@@ -1144,19 +1200,19 @@ def clean_wrapper_scripts(work_dir):
 
 
 def clean_output_files(work_dir):
-    """
-    Clean up output files from work directory.
+    """Clean up output files from work directory.
 
-    The pipeline process uses empty files ending in '.out' to mark task completion.
-    This script removes such files, since they are unnecessary once the pipeline is
-    completed.
+    The pipeline process uses empty files ending in '.out' to mark task
+    completion. This script removes such files, since they are unnecessary once
+    the pipeline is completed.
 
-    Arguments:
-    ====================
-    work_dir (str) -- the full path to the work directory
+    Parameters
+    ----------
+    work_dir : str
+        The full path to the work directory.
 
-    Returns:
-    ====================
+    Returns
+    -------
     None
 
     """
@@ -1175,23 +1231,29 @@ def clean_output_files(work_dir):
 def consolidate_logs(
     work_dir, output_fn, overwrite=False, remove_original=True, zip_file=False
 ):
-    """
-    Combine logs from a makeflow run into a single file.
+    """Combine logs from a makeflow run into a single file.
 
-    This function will combine the log files from a makeflow execution into a single file.
-    It also provides the option of zipping the resulting file, to save space.
+    This function will combine the log files from a makeflow execution into a
+    single file.  It also provides the option of zipping the resulting file, to
+    save space.
 
-    Arguments:
-    ====================
-    work_dir (str) -- the full path to the work directory
-    output_fn (str) -- the full path to the desired output file
-    overwrite (bool) -- option to overwrite the named output_fn if it exists. Defaults to False.
-    remove_original (bool) -- option to remove original individual logs. Defaults to True.
-    zip_file (bool) -- option to zip the resulting file. Defaults to False.
+    Parameters
+    ----------
+    work_dir : str
+        The full path to the work directory.
+    output_fn : str
+        The full path to the desired output file.
+    overwrite : bool
+        Controls wheter to overwrite the named `output_fn` if it exists.
+    remove_original : bool
+        Controls whether to remove original individual logs.
+    zip_file : bool
+        Controls whether to zip the resulting file.
 
-    Returns:
-    ====================
+    Returns
+    -------
     None
+
     """
     # Check to see if output file already exists.
     # Note we need to check if this file exists, even when zip_file=True, since we use the standard

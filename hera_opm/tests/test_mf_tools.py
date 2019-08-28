@@ -97,7 +97,7 @@ def test_get_config_entry(config_options):
     assert mt.get_config_entry(config, header, item, required=False) is None
 
     # raise an error for a nonexistent, required entry
-    with pytest.raises(AttributeError):
+    with pytest.raises(AssertionError):
         mt.get_config_entry(config, header, item)
     return
 
@@ -385,6 +385,7 @@ def test_build_analysis_makeflow_from_config_errors(config_options):
     return
 
 
+@pytest.mark.filterwarnings("ignore:A value for the")
 def test_build_analysis_makeflow_from_config_options(config_options):
     # define args
     obsids = config_options["obsids_pol"][:1]
@@ -657,6 +658,7 @@ def test_build_lstbin_makeflow_from_config(config_options):
 
 @hc_skip
 @pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
+@pytest.mark.filterwarnings("ignore: A value for the")
 def test_build_lstbin_makeflow_from_config_options(config_options):
     # define load in config
     config_file = config_options["config_file_lstbin_options"]
@@ -725,6 +727,7 @@ def test_build_makeflow_from_config(config_options):
 
 @hc_skip
 @pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
+@pytest.mark.filterwarnings("ignore: A value for the")
 def test_build_makeflow_from_config_lstbin_options(config_options):
     # test lstbin version with options
     obsids = config_options["obsids_pol"][:1]
