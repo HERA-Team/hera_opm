@@ -22,41 +22,45 @@ def get_jd(filename):
     """
     Get the JD from a data file name.
 
-    Args:
-    ====================
-    filename (str) -- file name; assumed to follow standard convention where name is
-        `zen.xxxxxxx.xxxxx.uv` (potentially with polarization and subarray information mixed in).
+    Parameters
+    ----------
+    filename : str
+        File name. Assumed to follow standard convention where name is
+        `zen.xxxxxxx.xxxxx.uv` (potentially with polarization and subarray
+        information mixed in).
 
-    Returns:
-    ====================
-    jd (str) -- the integer JD (fractional part truncated) as a string
+    Returns
+    -------
+    str
+        The integer JD (fractional part truncated).
+
     """
     m = re.match(r"zen\.([0-9]{7})\.[0-9]{5}\.", filename)
     return m.groups()[0]
 
 
 def _interpolate_config(config, entry):
-    """
-    Interpolate entries in the configuration file.
+    """Interpolate entries in the configuration file.
 
-    Args:
-    ====================
-    config -- a dict of the processed config file
-    entry -- the raw entry in the config file to be processed
+    Parameters
+    ----------
+    config : dict
+        The entries of the processed config file.
+    entry : str
+        The raw entry in the config file to be processed.
 
-    Returns:
-    ====================
-    entry -- a config entry that has been interpolated
+    Returns
+    -------
+    entry : str
+        A config entry that has been interpolated.
 
-    Notes:
-    ====================
+    Notes
+    -----
     The interpolation will be invoked for strings matching the pattern:
-        ${Header:Key}
-    This will match an entry in the config file of the form:
-        [Header]
-        Key = value
-    The entry "value" will be returned. If "Key" is not found in the parsed
-    config file, an error is raised.
+    ${Header:Key} This will match an entry in the config file of the form:
+    [Header] Key = value The entry "value" will be returned. If "Key" is not
+    found in the parsed config file, an error is raised.
+
     """
     m = re.match(r"\$\{(.+)\}", str(entry))
     if m is not None:
@@ -74,25 +78,36 @@ def _interpolate_config(config, entry):
 
 
 def get_config_entry(config, header, item, required=True, interpolate=True):
-    """
-    Helper function to extract specific entry from config file.
+    """Extract a specific entry from config file.
 
-    Args:
-    ====================
-    config -- a dict of a config file that has already been processed
-    header (str) -- the entry in a config file to get the item of, e.g., 'OMNICAL'
-    item (str) -- the attribute to retreive, e.g., 'prereqs'
-    required (bool) -- whether the attribute is required or not. If required and not present,
-        an error is raised. Default is True
-    interpolate (bool) -- whether to interpolate the entry with an option found elsewhere in
-        the config file. Interpolation is triggered by a string with the template "${header:item}".
-        If the corresponding key is not defined in that part of the config file, an error is raised.
-        Default is True.
+    Parameters
+    ----------
+    config : dict
+        Entries of a config file that has already been processed.
+    header : str
+        The entry in a config file to get the item of, e.g., 'OMNICAL'.
+    item : str
+        The attribute to retreive, e.g., 'prereqs'.
+    required : bool
+        Whether the attribute is required or not. If required and not present,
+        an error is raised. Default is True.
+    interpolate : bool
+        Whether to interpolate the entry with an option found elsewhere in the
+        config file. Interpolation is triggered by a string with the template
+        "${header:item}". If the corresponding key is not defined in that part
+        of the config file, an error is raised. Default is True.
 
-    Returns:
-    ====================
-    entries -- a list of entries contained in the config file. If item is not present, and
+    Returns
+    -------
+    entries : list of str
+        List of entries contained in the config file. If item is not present, and
         required is False, an empty list is returned.
+
+    Raises
+    ------
+    AssertionError
+        This error is raised if the specified entry is required but not present.
+
     """
     try:
         entries = config[header][item]
@@ -108,29 +123,32 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
         if not required:
             return None
         else:
-            raise AttributeError(
+            raise AssertionError(
                 'Error processing config file: item "{0}" under header "{1}" is '
                 "required, but not specified".format(item, header)
             )
 
 
 def make_outfile_name(obsid, action, pol_list=[]):
-    """
-    Make a list of unique output files names for each stage and polarization.
+    """Make a list of unique output files names for each stage and polarization.
 
-    Args:
-    ====================
-    obsid (str) -- obsid of the file
-    action (str) -- the action corresponding to the output name
-    pol_list -- a list of strings for polarizations in files; if an empty list,
+    Parameters
+    ----------
+    obsid : str
+        The obsid of the file.
+    action : str
+        The action corresponding to the output name.
+    pol_list : list of str
+        List denoting polarizations in files; if an empty list,
         then all polarizations in a single file is assumed. (Default empty list)
 
-    Returns:
-    ====================
-    outfiles -- a list of files that represent output produced for `action`
-        corresponding to `obsid`. For multiple polarizations, contains one string
-        per polarization. For one or no polarizations, just a list with a single
-        entry is returned.
+    Returns
+    -------
+    outfiles : list of str
+        A list of files that represent output produced for `action`
+        corresponding to `obsid`. For multiple polarizations, contains one
+        string per polarization. For one or no polarizations, just a list with
+        a single entry is returned.
     """
     outfiles = []
     if len(pol_list) > 1 and pol_list[0] is not None:
@@ -147,19 +165,32 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
     """
     Make a list of neighbors in time for prereqs.
 
-    Args:
-    ====================
-    obsid (str) -- obsid of the current file
-    action (str) -- the action corresponding to the time prereqs
-    obsids -- list of all obsids for the given day; uses this list (sorted) to
+    Parameters
+    ----------
+    obsid : str
+        The obsid of the current file.
+    action : str
+        The action corresponding to the time prereqs.
+    obsids : list of str
+        A list of all obsids for the given day; uses this list (sorted) to
         define neighbors
-    pol (str) -- if present, polarization string to specify for output file
-    n_neighbors (str) -- number of neighboring time files to append to list.
-        If set to the string "all", then all neighbors from that JD are added.
+    pol : str, optional
+        If present, polarization string to specify for output file.
+    n_neighbors : str
+        Number of neighboring time files to append to list. If set to the
+        string "all", then all neighbors from that JD are added.
 
-    Returns:
-    ====================
-    outfiles -- a list of files for time-adjacent neighbors.
+    Returns
+    -------
+    outfiles : list of str
+        A list of files for time-adjacent neighbors.
+
+    Raises
+    ------
+    ValueError
+        Raised if the specified obsid is not present in the full list, if
+        `n_neighbors` cannot be parsed as an int, or if `n_neighbors` is
+        not positive.
     """
     outfiles = []
 
@@ -213,31 +244,61 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
 
 
 def process_batch_options(
-    mem, ncpu=None, pbs_mail_user="youremail@example.org", queue="hera"
+        mem,
+        ncpu=None,
+        mail_user="youremail@example.org",
+        queue="hera",
+        batch_system="pbs"
 ):
-    """
-    Form a series of PBS batch options to be passed to makeflow.
+    """Form a series of batch options to be passed to makeflow.
 
-    Args:
-    ====================
-    mem (str) -- amount of memory to reserve for the task, in MB
-    ncpu (str) -- number of processors to reserve
-    pbs_mail_user (str) -- email address to send PBS reports to
-    queue (str) -- name of PBS queue to submit to; defaults to "hera"
+    Parameters
+    ----------
+    mem : str
+        Amount of memory to reserve for the task, in MB.
+    ncpu : str, optional
+        The number of processors to reserve.
+    mail_user : str, optional
+        The email address to send batch system reports to.
+    queue : str, optional
+        Name of queue/partition to submit to; defaults to "hera".
+    batch_system : str, optional
+        The batch system that will be running the makeflow. Must be one of:
+        "pbs", "slurm".
 
-    Returns:
-    ====================
-    batch_options (str) -- series of batch options that will be parsed by makeflow; should be
+    Returns
+    -------
+    batch_options : str
+        Series of batch options that will be parsed by makeflow; should be
         added to the makeflow file with the syntax:
             "export BATCH_OPTIONS = {batch_options}"
+
+    Raises
+    ------
+    ValueError
+        Raised if batch_system is not a valid option.
     """
-    batch_options = "-l vmem={0:d}M,mem={0:d}M".format(mem)
-    if ncpu is not None:
-        batch_options += ",nodes=1:ppn={:d}".format(ncpu)
-    if pbs_mail_user is not None:
-        batch_options += " -M {}".format(pbs_mail_user)
-    if queue is not None:
-        batch_options += " -q {}".format(queue)
+    if batch_system is None:
+        batch_system = "pbs"
+    if batch_system.lower() == "pbs":
+        batch_options = "-l vmem={0:d}M,mem={0:d}M".format(mem)
+        if ncpu is not None:
+            batch_options += ",nodes=1:ppn={:d}".format(ncpu)
+        if mail_user is not None:
+            batch_options += " -M {}".format(mail_user)
+        if queue is not None:
+            batch_options += " -q {}".format(queue)
+    elif batch_system.lower() == "slurm":
+        batch_options = "--mem {:d}M".format(mem)
+        if ncpu is not None:
+            batch_options += " -n {:d}".format(ncpu)
+        if mail_user is not None:
+            batch_options += " --mail-user {}".format(mail_user)
+        if queue is not None:
+            batch_options += " -p {}".format(queue)
+    else:
+        raise ValueError("Unrecognized batch system {}; must be one of: "
+                         "pbs, slurm".format(batch_system))
     return batch_options
 
 
@@ -462,7 +523,9 @@ def build_analysis_makeflow_from_config(
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
     source_script = get_config_entry(config, "Options", "source_script", required=False)
-    pbs_mail_user = get_config_entry(config, "Options", "pbs_mail_user", required=False)
+    mail_user = get_config_entry(config, "Options", "mail_user", required=False)
+    
+    batch_system = get_config_entry(config, "Options", "batch_system", required=False)
     timeout = get_config_entry(config, "Options", "timeout", required=False)
     if timeout is not None:
         # check that the `timeout' command exists on the system
@@ -524,12 +587,15 @@ def build_analysis_makeflow_from_config(
             outfile = "setup.out"
             mem = get_config_entry(config, "SETUP", "mem", required=False)
             ncpu = get_config_entry(config, "SETUP", "ncpu", required=False)
+            queue = get_config_entry(config, "SETUP", "queue", required=False)
+            if queue is None:
+                queue = "hera"
             if mem is None:
                 mem = base_mem
             if ncpu is None:
                 if base_cpu is not None:
                     ncpu = base_cpu
-            batch_options = process_batch_options(mem, ncpu, pbs_mail_user)
+            batch_options = process_batch_options(mem, ncpu, mail_user, queue, batch_system)
             print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
             # define the logfile
@@ -637,7 +703,7 @@ def build_analysis_makeflow_from_config(
                     if base_cpu is not None:
                         ncpu = base_cpu
 
-                batch_options = process_batch_options(mem, ncpu, pbs_mail_user)
+                batch_options = process_batch_options(mem, ncpu, mail_user, queue, batch_system)
                 print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
                 # make rules
@@ -770,7 +836,7 @@ def build_analysis_makeflow_from_config(
             if ncpu is None:
                 if base_cpu is not None:
                     ncpu = base_cpu
-            batch_options = process_batch_options(mem, ncpu, pbs_mail_user)
+            batch_options = process_batch_options(mem, ncpu, mail_user)
             print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
             # define the logfile
@@ -861,6 +927,7 @@ def build_lstbin_makeflow_from_config(
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
     source_script = get_config_entry(config, "Options", "source_script", required=False)
+    batch_system = get_config_entry(config, "Options", "batch_system", required=False)
     timeout = get_config_entry(config, "Options", "timeout", required=False)
     if timeout is not None:
         # check that the `timeout' command exists on the system
@@ -907,10 +974,10 @@ def build_lstbin_makeflow_from_config(
         # add resource information
         base_mem = get_config_entry(config, "Options", "base_mem", required=True)
         base_cpu = get_config_entry(config, "Options", "base_cpu", required=False)
-        pbs_mail_user = get_config_entry(
-            config, "Options", "pbs_mail_user", required=False
+        mail_user = get_config_entry(
+            config, "Options", "mail_user", required=False
         )
-        batch_options = process_batch_options(base_mem, base_cpu, pbs_mail_user)
+        batch_options = process_batch_options(base_mem, base_cpu, mail_user, batch_system)
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
         # loop over polarizations
