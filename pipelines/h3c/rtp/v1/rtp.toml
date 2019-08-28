@@ -3,6 +3,9 @@ makeflow_type = "analysis"
 path_to_do_scripts = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/task_scripts"
 source_script = "~/.bashrc"
 conda_env = "RTP"
+base_mem = 8000
+base_cpu = 1
+batch_system = "slurm"
 
 [WorkFlow]
 actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "TEARDOWN"]
