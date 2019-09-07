@@ -20,8 +20,7 @@ import toml
 
 
 def get_jd(filename):
-    """
-    Get the JD from a data file name.
+    """Get the JD from a data file name.
 
     Parameters
     ----------
@@ -677,7 +676,7 @@ def build_analysis_makeflow_from_config(
             print(line2, file=f)
 
             # save outfile as prereq for first step
-            outfiles_prev = [outfile]
+            setup_outfiles = [outfile]
 
         # main loop over actual data files
         for obsid in obsids:
@@ -688,7 +687,10 @@ def build_analysis_makeflow_from_config(
 
             # loop over actions for this obsid
             for ia, action in enumerate(workflow):
-                if action == "SETUP" or action == "TEARDOWN":
+                if action == "SETUP":
+                    outfiles_prev = setup_outfiles
+                    continue
+                if action == "TEARDOWN":
                     continue
                 # start list of input files
                 infiles = []
