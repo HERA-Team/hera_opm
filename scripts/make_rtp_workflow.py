@@ -5,6 +5,7 @@
 from __future__ import print_function, division, absolute_import
 
 import os
+import sys
 import time
 import datetime
 import subprocess
@@ -38,6 +39,8 @@ while True:
     if rsession.hget("rtp:has_new_data", "state") == "True":
         # fetch the list of files generated
         new_files = rsession.lrange("rtp:file_list", 0, -1)
+        if sys.version.major > 2:
+            new_files = [new_file.decode("utf-8") for new_file in new_files]
         file_paths = [
             os.path.join(STORAGE_LOCATION, new_file) for new_file in new_files
         ]
@@ -51,6 +54,9 @@ while True:
         t0 = Time(jd0, format="jd", out_subfmt="date_hms")
         mf_name = "rtp_{}.mf".format(t0.isot)
         mf_path = os.path.join(MF_LOCATION, mf_name)
+
+        # change working location
+        os.chdir(MF_LOCATION)
 
         # make a workflow
         mt.build_makeflow_from_config(file_paths, WORKFLOW_CONFIG, mf_path, MF_LOCATION)
