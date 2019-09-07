@@ -33,7 +33,6 @@ def package_files(package_dir, subdirectory):
     -------
     paths : list of str
         A list containing all of the relevant package_data.
-    
     """
     paths = []
     directory = os.path.join(package_dir, subdirectory)
