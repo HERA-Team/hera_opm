@@ -260,6 +260,22 @@ def test_process_batch_options():
     assert "nodes=1:ppn=1" in batch_options
     assert "-M youremail@example.org" in batch_options
     assert "-q hera" in batch_options
+
+    # test slurm options
+    batch_system = "slurm"
+    batch_options = mt.process_batch_options(
+        mem, ncpu, pbs_mail_user, queue, batch_system
+    )
+    assert "--mem 8000M" in batch_options
+    assert "-n 1" in batch_options
+    assert "--mail-user youremail@example.org" in batch_options
+    assert "-p hera" in batch_options
+
+    # test invalid batch_system
+    with pytest.raises(ValueError) as cm:
+        mt.process_batch_options(mem, batch_system="foo")
+    assert str(cm.value).startswith("Unrecognized batch system foo")
+
     return
 
 
