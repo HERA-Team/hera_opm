@@ -22,8 +22,6 @@ REDIS_HOST = "redishost"
 REDIS_PORT = 6379
 STORAGE_LOCATION = "/mnt/sn1"
 WORKFLOW_CONFIG = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/rtp.toml"
-date = datetime.date.today().strftime("%y%m%d")
-MF_LOCATION = os.path.join("/home/obs/rtp_makeflow", date)
 CONDA_ENV = "RTP"
 
 # make a redis pool and initialize connection
@@ -36,7 +34,10 @@ while True:
     if rsession is None:
         rsession = redis.Redis(connection_pool=redis_pool)
 
-    if rsession.hget("rtp:has_new_data", "state") == "True":
+    rkey = rsession.hget("rtp:has_new_data", "state")
+    if sys.version.major > 2:
+        rkey = rkey.decode("utf-8")
+    if rkey == "True":
         # fetch the list of files generated
         new_files = rsession.lrange("rtp:file_list", 0, -1)
         if sys.version.major > 2:
@@ -46,6 +47,8 @@ while True:
         ]
 
         # make target directory if it doesn't exist
+        date = datetime.date.today().strftime("%y%m%d")
+        MF_LOCATION = os.path.join("/home/obs/rtp_makeflow", date)
         if not os.path.isdir(MF_LOCATION):
             os.makedirs(MF_LOCATION)
 
