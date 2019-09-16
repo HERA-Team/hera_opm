@@ -35,12 +35,12 @@ while True:
         rsession = redis.Redis(connection_pool=redis_pool)
 
     rkey = rsession.hget("rtp:has_new_data", "state")
-    if sys.version.major > 2:
+    if sys.version_info.major > 2:
         rkey = rkey.decode("utf-8")
     if rkey == "True":
         # fetch the list of files generated
         new_files = rsession.lrange("rtp:file_list", 0, -1)
-        if sys.version.major > 2:
+        if sys.version_info.major > 2:
             new_files = [new_file.decode("utf-8") for new_file in new_files]
         file_paths = [
             os.path.join(STORAGE_LOCATION, new_file) for new_file in new_files
