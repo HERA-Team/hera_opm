@@ -249,29 +249,60 @@ def test_prep_args_errors(config_options):
     return
 
 
-def test_process_batch_options():
+def test_process_batch_options_pbs():
     # define args
     mem = 8000
     ncpu = 1
-    pbs_mail_user = "youremail@example.org"
+    mail_user = "youremail@example.org"
     queue = "hera"
-    batch_options = mt.process_batch_options(mem, ncpu, pbs_mail_user, queue)
+    batch_system = "pbs"
+    batch_options = mt.process_batch_options(mem, ncpu, mail_user, queue, batch_system)
     assert "-l vmem=8000M,mem=8000M" in batch_options
     assert "nodes=1:ppn=1" in batch_options
     assert "-M youremail@example.org" in batch_options
     assert "-q hera" in batch_options
 
-    # test slurm options
+    return
+
+
+def test_process_batch_options_slurm():
+    # define args
+    mem = 8000
+    ncpu = 1
+    mail_user = "youremail@example.org"
+    queue = "hera"
     batch_system = "slurm"
-    batch_options = mt.process_batch_options(
-        mem, ncpu, pbs_mail_user, queue, batch_system
-    )
+    batch_options = mt.process_batch_options(mem, ncpu, mail_user, queue, batch_system)
     assert "--mem 8000M" in batch_options
-    assert "-n 1" in batch_options
+    assert "-c 1" in batch_options
     assert "--mail-user youremail@example.org" in batch_options
     assert "-p hera" in batch_options
 
+    return
+
+
+def test_process_batch_options_htcondor():
+    # define args
+    mem = 8000
+    ncpu = 1
+    mail_user = "youremail@example.org"
+    queue = "HERA"
+    batch_system = "htcondor"
+    batch_options = mt.process_batch_options(mem, ncpu, mail_user, queue, batch_system)
+    assert (
+        "request_memory = 8000 M \n "
+        "request_virtualmemory = 8000 M \n" in batch_options
+    )
+    assert "\n request_cpus = 1 \n" in batch_options
+    assert "\n notify_user = youremail@example.org \n" in batch_options
+    assert "\n Requirements = (HERA=True)" in batch_options
+
+    return
+
+
+def test_process_batch_options_error():
     # test invalid batch_system
+    mem = 8000
     with pytest.raises(ValueError) as cm:
         mt.process_batch_options(mem, batch_system="foo")
     assert str(cm.value).startswith("Unrecognized batch system foo")

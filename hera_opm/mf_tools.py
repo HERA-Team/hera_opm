@@ -262,7 +262,7 @@ def process_batch_options(
         Name of queue/partition to submit to; defaults to "hera".
     batch_system : str, optional
         The batch system that will be running the makeflow. Must be one of:
-        "pbs", "slurm".
+        "pbs", "slurm", "htcondor".
 
     Returns
     -------
@@ -290,11 +290,21 @@ def process_batch_options(
     elif batch_system.lower() == "slurm":
         batch_options = "--mem {:d}M".format(mem)
         if ncpu is not None:
-            batch_options += " -n {:d}".format(ncpu)
+            batch_options += " -c {:d}".format(ncpu)
         if mail_user is not None:
             batch_options += " --mail-user {}".format(mail_user)
         if queue is not None:
             batch_options += " -p {}".format(queue)
+    elif batch_system.lower() == "htcondor":
+        batch_options = "request_memory = {0:d} M \n request_virtualmemory = {0:d} M".format(
+            mem
+        )
+        if ncpu is not None:
+            batch_options += " \n request_cpus = {:d}".format(ncpu)
+        if mail_user is not None:
+            batch_options += " \n notify_user = {}".format(mail_user)
+        if queue is not None:
+            batch_options += " \n Requirements = ({}=True)".format(queue)
     else:
         raise ValueError(
             "Unrecognized batch system {}; must be one of: "
