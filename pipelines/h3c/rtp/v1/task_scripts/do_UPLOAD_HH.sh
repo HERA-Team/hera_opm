@@ -18,4 +18,4 @@ jd=$(get_int_jd ${fn})
 fn_hh=`basename $fn | sed -E "s/(zen.[0-9]{7}\.[0-9]{5}\.)/\1HH./g"`
 
 echo upload_to_librarian.py local-rtp ${fn_hh} ${jd}/${fn_hh}
-upload_to_librarian.py local-rtp ${fn_hh} ${jd}/${fn_hh}
+librarian upload local-rtp ${fn_hh} ${jd}/${fn_hh}
