@@ -8,10 +8,13 @@ base_cpu = 1
 batch_system = "slurm"
 
 [WorkFlow]
-actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "TEARDOWN"]
+actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "ADD_RTP_PROCESS_RECORD", "TEARDOWN"]
 
 [EXTRACT_HH]
 args = ["{basename}"]
 
 [UPLOAD_HH]
 args = ["{basename}"]
+
+[ADD_RTP_PROCESS_RECORD]
+args = ["{basename}", "${WorkFlow:actions}"]
