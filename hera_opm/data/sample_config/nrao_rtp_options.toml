@@ -11,6 +11,7 @@ base_mem = 10000
 base_cpu = 1
 timeout = "1m"
 pbs_mail_user = "heramgr@nrao.edu"
+mandc_report = true
 
 [WorkFlow]
 actions = ["SETUP", "ANT_METRICS", "FIRSTCAL", "FIRSTCAL_METRICS", "OMNICAL",

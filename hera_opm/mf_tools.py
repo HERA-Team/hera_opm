@@ -543,6 +543,7 @@ def build_analysis_makeflow_from_config(
                             "Polarizations do not match for"
                             " obsids {} and {}".format(obsid, obsid2)
                         )
+    mandc_report = get_config_entry(config, "Options", "mandc_report", required=False)
 
     # make sure that SETUP and TEARDOWN are in the right spots, if they are in the workflow
     try:
@@ -821,6 +822,11 @@ def build_analysis_makeflow_from_config(
                             print("conda activate {}".format(conda_env), file=f2)
                         print("date", file=f2)
                         print("cd {}".format(parent_dir), file=f2)
+                        if mandc_report:
+                            print(
+                                "add_rtp_process_event.py {} started".format(filename),
+                                file=f2,
+                            )
                         if timeout is not None:
                             print(
                                 "timeout {0} {1} {2}".format(
@@ -831,9 +837,23 @@ def build_analysis_makeflow_from_config(
                         else:
                             print("{0} {1}".format(command, prepped_args), file=f2)
                         print("if [ $? -eq 0 ]; then", file=f2)
+                        if mandc_report:
+                            print(
+                                "  add_rtp_process_event.py {} finished".format(
+                                    filename
+                                ),
+                                file=f2,
+                            )
                         print("  cd {}".format(work_dir), file=f2)
                         print("  touch {}".format(outfile), file=f2)
                         print("else", file=f2)
+                        if mandc_report:
+                            print(
+                                "  add_rtp_process_event.py {} errored".format(
+                                    filename
+                                ),
+                                file=f2,
+                            )
                         print(
                             "  mv {0} {1}".format(logfile, logfile + ".error"), file=f2
                         )

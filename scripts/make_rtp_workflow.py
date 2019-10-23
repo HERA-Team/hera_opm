@@ -12,7 +12,10 @@ import subprocess
 
 from astropy.time import Time
 import redis
+import h5py
+import numpy as np
 
+import hera_mc.mc as mc
 from hera_opm import mf_tools as mt
 
 # hard-coded options
@@ -79,6 +82,23 @@ while True:
                     e.cmd, e.returncode, e.output, e.stderr
                 )
             )
+
+        # make M&C RTP process events for each file
+        parser = mc.get_mc_argument_parser()
+        args = parser.parse_args("")
+        db = mc.connect_to_mc_db(args)
+        for filename in file_paths:
+            # get obsid
+            with h5py.File(filename, "r") as h5f:
+                time_array = h5f["Header/time_array"][()]
+            t0 = Time(np.unique(time_array)[0], scale="utc", format="jd")
+            obsid = int(np.floor(t0.gps))
+
+            # add to M&C
+            with db.sessionmaker() as session:
+                session.add_rtp_process_event(
+                    time=Time.now(), obsid=obsid, event="queued"
+                )
 
         # update redis
         rsession.hset("rtp:has_new_data", "state", "False")
