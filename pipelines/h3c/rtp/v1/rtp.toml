@@ -8,9 +8,18 @@ base_cpu = 1
 batch_system = "slurm"
 
 [WorkFlow]
-actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "ADD_RTP_PROCESS_RECORD", "TEARDOWN"]
+actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "ANT_METRICS", "ADD_MC_ANT_METRICS", "ADD_LIBRARIAN_ANT_METRICS", "ADD_RTP_PROCESS_RECORD", "TEARDOWN"]
 
 [EXTRACT_HH]
+args = ["{basename}"]
+
+[ANT_METRICS]
+args = ["{basename}"]
+
+[ADD_MC_ANT_METRICS]
+args = ["{basename}"]
+
+[ADD_LIBRARIAN_ANT_METRICS]
 args = ["{basename}"]
 
 [UPLOAD_HH]
