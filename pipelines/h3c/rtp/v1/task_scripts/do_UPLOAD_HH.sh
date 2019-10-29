@@ -15,7 +15,7 @@ jd=$(get_int_jd ${fn})
 
 # make the name of the output file based on the input file
 # we put "HH" immediately after the JD
-fn_hh=`basename $fn | sed -E "s/(zen.[0-9]{7}\.[0-9]{5}\.)/\1HH./g"`
+fn_hh=$(inject_hh ${fn})
 
 echo upload_to_librarian.py local-rtp ${fn_hh} ${jd}/${fn_hh}
 librarian upload local-rtp ${fn_hh} ${jd}/${fn_hh}
