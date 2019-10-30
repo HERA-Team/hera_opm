@@ -19,10 +19,10 @@ extension=${4}
 vis_format=${5}
 
 # define polarizations
-pol1="xx"
-pol2="yy"
-pol3="xy"
-pol4="yx"
+pol1="nn"
+pol2="ee"
+pol3="ne"
+pol4="en"
 
 # make comma-separated list of polarizations
 pols=$(join_by , $pol1 $pol2 $pol3 $pol4)
