@@ -8,10 +8,10 @@ base_cpu = 1
 batch_system = "slurm"
 
 [ANT_METRICS_OPTS]
-crossCut = 5.
-deadCut = 5.
-extension = .ant_metrics.hdf5
-vis_format = uvh5
+crossCut = 5.0
+deadCut = 5.0
+extension = ".ant_metrics.hdf5"
+vis_format = "uvh5"
 
 [WorkFlow]
 actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "ANT_METRICS",
