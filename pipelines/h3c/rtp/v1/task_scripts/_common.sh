@@ -95,6 +95,6 @@ function query_exants_db ()
 
 function inject_hh ()
 {
-  local fn_hh=`basename $1 | sed -E "s/(zen.[0-9]{7}\.[0-9]{5}\.)/\1HH./g"`
+  local fn_hh=`basename $1 | sed -E "s/(zen\.[0-9]{7}\.[0-9]{5}\.)/\1HH./g"`
   echo "$fn_hh"
 }
