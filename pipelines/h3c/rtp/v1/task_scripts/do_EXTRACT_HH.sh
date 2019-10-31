@@ -12,7 +12,7 @@ fn="${1}"
 
 # make the name of the output file based on the input file
 # we put "HH" immediately after the JD
-fn_out=`basename $fn | sed -E "s/(zen.[0-9]{7}\.[0-9]{5}\.)/\1HH./g"`
+fn_out=$(inject_hh ${fn})
 
 echo extract_hh.py ${fn} ${fn_out}
 extract_hh.py ${fn} ${fn_out}
