@@ -849,9 +849,7 @@ def build_analysis_makeflow_from_config(
                         print("else", file=f2)
                         if mandc_report:
                             print(
-                                "  add_rtp_process_event.py {} errored".format(
-                                    filename
-                                ),
+                                "  add_rtp_process_event.py {} error".format(filename),
                                 file=f2,
                             )
                         print(
