@@ -290,7 +290,7 @@ def process_batch_options(
     elif batch_system.lower() == "slurm":
         batch_options = "--mem {:d}M".format(mem)
         if ncpu is not None:
-            batch_options += " -c {:d}".format(ncpu)
+            batch_options += " -n {:d}".format(ncpu)
         if mail_user is not None:
             batch_options += " --mail-user {}".format(mail_user)
         if queue is not None:
