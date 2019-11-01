@@ -6,6 +6,8 @@ conda_env = "RTP"
 base_mem = 8000
 base_cpu = 1
 batch_system = "slurm"
+default_queue = "hera,bigmem"
+mandc_report = true
 
 [ANT_METRICS_OPTS]
 crossCut = 5.0
@@ -15,7 +17,7 @@ vis_format = "uvh5"
 
 [WorkFlow]
 actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "ANT_METRICS",
-           "ADD_MC_ANT_METRICS", "ADD_LIBRARIAN_ANT_METRICS",
+           "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS",
            "ADD_RTP_PROCESS_RECORD", "TEARDOWN"]
 
 [EXTRACT_HH]
@@ -26,11 +28,11 @@ args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}", "${ANT_METRICS_OPTS:extension}",
         "${ANT_METRICS_OPTS:vis_format}"]
 
-[ADD_MC_ANT_METRICS]
-args = ["{basename}"]
-
 [ADD_LIBRARIAN_ANT_METRICS]
-args = ["{basename}"]
+args = ["{basename}", "${ANT_METRICS_OPTS:extension}"]
+
+[ADD_MC_ANT_METRICS]
+args = ["{basename}", "${ANT_METRICS_OPTS:extension}"]
 
 [UPLOAD_HH]
 args = ["{basename}"]
