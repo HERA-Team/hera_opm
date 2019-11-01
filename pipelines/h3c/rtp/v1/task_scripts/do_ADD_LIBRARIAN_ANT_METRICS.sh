@@ -15,8 +15,13 @@ extension=${2}
 # get the integer portion of the JD
 jd=$(get_int_jd ${1})
 
-# get ant_metrics filename
-metrics_f="${fn%.*}"${extension}
 
-echo upload_to_librarian.py local-rtp ${metrics_f} ${jd}/${metrics_f}
-librarian upload local-rtp ${metrics_f} ${jd}/${metrics_f}
+# We only want to upload ant metrics on sum files
+# check if the string does not contain the word diff
+if ! stringContain diff "${fn}"; then
+  # get ant_metrics filename
+  metrics_f="${fn%.*}"${extension}
+
+  echo upload_to_librarian.py local-rtp ${metrics_f} ${jd}/${metrics_f}
+  librarian upload local-rtp ${metrics_f} ${jd}/${metrics_f}
+fi

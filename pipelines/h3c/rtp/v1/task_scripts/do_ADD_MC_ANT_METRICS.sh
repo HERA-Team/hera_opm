@@ -12,7 +12,11 @@ source ${src_dir}/_common.sh
 fn=$(inject_hh ${1})
 extension=${2}
 
-# get ant_metrics filename
-metrics_f="${fn%.*}"${extension}
-echo add_qm_metrics.py --type=ant ${metrics_f}
-add_qm_metrics.py --type=ant ${metrics_f}
+# We only want to upload ant metrics on sum files
+# check if the string does not contain the word diff
+if ! stringContain diff "${fn}"; then
+  # get ant_metrics filename
+  metrics_f="${fn%.*}"${extension}
+  echo add_qm_metrics.py --type=ant ${metrics_f}
+  add_qm_metrics.py --type=ant ${metrics_f}
+fi
