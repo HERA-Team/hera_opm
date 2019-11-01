@@ -274,7 +274,7 @@ def test_process_batch_options_slurm():
     batch_system = "slurm"
     batch_options = mt.process_batch_options(mem, ncpu, mail_user, queue, batch_system)
     assert "--mem 8000M" in batch_options
-    assert "-c 1" in batch_options
+    assert "-n 1" in batch_options
     assert "--mail-user youremail@example.org" in batch_options
     assert "-p hera" in batch_options
 
