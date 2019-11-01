@@ -98,3 +98,12 @@ function inject_hh ()
   local fn_hh=`basename $1 | sed -E "s/(zen\.[0-9]{7}\.[0-9]{5}\.)/\1HH./g"`
   echo "$fn_hh"
 }
+
+function stringContain()
+# the following function was found from a stackoverflow thread
+# want to find a substring inside of string and check the substring is not empty
+# and the string is really a string
+# https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash
+{
+  [ -z "${2##*$1*}" ] && [ -z "$1" -o -n "$2" ];
+}
