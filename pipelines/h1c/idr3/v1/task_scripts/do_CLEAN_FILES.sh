@@ -11,5 +11,9 @@ fn="${1}"
 # remove uvh5 files
 uvh5_fn=$(remove_pol ${fn})
 uvh5_fn=${uvh5_fn%.uv}.uvh5
-echo rm -rf ${uvh5_fn}
-rm -rf ${uvh5_fn}
+echo rm -rfv ${uvh5_fn}
+rm -rfv ${uvh5_fn}
+
+# remove firstcal files
+echo rm -rfv *.first.calfits
+rm -rfv *.first.calfits

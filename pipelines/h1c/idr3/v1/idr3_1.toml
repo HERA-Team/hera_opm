@@ -21,7 +21,7 @@ max_bl_cut = 90
 ############################################################################################################
 
 [WorkFlow]
-actions = ["MAKE_UVH5", "CLEAN_UV", "REDCAL", "UPLOAD_FILES", "CLEAN_FILES"]
+actions = ["MAKE_UVH5", "CLEAN_UV", "REDCAL", "CLEAN_FILES"]
 
 [MAKE_UVH5]
 args = ["{basename}"]
