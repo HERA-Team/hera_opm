@@ -27,6 +27,7 @@ conda_env="${5}"
 ntasks="${6}"
 
 # activate conda env
+source ~/.bashrc
 conda activate $conda_env
 
 # get current directory
