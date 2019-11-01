@@ -53,14 +53,14 @@ mf_file=`realpath *.mf`
 
 # build command to be fed to screen session
 if [ "$#" -gt 5 ]; then
-    cmd="conda activate $conda_env; makeflow_nrao.sh ${mf_file} ${6}; if [ $? -eq 0 ]; then touch succeeded.out; else touch failed.out; fi; exit\n"
+    cmd="conda activate $conda_env; makeflow_nrao.sh ${mf_file} $ntasks; if [ $? -eq 0 ]; then touch succeeded.out; else touch failed.out; fi; exit\n"
 else
     cmd="conda activate $conda_env; makeflow_nrao.sh ${mf_file}; if [ $? -eq 0 ]; then touch succeeded.out; else touch failed.out; fi; exit\n"
 fi
 
 # launch screen session named by JD and send commands
-screen -d -m -S "${JD}"
-screen -S "${JD}" -p 0 -X stuff "${cmd}"
+screen -d -m -S "${jd}"
+screen -S "${jd}" -p 0 -X stuff "${cmd}"
 
 # go back to main directory
 cd $current_dir
