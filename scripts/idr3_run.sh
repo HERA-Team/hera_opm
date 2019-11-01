@@ -133,14 +133,13 @@ makeflow_dir=`dirname $toml_path`
 for jd in ${jdArray[@]}; do
     # make folder for raw data and makeflow scripts
     mkdir -p $jd
-    stagedir=`realpath $jd`
     cd $makeflow_dir
     mkdir -p $jd
     workdir=`realpath $jd`
     cd $jd
 
     # call child script
-    make_idr3_makeflow.sh $jd $stagedir $workdir $toml_path $conda_env $ntasks
+    make_idr3_makeflow.sh $jd $root_dir $workdir $toml_path $conda_env $ntasks
     # wait for the workflow to finish one way or the other
     while [[ ! -f "succeeded.out" || ! -f "failed.out" ]]; do
         sleep 120;
