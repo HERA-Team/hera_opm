@@ -52,8 +52,8 @@ build_makeflow_from_config.py -c $config_file $input_files
 mf_file=`realpath *.mf`
 
 # build command to be fed to screen session
-if [ "$#" -gt 3 ]; then
-    cmd="conda activate $conda_env; makeflow_nrao.sh ${mf_file} ${4}; if [ $? -eq 0 ]; then touch succeeded.out; else touch failed.out; fi; exit\n"
+if [ "$#" -gt 5 ]; then
+    cmd="conda activate $conda_env; makeflow_nrao.sh ${mf_file} ${6}; if [ $? -eq 0 ]; then touch succeeded.out; else touch failed.out; fi; exit\n"
 else
     cmd="conda activate $conda_env; makeflow_nrao.sh ${mf_file}; if [ $? -eq 0 ]; then touch succeeded.out; else touch failed.out; fi; exit\n"
 fi
