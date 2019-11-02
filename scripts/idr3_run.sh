@@ -141,11 +141,13 @@ for jd in ${jdArray[@]}; do
     # call child script
     make_idr3_makeflow.sh $jd $root_dir $workdir $toml_path $conda_env $ntasks
     # wait for the workflow to finish one way or the other
-    while [[ ! -f "succeeded.out" || ! -f "failed.out" ]]; do
-        sleep 120;
+    while [[ ! -f "succeeded.out" && ! -f "failed.out" ]]; do
+        sleep 60;
+        echo -n .
     done
     if [ -f "failed.out" ]; then
         mail plaplant@nrao.edu "idr3_failed on JD $jd"
         exit 1
     fi
+    echo Finished $jd 
 done
