@@ -15,10 +15,15 @@ deadCut = 5.0
 extension = ".ant_metrics.hdf5"
 vis_format = "uvh5"
 
+[SSINS_OPTS]
+streak_sig = 20.0
+other_sig = 5.0
+N_samp_thresh = 10
+
 [WorkFlow]
 actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "ANT_METRICS",
-           "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS",
-           "ADD_RTP_PROCESS_RECORD", "TEARDOWN"]
+           "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
+           "ADD_LIBRARIAN_SSINS", "ADD_RTP_PROCESS_RECORD", "TEARDOWN"]
 
 [EXTRACT_HH]
 args = ["{basename}"]
@@ -39,3 +44,10 @@ args = ["{basename}"]
 
 [ADD_RTP_PROCESS_RECORD]
 args = ["{basename}", "${WorkFlow:actions}"]
+
+[SSINS]
+args = ["{basename}", "${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
+        "${SSINS_OPTS:N_samp_thresh}"]
+
+[ADD_LIBRARIAN_SSINS]
+args = ["{basename}"]
