@@ -27,6 +27,9 @@ STORAGE_LOCATION = "/mnt/sn1"
 WORKFLOW_CONFIG = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/rtp.toml"
 CONDA_ENV = "RTP"
 
+# get around potential problem of HDF5 not being able to lock files
+os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
+
 # make a redis pool and initialize connection
 redis_pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=0)
 rsession = redis.Redis(connection_pool=redis_pool)
