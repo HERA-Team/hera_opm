@@ -375,15 +375,11 @@ def process_batch_options(
         if queue is not None:
             batch_options += " -p {}".format(queue)
     elif batch_system.lower() == "htcondor":
-        batch_options = (
-            "request_memory = {0:d} M \n request_virtualmemory = {0:d} M".format(mem)
-        )
+        batch_options = r"request_memory = {0:d} M".format(mem)
         if ncpu is not None:
-            batch_options += " \n request_cpus = {:d}".format(ncpu)
+            batch_options += r" \n request_cpus = {:d}".format(ncpu)
         if mail_user is not None:
-            batch_options += " \n notify_user = {}".format(mail_user)
-        if queue is not None:
-            batch_options += " \n Requirements = ({}=True)".format(queue)
+            batch_options += r" \n notify_user = {}".format(mail_user)
     else:
         raise ValueError(
             "Unrecognized batch system {}; must be one of: "

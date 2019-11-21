@@ -353,13 +353,9 @@ def test_process_batch_options_htcondor():
     queue = "HERA"
     batch_system = "htcondor"
     batch_options = mt.process_batch_options(mem, ncpu, mail_user, queue, batch_system)
-    assert (
-        "request_memory = 8000 M \n "
-        "request_virtualmemory = 8000 M \n" in batch_options
-    )
-    assert "\n request_cpus = 1 \n" in batch_options
-    assert "\n notify_user = youremail@example.org \n" in batch_options
-    assert "\n Requirements = (HERA=True)" in batch_options
+    assert "request_memory = 8000 M \\n " in batch_options
+    assert "\\n request_cpus = 1 \\n" in batch_options
+    assert "\\n notify_user = youremail@example.org" in batch_options
 
     return
 
