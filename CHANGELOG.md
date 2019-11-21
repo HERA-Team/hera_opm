@@ -7,7 +7,7 @@ analysis/lstbin pipelines and workflows.
 ## Unreleased
 
 
-## [1.0.0] - 2019-11-??
+## [1.0.0] - 2019-11-21
 
 ### Added
 - HTCondor added as a batch system.
@@ -29,8 +29,6 @@ analysis/lstbin pipelines and workflows.
 
 ### Changed
 - Codebase supports python3 only.
-
-### Fixed
 
 
 ## [0.1.1] - 2018-02-28
