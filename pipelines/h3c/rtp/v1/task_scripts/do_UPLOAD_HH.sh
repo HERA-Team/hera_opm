@@ -17,5 +17,5 @@ jd=$(get_int_jd ${fn})
 # we put "HH" immediately after the JD
 fn_hh=$(inject_hh ${fn})
 
-echo upload_to_librarian.py local-rtp ${fn_hh} ${jd}/${fn_hh}
+echo librarian upload local-rtp ${fn_hh} ${jd}/${fn_hh}
 librarian upload local-rtp ${fn_hh} ${jd}/${fn_hh}
