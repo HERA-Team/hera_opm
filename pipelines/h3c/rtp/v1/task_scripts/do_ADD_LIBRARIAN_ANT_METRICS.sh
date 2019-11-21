@@ -22,6 +22,6 @@ if ! stringContain diff "${fn}"; then
   # get ant_metrics filename
   metrics_f="${fn%.*}"${extension}
 
-echo librarian upload local-rtp ${metrics_f} ${jd}/${metrics_f}
+  echo librarian upload local-rtp ${metrics_f} ${jd}/${metrics_f}
   librarian upload local-rtp ${metrics_f} ${jd}/${metrics_f}
 fi
