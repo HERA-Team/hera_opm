@@ -6,7 +6,6 @@
 import json
 import os
 import subprocess
-import sys
 
 
 def construct_version_info():
