@@ -3,14 +3,10 @@
 # Licensed under the 2-clause BSD license
 """Module for generating version info."""
 
-from __future__ import print_function, division, absolute_import
-
 import json
 import os
 import subprocess
 import sys
-
-PY2 = sys.version_info < (3, 0)
 
 
 def construct_version_info():
@@ -55,13 +51,9 @@ def construct_version_info():
 
         data = data.strip()
 
-        if PY2:
-            return data
         return data.decode("utf-8")
 
     def unicode_to_str(u):
-        if PY2:
-            return u.encode("utf-8")
         return u
 
     version_file = os.path.join(hera_opm_dir, "VERSION")
