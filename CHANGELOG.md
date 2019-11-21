@@ -6,6 +6,9 @@ analysis/lstbin pipelines and workflows.
 
 ## Unreleased
 
+### Changed
+- Use `flake8` instead of `pycodestyle` for style checks.
+
 
 ## [1.0.0] - 2019-11-21
 
@@ -39,7 +42,7 @@ analysis/lstbin pipelines and workflows.
 ### Fixed
 - A bug in output script naming was fixed.
 
-## [0.1] - 2018-02-27
+## [0.1] - 2018-02-14
 
 ### Added
 - Initial versioned release. Earlier changes available in git history.
