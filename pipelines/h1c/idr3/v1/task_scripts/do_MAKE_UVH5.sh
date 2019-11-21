@@ -17,5 +17,5 @@ fn_out=$(remove_pol $fn)
 fn_out=${fn_out%.uv}.uvh5
 
 # build python script as series of commands
-echo python -c "from pyuvdata import UVData; uv = UVData(); uv.read([\"${fn_xx}\", \"${fn_yy}\", \"${fn_xy}\", \"${fn_yx}\"], axis=\"polarization\"); uv.write_uvh5(\"${fn_out}\", clobber=True)"
-python -c "from pyuvdata import UVData; uv = UVData(); uv.read([\"${fn_xx}\", \"${fn_yy}\", \"${fn_xy}\", \"${fn_yx}\"], axis=\"polarization\"); uv.write_uvh5(\"${fn_out}\", clobber=True)"
+echo python -c "from pyuvdata import UVData; uv = UVData(); uv.read([\"${fn_xx}\", \"${fn_yy}\", \"${fn_xy}\", \"${fn_yx}\"], axis=\"polarization\"); uv.x_orientation = 'east'; uv.history += '\n\nx_orientation manually set to east\n\n'; uv.write_uvh5(\"${fn_out}\", clobber=True)"
+python -c "from pyuvdata import UVData; uv = UVData(); uv.read([\"${fn_xx}\", \"${fn_yy}\", \"${fn_xy}\", \"${fn_yx}\"], axis=\"polarization\"); uv.x_orientation = 'east'; uv.history += '\n\nx_orientation manually set to east\n\n'; uv.write_uvh5(\"${fn_out}\", clobber=True)"
