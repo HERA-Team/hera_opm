@@ -3,8 +3,6 @@
 # Licensed under the 2-clause BSD License
 """Module for converting a config file into a makeflow script."""
 
-from __future__ import print_function, division, absolute_import
-
 import os
 import re
 import sys
