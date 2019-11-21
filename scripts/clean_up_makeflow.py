@@ -4,7 +4,6 @@
 # Licensed under the 2-clause BSD License
 """Clean up after a makeflow has completed."""
 
-import os
 from hera_opm import mf_tools as mt
 from hera_opm import utils
 

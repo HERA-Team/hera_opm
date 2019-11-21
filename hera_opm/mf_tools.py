@@ -5,7 +5,6 @@
 
 import os
 import re
-import sys
 import time
 import gzip
 import shutil
@@ -566,7 +565,7 @@ def build_analysis_makeflow_from_config(
     if timeout is not None:
         # check that the `timeout' command exists on the system
         try:
-            out = subprocess.check_output(["timeout", "--help"])
+            subprocess.check_output(["timeout", "--help"])
         except OSError:
             warnings.warn(
                 'A value for the "timeout" option was specified,'
@@ -709,7 +708,7 @@ def build_analysis_makeflow_from_config(
                         prereqs = [prereqs]
                     for prereq in prereqs:
                         try:
-                            ip = workflow.index(prereq)
+                            workflow.index(prereq)
                         except ValueError:
                             raise ValueError(
                                 'Prereq "{0}" for action "{1}" not found in main '
@@ -776,7 +775,7 @@ def build_analysis_makeflow_from_config(
                         infiles_pol = infiles
                         for tp in time_prereqs:
                             try:
-                                ip = workflow.index(tp)
+                                workflow.index(tp)
                             except ValueError:
                                 raise ValueError(
                                     'Time prereq "{0}" for action "{1}" not found in main '
@@ -1009,7 +1008,7 @@ def build_lstbin_makeflow_from_config(
     if timeout is not None:
         # check that the `timeout' command exists on the system
         try:
-            out = subprocess.check_output(["timeout", "--help"])
+            subprocess.check_output(["timeout", "--help"])
         except OSError:
             warnings.warn(
                 'A value for the "timeout" option was specified,'

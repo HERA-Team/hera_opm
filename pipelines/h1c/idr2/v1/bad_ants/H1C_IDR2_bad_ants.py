@@ -34,5 +34,5 @@ for JD in JDs:
         flagged.add(104)
         flagged.add(117)
     with open(str(JD) + ".txt", "w") as f:
-        for bad_ant in sorted(list(flagged)):
+        for bad_ant in sorted(flagged):
             f.write(str(bad_ant) + "\n")

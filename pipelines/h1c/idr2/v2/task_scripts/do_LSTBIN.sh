@@ -57,7 +57,7 @@ then
     done
     input_cals="--input_cals ${input_cals[@]}"
 else
-   input_cals="" 
+   input_cals=""
 fi
 
 # set special kwargs

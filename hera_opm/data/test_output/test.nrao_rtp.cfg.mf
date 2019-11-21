@@ -381,4 +381,3 @@ zen.2457698.40355.yy.HH.uvcA.XRFI_APPLY.yx.out: zen.2457698.40355.yy.HH.uvcA.XRF
 
 zen.2457698.40355.yy.HH.uvcA.XRFI_APPLY.yy.out: zen.2457698.40355.yy.HH.uvcA.XRFI.xx.out zen.2457698.40355.yy.HH.uvcA.XRFI.xy.out zen.2457698.40355.yy.HH.uvcA.XRFI.yx.out zen.2457698.40355.yy.HH.uvcA.XRFI.yy.out ~/hera/hera_op/hera_op/data/sample_task_scripts/do_XRFI_APPLY.sh zen.2457698.40355.yy.HH.uvcA.XRFI.xx.out zen.2457698.40355.yy.HH.uvcA.XRFI.xy.out zen.2457698.40355.yy.HH.uvcA.XRFI.yx.out zen.2457698.40355.yy.HH.uvcA.XRFI.yy.out
 	/Users/plaplant/Documents/school/penn/software/hera_opm/hera_opm/data/test_output/wrapper_zen.2457698.40355.yy.HH.uvcA.XRFI_APPLY.yy.sh > /Users/plaplant/Documents/school/penn/software/hera_opm/hera_opm/data/test_output/zen.2457698.40355.yy.HH.uvcA.XRFI_APPLY.yy.log 2>&1
-

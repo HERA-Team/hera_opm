@@ -1,4 +1,4 @@
-#! /bin/bash 
+#! /bin/bash
 set -e
 
 # import common functions
