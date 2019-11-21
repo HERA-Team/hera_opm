@@ -23,7 +23,7 @@ install:
   # create environment and install dependencies
   - conda create -q -n testenv python="$PYTHON_VERSION"
   - source activate testenv
-  - conda install pytest pytest-runner pip numpy scipy matplotlib six toml nose astropy ephem pycodestyle coveralls h5py scikit-learn six pandas coverage
+  - conda install pytest pytest-runner pip numpy scipy matplotlib toml nose astropy ephem pycodestyle coveralls h5py scikit-learn pandas coverage
   - conda install -c conda-forge aipy pyephem
   - pip install git+https://github.com/HERA-Team/pyuvdata.git
   - pip install git+https://github.com/HERA-Team/linsolve.git

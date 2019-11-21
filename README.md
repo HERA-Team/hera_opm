@@ -71,7 +71,6 @@ missing dependencies. If you prefer to manage your own python environment
 
 ### Required
 
-* six
 * toml >= 0.9.4
 
 ### Optional

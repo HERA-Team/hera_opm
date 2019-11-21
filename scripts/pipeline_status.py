@@ -4,8 +4,6 @@
 # Licensed under the 2-clause BSD Licnse
 """Script for checking the status of a HERA makeflow pipeline."""
 
-from __future__ import print_function, division, absolute_import
-
 import numpy as np
 import glob
 from hera_opm.mf_tools import get_config_entry

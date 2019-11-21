@@ -4,7 +4,6 @@ import os
 import shutil
 import gzip
 import glob
-import six
 import toml
 
 from . import BAD_CONFIG_PATH
