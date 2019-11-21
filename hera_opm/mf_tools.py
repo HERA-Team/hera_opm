@@ -13,8 +13,6 @@ import gzip
 import shutil
 import subprocess
 import warnings
-import six
-from six.moves import range, map, zip
 import glob
 import toml
 
@@ -1108,10 +1106,6 @@ def build_lstbin_makeflow_from_config(
                 _datafiles = [
                     sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
                 ]
-                if six.PY2:
-                    _datafiles = [
-                        [df.encode("utf-8") for df in li] for li in _datafiles
-                    ]
 
                 output = lstbin.config_lst_bin_files(
                     _datafiles,

@@ -899,9 +899,7 @@ def test_consolidate_logs():
 
     # make sure that individual logs' content was transferred over
     with gzip.open(output_gz, "rb") as f_out:
-        data = f_out.read()
-        if six.PY3:
-            data = data.decode("utf-8")
+        data = f_out.read().decode("utf-8")
         out_lines = set(data.splitlines())
         print(out_lines)
         for fn in input_files:

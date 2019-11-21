@@ -3,8 +3,6 @@
 # Licensed under the 2-clause BSD License
 """Module for generating ArgumentParsers."""
 
-from __future__ import print_function, division, absolute_import
-
 import argparse
 import os
 
