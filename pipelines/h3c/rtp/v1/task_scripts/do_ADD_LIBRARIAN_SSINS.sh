@@ -18,6 +18,6 @@ prefix="${fn%.*}"${midfix}
 
 for suffix in data.h5 z_score.h5 mask.h5 flags.h5 match_events.yml; do
   file=${prefix}${suffix}
-  echo upload_to_librarian.py local-rtp $file ${jd}/$file
+  echo librarian upload local-rtp $file ${jd}/$file
   librarian upload local-rtp $file ${jd}/$file
 done
