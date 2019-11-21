@@ -4,7 +4,6 @@
 # Licensed under the 2-clause BSD License
 """Script for generating a makeflow from a config and list of files."""
 
-import os
 from hera_opm import mf_tools as mt
 from hera_opm import utils
 

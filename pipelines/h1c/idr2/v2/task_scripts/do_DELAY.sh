@@ -12,7 +12,7 @@ source ${src_dir}/_common.sh
 # 2 partial_load_Nbls
 # 3 - standoff: fixed additional delay beyond the horizon (in ns)
 # 4 - horizon: proportionality constant for bl_len where 1.0 is the horizon (full light travel time)
-# 5 - tol: CLEAN algorithm convergence tolerance 
+# 5 - tol: CLEAN algorithm convergence tolerance
 # 6 - window: function for frequency filtering (see uvtools.dspec.gen_window for options)
 # 7 - skip_wgt: skips filtering and flags times with unflagged fraction ~< skip_wgt
 # 8 - maxiter: maximum iterations for aipy.deconv.clean to converge
