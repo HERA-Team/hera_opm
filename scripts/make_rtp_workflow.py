@@ -104,7 +104,7 @@ while True:
                     session.add_rtp_process_event(
                         time=Time.now(), obsid=obsid, event="queued"
                     )
-            except IntegrityError, UniqueViolation:
+            except (IntegrityError, UniqueViolation):
                 continue
 
         # update redis
