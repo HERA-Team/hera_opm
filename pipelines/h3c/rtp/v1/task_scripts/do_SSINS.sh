@@ -15,8 +15,7 @@ streak_sig=${2}
 other_sig=${3}
 N_samp_thresh=${4}
 
-# Inject HH into the filename to get the right raw file
-fn=$(inject_hh ${1})
+# Get the right raw file
 prefix="${fn%.*}"
 
 echo Run_HERA_SSINS.py -f $fn -s $streak_sig -o $other_sig -p prefix -N N_samp_thresh

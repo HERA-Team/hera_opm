@@ -99,6 +99,12 @@ function inject_hh ()
   echo "$fn_hh"
 }
 
+function inject_diff ()
+{
+  local fn_diff="${1%.uvh5}.diff.uvh5"
+  echo "$fn_diff"
+}
+
 function stringContain()
 # the following function was found from a stackoverflow thread
 # want to find a substring inside of string and check the substring is not empty

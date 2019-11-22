@@ -13,9 +13,10 @@ fn="${1}"
 # get the integer portion of the JD
 jd=$(get_int_jd ${fn})
 
-# make the name of the output file based on the input file
-# we put "HH" immediately after the JD
-fn_hh=$(inject_hh ${fn})
+# get the name of the diff file
+fn_diff=$(inject_diff ${fn})
 
-echo librarian upload local-rtp ${fn_hh} ${jd}/${fn_hh}
-librarian upload local-rtp ${fn_hh} ${jd}/${fn_hh}
+echo librarian upload local-rtp ${fn} ${jd}/${fn}
+librarian upload local-rtp ${fn} ${jd}/${fn}
+echo librarian upload local-rtp ${fn_diff} ${jd}/${fn_diff}
+librarian upload local-rtp ${fn_diff} ${jd}/${fn_diff}

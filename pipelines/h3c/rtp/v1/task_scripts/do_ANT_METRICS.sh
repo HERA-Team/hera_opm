@@ -12,7 +12,7 @@ source ${src_dir}/_common.sh
 # 3 - deadCut: Modified z-score cut for most likely dead antenna.
 # 4 - extension: Extension to be appended to the file name.
 # 5 - vis_format: File format for visibility files.
-fn=$(inject_hh ${1})
+fn=${1}
 crossCut=${2}
 deadCut=${3}
 extension=${4}
@@ -27,8 +27,5 @@ pol4="en"
 # make comma-separated list of polarizations
 pols=$(join_by , $pol1 $pol2 $pol3 $pol4)
 # We only want to run ant metrics on sum files
-# check if the string does not contain the word diff
-if ! stringContain diff "${fn}"; then
-  echo ant_metrics_run.py -p $pols --crossCut=${crossCut} --deadCut=${deadCut} --extension=${extension} --vis_format=${vis_format} $fn
-  ant_metrics_run.py -p $pols --crossCut=${crossCut} --deadCut=${deadCut} --extension=${extension} --vis_format=${vis_format} $fn
-fi
+echo ant_metrics_run.py -p $pols --crossCut=${crossCut} --deadCut=${deadCut} --extension=${extension} --vis_format=${vis_format} $fn
+ant_metrics_run.py -p $pols --crossCut=${crossCut} --deadCut=${deadCut} --extension=${extension} --vis_format=${vis_format} $fn

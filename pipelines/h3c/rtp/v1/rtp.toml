@@ -21,12 +21,9 @@ other_sig = 5.0
 N_samp_thresh = 10
 
 [WorkFlow]
-actions = ["SETUP", "EXTRACT_HH", "UPLOAD_HH", "ANT_METRICS",
+actions = ["SETUP", "UPLOAD", "ANT_METRICS",
            "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
            "ADD_LIBRARIAN_SSINS", "ADD_RTP_PROCESS_RECORD", "TEARDOWN"]
-
-[EXTRACT_HH]
-args = ["{basename}"]
 
 [ANT_METRICS]
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
@@ -39,7 +36,7 @@ args = ["{basename}", "${ANT_METRICS_OPTS:extension}"]
 [ADD_MC_ANT_METRICS]
 args = ["{basename}", "${ANT_METRICS_OPTS:extension}"]
 
-[UPLOAD_HH]
+[UPLOAD]
 args = ["{basename}"]
 
 [ADD_RTP_PROCESS_RECORD]
