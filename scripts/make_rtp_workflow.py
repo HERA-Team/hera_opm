@@ -11,6 +11,8 @@ from astropy.time import Time
 import redis
 import h5py
 import numpy as np
+from psycopg2.errors import UniqueViolation
+from sqlalchemy.exc import IntegrityError
 
 import hera_mc.mc as mc
 from hera_opm import mf_tools as mt
@@ -97,10 +99,13 @@ while True:
             obsid = int(np.floor(t0.gps))
 
             # add to M&C
-            with db.sessionmaker() as session:
-                session.add_rtp_process_event(
-                    time=Time.now(), obsid=obsid, event="queued"
-                )
+            try:
+                with db.sessionmaker() as session:
+                    session.add_rtp_process_event(
+                        time=Time.now(), obsid=obsid, event="queued"
+                    )
+            except IntegrityError, UniqueViolation:
+                continue
 
         # update redis
         rsession.hset("rtp:has_new_data", "state", "False")
