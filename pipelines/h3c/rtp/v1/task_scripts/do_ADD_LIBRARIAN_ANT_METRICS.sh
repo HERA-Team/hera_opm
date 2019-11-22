@@ -6,10 +6,10 @@ src_dir="$(dirname "$0")"
 source ${src_dir}/_common.sh
 
 # Parameters are set in the configuration file. Here we define their positions,
-# which must be consisten wtih the config.
+# which must be consistent wtih the config.
 # 1 - (raw) filename
 # 2 - extension: Extension to be appended to the file name.
-fn=$(inject_hh ${1})
+fn=${1}
 extension=${2}
 
 # get the integer portion of the JD

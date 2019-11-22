@@ -15,17 +15,10 @@ fn="${1}"
 shift
 pipeline_list="$@"
 
-# Diff files did not have the ANT metrics phase run on them
-if ! stringContain diff "${fn}"; then
-  # get ant_metrics filename
-  # string-ify the arguments joining with ''
-  # then remove "[", "]", "SETUP,", ",TEARDOWN", and ",ADD_RTP_PROCESS_RECORD"
-  action_string=$(join_by ''  ${pipeline_list[@]} | sed -E "s/\[|\]|(SETUP,)|(,TEARDOWN)|(,ADD_RTP_PROCESS_RECORD)//g")
-else
-  # then remove "[", "]", "SETUP,", ",TEARDOWN", and ",ADD_RTP_PROCESS_RECORD"
-  # "",ANT_METRICS" ",ADD_LIBRARIAN_ANT_METRICS" ",ADD_MC_ANT_METRICS"
-  action_string=$(join_by ''  ${pipeline_list[@]} | sed -E "s/\[|\]|(SETUP,)|(,TEARDOWN)|(,ADD_RTP_PROCESS_RECORD)|(,ANT_METRICS)|(,ADD_LIBRARIAN_ANT_METRICS)|(,ADD_MC_ANT_METRICS)//g")
-fi
+# get ant_metrics filename
+# string-ify the arguments joining with ''
+# then remove "[", "]", "SETUP,", ",TEARDOWN", and ",ADD_RTP_PROCESS_RECORD"
+action_string=$(join_by ''  ${pipeline_list[@]} | sed -E "s/\[|\]|(SETUP,)|(,TEARDOWN)|(,ADD_RTP_PROCESS_RECORD)//g")
 
 echo add_rtp_process_record.py ${fn} --pipeline_list ${action_string}
 add_rtp_process_record.py ${fn} --pipeline_list ${action_string}
