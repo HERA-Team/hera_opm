@@ -53,6 +53,32 @@ while True:
             os.path.join(STORAGE_LOCATION, new_file) for new_file in new_files
         ]
 
+        # make M&C RTP process events for each file
+        parser = mc.get_mc_argument_parser()
+        args = parser.parse_args("")
+        db = mc.connect_to_mc_db(args)
+        for filename in file_paths:
+            try:
+                # get time_array from file
+                with h5py.File(filename, "r") as h5f:
+                    time_array = h5f["Header/time_array"][()]
+            except KeyError:
+                # time_array not in file for some reason; ignore it
+                file_paths.remove(filename)
+                continue
+            # convert time_array entry to obsid
+            t0 = Time(np.unique(time_array)[0], scale="utc", format="jd")
+            obsid = int(np.floor(t0.gps))
+
+            # add to M&C
+            try:
+                with db.sessionmaker() as session:
+                    session.add_rtp_process_event(
+                        time=Time.now(), obsid=obsid, event="queued"
+                    )
+            except (IntegrityError, UniqueViolation):
+                continue
+
         # make target directory if it doesn't exist
         date = datetime.date.today().strftime("%y%m%d")
         MF_LOCATION = os.path.join("/home/obs/rtp_makeflow", date)
@@ -86,26 +112,6 @@ while True:
                     e.cmd, e.returncode, e.output, e.stderr
                 )
             )
-
-        # make M&C RTP process events for each file
-        parser = mc.get_mc_argument_parser()
-        args = parser.parse_args("")
-        db = mc.connect_to_mc_db(args)
-        for filename in file_paths:
-            # get obsid
-            with h5py.File(filename, "r") as h5f:
-                time_array = h5f["Header/time_array"][()]
-            t0 = Time(np.unique(time_array)[0], scale="utc", format="jd")
-            obsid = int(np.floor(t0.gps))
-
-            # add to M&C
-            try:
-                with db.sessionmaker() as session:
-                    session.add_rtp_process_event(
-                        time=Time.now(), obsid=obsid, event="queued"
-                    )
-            except (IntegrityError, UniqueViolation):
-                continue
 
         # update redis
         rsession.hset("rtp:has_new_data", "state", "False")
