@@ -21,7 +21,7 @@ other_sig = 5.0
 N_samp_thresh = 10
 
 [WorkFlow]
-actions = ["SETUP", "UPLOAD", "ANT_METRICS",
+actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
            "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
            "ADD_LIBRARIAN_SSINS", "ADD_RTP_PROCESS_RECORD", "TEARDOWN"]
 
@@ -38,6 +38,11 @@ args = ["{basename}", "${ANT_METRICS_OPTS:extension}"]
 
 [UPLOAD]
 args = ["{basename}"]
+
+[MAKE_SESSION]
+time_prereqs = "UPLOAD"
+n_time_neighbors = "all"
+args = ["{basename}","{prev_basename}"]
 
 [ADD_RTP_PROCESS_RECORD]
 args = ["{basename}", "${WorkFlow:actions}"]
