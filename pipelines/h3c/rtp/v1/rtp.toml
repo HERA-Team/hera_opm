@@ -23,6 +23,16 @@ N_samp_thresh = 0
 [NB_OPTS]
 basenbdir = '/home/obs/src/H3C_plots'
 
+[REDCAL_OPTS]
+ant_z_thresh = 4.0
+solar_horizon = 0.0
+nInt_to_load = 8
+flag_nchan_low = 0
+flag_nchan_high = 0
+min_bl_cut = 15
+max_bl_cut = 100
+iter0_prefix = ".iter0"
+
 [WorkFlow]
 actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
            "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
@@ -63,3 +73,13 @@ args = ["{basename}", "${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
 
 [ADD_LIBRARIAN_SSINS]
 args = ["{basename}"]
+
+[REDCAL]
+args = ["{basename}", "${REDCAL_OPTS:ant_z_thresh}",
+        "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
+        "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
+        "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}",
+        "${REDCAL_OPTS:iter0_prefix}", "${ANT_METRICS_OPTS:extension}"]
+
+[ADD_LIBRARIAN_REDCAL]
+args = ["{basename}", "${REDCAL_OPTS:iter0_prefix}"]
