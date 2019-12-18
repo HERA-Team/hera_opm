@@ -18,7 +18,7 @@ vis_format = "uvh5"
 [SSINS_OPTS]
 streak_sig = 20.0
 other_sig = 5.0
-N_samp_thresh = 10
+N_samp_thresh = 0
 
 [WorkFlow]
 actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
