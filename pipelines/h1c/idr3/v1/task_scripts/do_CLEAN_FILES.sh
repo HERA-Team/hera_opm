@@ -25,3 +25,7 @@ firstcal_fn=${uvh5_fn%.uvh5}.first.calfits
 echo rm -rfv ${firstcal_fn}
 rm -rfv ${firstcal_fn}
 
+# remove unflagged abscal files
+abscal_fn=${uvh5_fn%.uvh5}.abs.calfits
+echo rm -rfv ${abscal_fn}
+rm -rfv ${abscal_fn}
