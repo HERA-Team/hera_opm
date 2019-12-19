@@ -10,17 +10,15 @@ source ${src_dir}/_common.sh
 # 1 - filename
 fn="${1}"
 
-# get relevant files, removing base extension and appending new extensions
-omni_cal=`echo ${fn%.*}.omni.calfits`
-flagged_abs_cal=`echo ${fn%.*}.flagged_abs.calfits`
-smooth_abs_cal=`echo ${fn%.*}.smooth_abs.calfits`
-omni_vis=`echo ${fn%.*}.omni_vis.uvh5`
-flagged_abs_vis=`echo ${fn%.*}.flagged_abs_vis.uvh5`
-smooth_abs_vis=`echo ${fn%.*}.smooth_abs_vis.uvh5`
+# make sure input file is correct uvh5 file
+uvh5_fn=$(remove_pol $fn)
+uvh5_fn=${uvh5_fn%.uv}.uvh5
 
-# Update omnical visibility solution with flagged_abs calibration
-echo apply_cal.py ${omni_vis} ${flagged_abs_vis} --new_cal ${flagged_abs_cal} --old_cal ${omni_cal} --redundant_solution --clobber --vis_units Jy
-apply_cal.py ${omni_vis} ${flagged_abs_vis} --new_cal ${flagged_abs_cal} --old_cal ${omni_cal} --redundant_solution --clobber --vis_units Jy
+# get relevant files, removing base extension and appending new extensions
+omni_cal=`echo ${uvh5_fn%.*}.omni.calfits`
+smooth_abs_cal=`echo ${uvh5_fn%.*}.smooth_abs.calfits`
+omni_vis=`echo ${uvh5_fn%.*}.omni_vis.uvh5`
+smooth_abs_vis=`echo ${fn%.*}.smooth_abs_vis.uvh5`
 
 # Update omnical visibility solution with smooth_abs calibration
 echo apply_cal.py ${omni_vis} ${smooth_abs_vis} --new_cal ${smooth_abs_cal} --old_cal ${omni_cal} --redundant_solution --clobber --vis_units Jy

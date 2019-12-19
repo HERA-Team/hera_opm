@@ -8,12 +8,6 @@ source ${src_dir}/_common.sh
 # define input arguments
 fn="${1}"
 
-# remove antmetrics
-am_fn=$(remove_pol ${fn})
-am_fn=${am_fn}.ant_metrics.json
-echo rm -rfv ${am_fn}
-rm -rfv ${am_fn}
-
 # remove uvh5 files
 uvh5_fn=$(remove_pol ${fn})
 uvh5_fn=${uvh5_fn%.uv}.uvh5

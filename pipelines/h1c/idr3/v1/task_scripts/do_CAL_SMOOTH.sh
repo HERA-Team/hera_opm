@@ -32,13 +32,17 @@ freq_threshold="${9}"
 time_threshold="${10}"
 ant_threshold="${11}"
 
+# make sure input file is correct uvh5 file
+uvh5_fn=$(remove_pol $fn)
+uvh5_fn=${uvh5_fn%.uv}.uvh5
+
 # get list of all calfiles for a day
-jd=$(get_jd $fn)
+jd=$(get_jd $uvh5_fn)
 int_jd=${jd:0:7}
 calfiles=`echo zen.${int_jd}.*.flagged_abs.calfits`
 
 # make the name of this calfits file for --run_if_first option
-this_calfile=`echo ${fn%.*}.flagged_abs.calfits`
+this_calfile=`echo ${uvh5_fn%.*}.flagged_abs.calfits`
 
 echo smooth_cal_run.py ${calfiles} --infile_replace .flagged_abs. --outfile_replace .smooth_abs. --clobber \
                   --pick_refant --run_if_first ${this_calfile} --freq_scale ${freq_scale} \
