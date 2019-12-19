@@ -132,6 +132,7 @@ makeflow_dir=`dirname $toml_path`
 
 for jd in ${jdArray[@]}; do
     # make folder for raw data and makeflow scripts
+    cd $root_dir
     mkdir -p $jd
     cd $makeflow_dir
     mkdir -p $jd
