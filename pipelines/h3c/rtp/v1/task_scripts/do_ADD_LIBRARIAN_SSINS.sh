@@ -13,7 +13,7 @@ fn=${1}
 # get the integer portion of the JD
 jd=$(get_int_jd ${1})
 
-midfix="_SSINS_"
+midfix=".SSINS."
 prefix="${fn%.*}"${midfix}
 
 for suffix in data.h5 z_score.h5 mask.h5 flags.h5 match_events.yml; do
