@@ -351,7 +351,9 @@ def test_process_batch_options_htcondor():
     ncpu = 1
     mail_user = "youremail@example.org"
     batch_system = "htcondor"
-    batch_options = mt.process_batch_options(mem, ncpu, mail_user, batch_system=batch_system)
+    batch_options = mt.process_batch_options(
+        mem, ncpu, mail_user, batch_system=batch_system
+    )
     assert "request_memory = 8000 M \\n " in batch_options
     assert "\\n request_cpus = 1 \\n" in batch_options
     assert "\\n notify_user = youremail@example.org" in batch_options
