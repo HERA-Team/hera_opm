@@ -16,8 +16,14 @@ jd=$(get_int_jd ${1})
 midfix=".SSINS."
 prefix="${fn%.*}"${midfix}
 
+# make a new directory
+dirname="${prefix::-1}"
+mkdir "$dirname"
+
 for suffix in data.h5 z_score.h5 mask.h5 flags.h5 match_events.yml; do
   file=${prefix}${suffix}
-  echo librarian upload local-rtp $file ${jd}/$file
-  librarian upload local-rtp $file ${jd}/$file
+  mv $file $dirname
 done
+
+echo librarian upload local-rtp $dirname ${jd}/$dirname
+librarian upload local-rtp $dirname ${jd}/$dirname
