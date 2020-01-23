@@ -190,7 +190,8 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
     return sorted_obsids
 
 
-def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors="1"):
+def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors="1",
+                                    centered=True):
     """
     Make a list of neighbors in time for prereqs.
 
@@ -208,6 +209,10 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
     n_neighbors : str
         Number of neighboring time files to append to list. If set to the
         string "all", then all neighbors from that JD are added.
+    centered : bool, optional
+        Whether the provided obsid should be in the center of the neighbors.
+        If True (default), returns n_neighbors on either side of obsid.
+        If False, returns original obsid _and_ n_neighbors following.
 
     Returns
     -------
@@ -228,7 +233,7 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
     jd = get_jd(obsid)
 
     # find the neighbors of current obsid in list of obsids
-    obsids = sort_obsids(obsids, jd)
+    obsids = sort_obsids(obsids, jd=jd)
     )
     try:
         obs_idx = obsids.index(obsid)
@@ -247,7 +252,7 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
         if n_neighbors <= 0:
             raise ValueError("n_neighbors must be a postitive integer")
         # get n_neighbors before and after; make sure we don't have an IndexError
-        i0 = max(obs_idx - n_neighbors, 0)
+        i0 = max(obs_idx - centered * n_neighbors, 0)
         i1 = min(obs_idx + n_neighbors + 1, len(obsids))
 
     # build list of output files to wait for
