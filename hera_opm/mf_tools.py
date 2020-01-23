@@ -157,7 +157,7 @@ def make_outfile_name(obsid, action, pol_list=[]):
     return outfiles
 
 
-def sort_obsids(obsids, jd=None):
+def sort_obsids(obsids, jd=None, return_basenames=True):
     """
     Sort obsids in a given day.
 
@@ -168,6 +168,8 @@ def sort_obsids(obsids, jd=None):
     jd : str, optional
         The Julian date to include in sorted obsids. If not provided, includes
         all obsids regardless of day.
+    return_basenames : bool, optional
+        Whether to return only basenames of paths of obsids. Default is True.
 
     Returns
     -------
@@ -177,12 +179,14 @@ def sort_obsids(obsids, jd=None):
     if jd is None:
         jd = ''
     # need to get just the filename, and just ones on the same day
-    sorted_obsids = sorted(
-        [
-            os.path.basename(os.path.abspath(o))
-            for o in obsids
-            if jd in os.path.basename(os.path.abspath(o))
-        ]
+    argsort = sorted(list(range(len(obsids))),
+                          key=[os.path.basename(os.path.abspath(o))
+                          for o in obsids
+                          if jd in os.path.basename(os.path.abspath(o))])
+    sorted_obsids = obsids[argsort]
+    if return_basenames:
+        sorted_obsids = [os.path.basename(obsid) for obsid in sorted_obsids]
+
     return sorted_obsids
 
 
