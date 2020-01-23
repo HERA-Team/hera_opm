@@ -96,7 +96,7 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
     -------
     entries : list of str
         List of entries contained in the config file. If item is not present, and
-        required is False, an empty list is returned.
+        required is False, None is returned.
 
     Raises
     ------
@@ -157,6 +157,35 @@ def make_outfile_name(obsid, action, pol_list=[]):
     return outfiles
 
 
+def sort_obsids(obsids, jd=None):
+    """
+    Sort obsids in a given day.
+
+    Parameters
+    ----------
+    obsids : list of str
+        A list of all obsids to be sorted.
+    jd : str, optional
+        The Julian date to include in sorted obsids. If not provided, includes
+        all obsids regardless of day.
+
+    Returns
+    -------
+    sortd_obsids : list of str
+        Basenames of obsids, sorted by filename for given Julian day.
+    """
+    if jd is None:
+        jd = ''
+    # need to get just the filename, and just ones on the same day
+    sorted_obsids = sorted(
+        [
+            os.path.basename(os.path.abspath(o))
+            for o in obsids
+            if jd in os.path.basename(os.path.abspath(o))
+        ]
+    return sorted_obsids
+
+
 def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors="1"):
     """
     Make a list of neighbors in time for prereqs.
@@ -195,13 +224,7 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
     jd = get_jd(obsid)
 
     # find the neighbors of current obsid in list of obsids
-    # need to get just the filename, and just ones on the same day
-    obsids = sorted(
-        [
-            os.path.basename(os.path.abspath(o))
-            for o in obsids
-            if jd in os.path.basename(os.path.abspath(o))
-        ]
+    obsids = sort_obsids(obsids, jd)
     )
     try:
         obs_idx = obsids.index(obsid)
