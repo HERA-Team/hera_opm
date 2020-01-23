@@ -717,7 +717,8 @@ def build_analysis_makeflow_from_config(
             setup_outfiles = [outfile]
 
         # main loop over actual data files
-        for obsid in obsids:
+        sorted_obsids = sort_obsids(obsids, return_basenames=False)
+        for obsind, obsid in enumerate(sorted_obsids):
             # get parent directory
             abspath = os.path.abspath(obsid)
             parent_dir = os.path.dirname(abspath)
@@ -730,6 +731,11 @@ def build_analysis_makeflow_from_config(
                     continue
                 if action == "TEARDOWN":
                     continue
+                stride_length = get_config_entry(config, action, "stride_length",
+                                                 required=False)
+                if stride_length is not None:
+                    if obsind % int(stride_length) != 0:
+                        continue
                 # start list of input files
                 infiles = []
 
