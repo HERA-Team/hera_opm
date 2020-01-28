@@ -23,7 +23,7 @@ N_samp_thresh = 0
 [WorkFlow]
 actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
            "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
-           "ADD_LIBRARIAN_SSINS", "ADD_RTP_PROCESS_RECORD", "TEARDOWN"]
+           "ADD_LIBRARIAN_SSINS", "ADD_RTP_PROCESS_RECORD"]
 
 [ANT_METRICS]
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
@@ -45,6 +45,8 @@ n_time_neighbors = "all"
 args = ["{basename}","{prev_basename}"]
 
 [ADD_RTP_PROCESS_RECORD]
+time_prereqs = "MAKE_SESSION"
+n_time_neighbors = "all"
 args = ["{basename}", "${WorkFlow:actions}"]
 
 [SSINS]
