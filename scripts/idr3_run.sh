@@ -150,5 +150,5 @@ for jd in ${jdArray[@]}; do
         echo | mailx -s "idr3_failed on JD $jd" jsdillon@berkeley.edu
         exit 1
     fi
-    echo Finished $jd 
+    echo Finished $jd
 done
