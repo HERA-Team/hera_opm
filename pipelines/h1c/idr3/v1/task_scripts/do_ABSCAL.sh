@@ -32,5 +32,5 @@ uvh5_fn=${uvh5_fn%.uv}.uvh5
 omni_fn=`echo ${uvh5_fn%.*}.omni.calfits`
 
 # call omni-abscal script; see hera_cal.abscal for more details
-echo post_redcal_abscal_run.py ${uvh5_fn} ${omni_fn} ${model_files} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} --max_bl_cut ${max_bl_cut}  --phs_max_iter ${phs_max_iter} --phs_conv_crit ${phs_conv_crit} --edge_cut ${edge_cut} --clobber --verbose 
+echo post_redcal_abscal_run.py ${uvh5_fn} ${omni_fn} ${model_files} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} --max_bl_cut ${max_bl_cut}  --phs_max_iter ${phs_max_iter} --phs_conv_crit ${phs_conv_crit} --edge_cut ${edge_cut} --clobber --verbose
 post_redcal_abscal_run.py ${uvh5_fn} ${omni_fn} ${model_files} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} --max_bl_cut ${max_bl_cut}  --phs_max_iter ${phs_max_iter} --phs_conv_crit ${phs_conv_crit} --edge_cut ${edge_cut} --clobber --verbose

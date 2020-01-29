@@ -46,4 +46,3 @@ metrics_f=`echo ${uvh5_fn%.*}.uv.ant_metrics.json`
 
 echo redcal_run.py ${uvh5_fn} --ex_ants ${exants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} --max_bl_cut ${max_bl_cut} --clobber --verbose
 redcal_run.py ${uvh5_fn} --ex_ants ${exants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} --max_bl_cut ${max_bl_cut} --clobber --verbose
-
