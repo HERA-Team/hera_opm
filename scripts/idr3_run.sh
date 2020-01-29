@@ -147,7 +147,7 @@ for jd in ${jdArray[@]}; do
         echo -n .
     done
     if [ -f "failed.out" ]; then
-        mail plaplant@nrao.edu "idr3_failed on JD $jd"
+        echo | mailx -s "idr3_failed on JD $jd" jsdillon@berkeley.edu
         exit 1
     fi
     echo Finished $jd 
