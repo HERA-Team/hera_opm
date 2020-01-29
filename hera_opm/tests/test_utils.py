@@ -1,7 +1,5 @@
 """Tests for utils.py"""
 import pytest
-import os
-from hera_opm.data import DATA_PATH
 import hera_opm.utils as utils
 
 

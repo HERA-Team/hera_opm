@@ -57,10 +57,10 @@ setup_args = {
     "scripts": glob("scripts/*.py") + glob("scripts/*.sh"),
     "version": version.version,
     "package_data": {"hera_opm": data_files},
-    "install_requires": ["toml>=0.9.4", "six"],
+    "install_requires": ["toml>=0.9.4"],
     "zip_safe": False,
-    "setup_requires": ["pytest-runner", "toml>=0.9.4", "six"],
-    "tests_require": ["pytest", "toml>=0.9.4", "six"],
+    "setup_requires": ["pytest-runner", "toml>=0.9.4"],
+    "tests_require": ["pytest", "toml>=0.9.4"],
 }
 
 if __name__ == "__main__":

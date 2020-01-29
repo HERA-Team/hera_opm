@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 """Daemon script for automatically generating a makeflow for new raw data."""
 
-from __future__ import print_function, division, absolute_import
-
 import os
-import sys
 import time
 import datetime
 import subprocess
@@ -14,6 +11,8 @@ from astropy.time import Time
 import redis
 import h5py
 import numpy as np
+from psycopg2.errors import UniqueViolation
+from sqlalchemy.exc import IntegrityError
 
 import hera_mc.mc as mc
 from hera_opm import mf_tools as mt
@@ -27,6 +26,9 @@ STORAGE_LOCATION = "/mnt/sn1"
 WORKFLOW_CONFIG = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/rtp.toml"
 CONDA_ENV = "RTP"
 
+# get around potential problem of HDF5 not being able to lock files
+os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
+
 # make a redis pool and initialize connection
 redis_pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=0)
 rsession = redis.Redis(connection_pool=redis_pool)
@@ -37,17 +39,45 @@ while True:
     if rsession is None:
         rsession = redis.Redis(connection_pool=redis_pool)
 
-    rkey = rsession.hget("rtp:has_new_data", "state")
-    if sys.version_info.major > 2:
-        rkey = rkey.decode("utf-8")
+    rkey = rsession.hget("rtp:has_new_data", "state").decode("utf-8")
     if rkey == "True":
         # fetch the list of files generated
-        new_files = rsession.lrange("rtp:file_list", 0, -1)
-        if sys.version_info.major > 2:
-            new_files = [new_file.decode("utf-8") for new_file in new_files]
+        new_files = [
+            new_file.decode("utf-8")
+            for new_file in rsession.lrange("rtp:file_list", 0, -1)
+        ]
+        # drop diff files from list
+        new_files = [new_file for new_file in new_files if "diff" not in new_file]
+
         file_paths = [
             os.path.join(STORAGE_LOCATION, new_file) for new_file in new_files
         ]
+
+        # make M&C RTP process events for each file
+        parser = mc.get_mc_argument_parser()
+        args = parser.parse_args("")
+        db = mc.connect_to_mc_db(args)
+        for filename in file_paths:
+            try:
+                # get time_array from file
+                with h5py.File(filename, "r") as h5f:
+                    time_array = h5f["Header/time_array"][()]
+            except KeyError:
+                # time_array not in file for some reason; ignore it
+                file_paths.remove(filename)
+                continue
+            # convert time_array entry to obsid
+            t0 = Time(np.unique(time_array)[0], scale="utc", format="jd")
+            obsid = int(np.floor(t0.gps))
+
+            # add to M&C
+            try:
+                with db.sessionmaker() as session:
+                    session.add_rtp_process_event(
+                        time=Time.now(), obsid=obsid, event="queued"
+                    )
+            except (IntegrityError, UniqueViolation):
+                continue
 
         # make target directory if it doesn't exist
         date = datetime.date.today().strftime("%y%m%d")
@@ -82,23 +112,6 @@ while True:
                     e.cmd, e.returncode, e.output, e.stderr
                 )
             )
-
-        # make M&C RTP process events for each file
-        parser = mc.get_mc_argument_parser()
-        args = parser.parse_args("")
-        db = mc.connect_to_mc_db(args)
-        for filename in file_paths:
-            # get obsid
-            with h5py.File(filename, "r") as h5f:
-                time_array = h5f["Header/time_array"][()]
-            t0 = Time(np.unique(time_array)[0], scale="utc", format="jd")
-            obsid = int(np.floor(t0.gps))
-
-            # add to M&C
-            with db.sessionmaker() as session:
-                session.add_rtp_process_event(
-                    time=Time.now(), obsid=obsid, event="queued"
-                )
 
         # update redis
         rsession.hset("rtp:has_new_data", "state", "False")

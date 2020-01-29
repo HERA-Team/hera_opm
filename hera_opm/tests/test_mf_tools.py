@@ -1,10 +1,9 @@
-"""Tests for mf_tools.py"""
+"""Tests for mf_tools.py."""
 import pytest
 import os
 import shutil
 import gzip
 import glob
-import six
 import toml
 
 from . import BAD_CONFIG_PATH
@@ -13,7 +12,7 @@ from .. import mf_tools as mt
 
 # define a pytest marker for skipping lstbin tests
 try:
-    import hera_cal
+    import hera_cal  # noqa
 
     hc_installed = True
 except ImportError:
@@ -25,6 +24,7 @@ hc_skip = pytest.mark.skipif(
 
 @pytest.fixture(scope="module")
 def config_options():
+    """Define commonly used config options."""
     config_dict = {}
     config_dict["config_file"] = os.path.join(
         DATA_PATH, "sample_config", "nrao_rtp.toml"
@@ -75,6 +75,7 @@ def config_options():
 
 
 def test_get_jd():
+    """Test getting the JD from a typical filename."""
     # send in a sample file name
     filename = "zen.2458000.12345.xx.HH.uv"
     jd = mt.get_jd(filename)
@@ -83,6 +84,7 @@ def test_get_jd():
 
 
 def test_get_config_entry(config_options):
+    """Test getting a specific entry from a config file."""
     # retreive config
     config = toml.load(config_options["config_file"])
 
@@ -103,6 +105,7 @@ def test_get_config_entry(config_options):
 
 
 def test_make_outfile_name(config_options):
+    """Test making the name of an output file for a specific step."""
     # define args
     obsid = config_options["obsids_pol"][0]
     action = "OMNICAL"
@@ -274,7 +277,7 @@ def test_process_batch_options_slurm():
     batch_system = "slurm"
     batch_options = mt.process_batch_options(mem, ncpu, mail_user, queue, batch_system)
     assert "--mem 8000M" in batch_options
-    assert "-c 1" in batch_options
+    assert "-n 1" in batch_options
     assert "--mail-user youremail@example.org" in batch_options
     assert "-p hera" in batch_options
 
@@ -899,9 +902,7 @@ def test_consolidate_logs():
 
     # make sure that individual logs' content was transferred over
     with gzip.open(output_gz, "rb") as f_out:
-        data = f_out.read()
-        if six.PY3:
-            data = data.decode("utf-8")
+        data = f_out.read().decode("utf-8")
         out_lines = set(data.splitlines())
         print(out_lines)
         for fn in input_files:

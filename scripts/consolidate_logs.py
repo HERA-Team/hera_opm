@@ -4,8 +4,6 @@
 # Licensed under the 2-clause BSD License
 """Script for consolidating logs from a completed makeflow run."""
 
-from __future__ import print_function, division, absolute_import
-import os
 from hera_opm import mf_tools as mt
 from hera_opm import utils
 

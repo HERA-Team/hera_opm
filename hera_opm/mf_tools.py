@@ -3,18 +3,13 @@
 # Licensed under the 2-clause BSD License
 """Module for converting a config file into a makeflow script."""
 
-from __future__ import print_function, division, absolute_import
-
 import os
 import re
-import sys
 import time
 import gzip
 import shutil
 import subprocess
 import warnings
-import six
-from six.moves import range, map, zip
 import glob
 import toml
 
@@ -290,7 +285,7 @@ def process_batch_options(
     elif batch_system.lower() == "slurm":
         batch_options = "--mem {:d}M".format(mem)
         if ncpu is not None:
-            batch_options += " -c {:d}".format(ncpu)
+            batch_options += " -n {:d}".format(ncpu)
         if mail_user is not None:
             batch_options += " --mail-user {}".format(mail_user)
         if queue is not None:
@@ -570,7 +565,7 @@ def build_analysis_makeflow_from_config(
     if timeout is not None:
         # check that the `timeout' command exists on the system
         try:
-            out = subprocess.check_output(["timeout", "--help"])
+            subprocess.check_output(["timeout", "--help"])
         except OSError:
             warnings.warn(
                 'A value for the "timeout" option was specified,'
@@ -713,7 +708,7 @@ def build_analysis_makeflow_from_config(
                         prereqs = [prereqs]
                     for prereq in prereqs:
                         try:
-                            ip = workflow.index(prereq)
+                            workflow.index(prereq)
                         except ValueError:
                             raise ValueError(
                                 'Prereq "{0}" for action "{1}" not found in main '
@@ -780,7 +775,7 @@ def build_analysis_makeflow_from_config(
                         infiles_pol = infiles
                         for tp in time_prereqs:
                             try:
-                                ip = workflow.index(tp)
+                                workflow.index(tp)
                             except ValueError:
                                 raise ValueError(
                                     'Time prereq "{0}" for action "{1}" not found in main '
@@ -849,9 +844,7 @@ def build_analysis_makeflow_from_config(
                         print("else", file=f2)
                         if mandc_report:
                             print(
-                                "  add_rtp_process_event.py {} errored".format(
-                                    filename
-                                ),
+                                "  add_rtp_process_event.py {} error".format(filename),
                                 file=f2,
                             )
                         print(
@@ -1015,7 +1008,7 @@ def build_lstbin_makeflow_from_config(
     if timeout is not None:
         # check that the `timeout' command exists on the system
         try:
-            out = subprocess.check_output(["timeout", "--help"])
+            subprocess.check_output(["timeout", "--help"])
         except OSError:
             warnings.warn(
                 'A value for the "timeout" option was specified,'
@@ -1110,10 +1103,6 @@ def build_lstbin_makeflow_from_config(
                 _datafiles = [
                     sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
                 ]
-                if six.PY2:
-                    _datafiles = [
-                        [df.encode("utf-8") for df in li] for li in _datafiles
-                    ]
 
                 output = lstbin.config_lst_bin_files(
                     _datafiles,

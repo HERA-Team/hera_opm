@@ -3,14 +3,9 @@
 # Licensed under the 2-clause BSD license
 """Module for generating version info."""
 
-from __future__ import print_function, division, absolute_import
-
 import json
 import os
 import subprocess
-import sys
-
-PY2 = sys.version_info < (3, 0)
 
 
 def construct_version_info():
@@ -55,13 +50,9 @@ def construct_version_info():
 
         data = data.strip()
 
-        if PY2:
-            return data
         return data.decode("utf-8")
 
     def unicode_to_str(u):
-        if PY2:
-            return u.encode("utf-8")
         return u
 
     version_file = os.path.join(hera_opm_dir, "VERSION")
@@ -76,7 +67,6 @@ def construct_version_info():
         git_branch = get_git_output(
             ["rev-parse", "--abbrev-ref", "HEAD"], capture_stderr=True
         )
-        git_version = get_git_output(["describe", "--tags", "--abbrev=0"])
     except subprocess.CalledProcessError:  # pragma: no cover
         try:
             # Check if a GIT_INFO file was created when installing package
@@ -112,7 +102,7 @@ git_branch = version_info["git_branch"]
 
 # String to add to history of any files written with this version of hera_opm
 hera_opm_version_str = "hera_opm version: " + version + "."
-if git_hash is not "":
+if git_hash != "":
     hera_opm_version_str += (
         "  Git origin: "
         + git_origin

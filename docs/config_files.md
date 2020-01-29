@@ -107,7 +107,7 @@ One of the entries replaced in the `args` section is `{basename}` (that exact
 string, including the curly braces), which is the root name of the file. For
 instance, if the obsid specified when constructing the makeflow file is
 `zen.2458000.12345.xx.uv`, then this name will be replaced anytime `{basename}`
-is encountered in the `args`. 
+is encountered in the `args`.
 
 In addition to the `{basename}` substitution, entries from other parts of the
 config file can be substituted. The syntax for this is to use:
@@ -136,4 +136,3 @@ This will be equivalent to calling:
 ```bash
 $ do_FIRSTCAL.sh zen.2458000.12345.xx.HH.uv /path/to/exants/file.txt
 ```
-
