@@ -26,7 +26,7 @@ basenbdir = '/home/obs/src/H3C_plots'
 [WorkFlow]
 actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
            "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
-           "ADD_LIBRARIAN_SSINS", "ADD_NOTEBOOK", "ADD_RTP_PROCESS_RECORD"]
+           "ADD_LIBRARIAN_SSINS", "MAKE_NOTEBOOK", "ADD_RTP_PROCESS_RECORD"]
 
 [ANT_METRICS]
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
@@ -47,7 +47,7 @@ time_prereqs = "UPLOAD"
 n_time_neighbors = "all"
 args = ["{basename}","{prev_basename}"]
 
-[ADD_NOTEBOOK]
+[MAKE_NOTEBOOK]
 time_prereqs = "UPLOAD"
 n_time_neighbors = "all"
 args = ["{basename}","{prev_basename}","${NB_OPTS:basenbdir}"]
