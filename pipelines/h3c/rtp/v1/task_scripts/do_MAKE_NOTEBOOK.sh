@@ -10,7 +10,7 @@ then
     jd=$(get_int_jd ${1})
 
     OUTPUT=data_inspect_"$jd".ipynb
-    OUTPUTDIR=`pwd`
+    OUTPUTDIR=$3
     BASENBDIR=$3
 
     jupyter nbconvert --output=$OUTPUTDIR/$OUTPUT \
