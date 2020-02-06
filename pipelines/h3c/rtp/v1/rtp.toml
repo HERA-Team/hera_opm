@@ -74,6 +74,8 @@ args = ["{basename}", "${WorkFlow:actions}"]
 [SSINS]
 args = ["{basename}", "${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
         "${SSINS_OPTS:N_samp_thresh}"]
+stride_length = 10
+n_time_neighbors = 9
 
 [ADD_LIBRARIAN_SSINS]
 args = ["{basename}"]
