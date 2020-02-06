@@ -18,5 +18,5 @@ N_samp_thresh=${4}
 # Get the right raw file
 prefix="${fn%.*}"
 
-echo Run_HERA_SSINS.py -f $fn -s $streak_sig -o $other_sig -p $prefix -N $N_samp_thresh
-Run_HERA_SSINS.py -f $fn -s $streak_sig -o $other_sig -p $prefix -N $N_samp_thresh
+echo Run_HERA_SSINS.py -f $fn -s $streak_sig -o $other_sig -p $prefix -N $N_samp_thresh -c
+Run_HERA_SSINS.py -f $fn -s $streak_sig -o $other_sig -p $prefix -N $N_samp_thresh -c
