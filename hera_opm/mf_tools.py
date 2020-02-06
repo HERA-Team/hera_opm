@@ -163,27 +163,30 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
 
     Parameters
     ----------
-    obsids : list of str
+    obsids : list or tuple of str
         A list of all obsids to be sorted.
     jd : str, optional
         The Julian date to include in sorted obsids. If not provided, includes
         all obsids regardless of day.
     return_basenames : bool, optional
         Whether to return only basenames of paths of obsids. Default is True.
+        If False, return full path as given in input.
 
     Returns
     -------
     sortd_obsids : list of str
-        Basenames of obsids, sorted by filename for given Julian day.
+        Obsids (basename or absolute path), sorted by filename for given Julian day.
     """
     if jd is None:
         jd = ''
     # need to get just the filename, and just ones on the same day
-    argsort = sorted(list(range(len(obsids))),
-                          key=[os.path.basename(os.path.abspath(o))
-                          for o in obsids
-                          if jd in os.path.basename(os.path.abspath(o))])
-    sorted_obsids = obsids[argsort]
+    keys = [os.path.basename(os.path.abspath(o)) for o in obsids
+            if jd in os.path.basename(os.path.abspath(o))]
+    to_sort = list(zip(keys, range(len(obsids))))
+    temp = sorted(to_sort, key=lambda obs: obs[0])
+    argsort = [obs[1] for obs in temp]
+
+    sorted_obsids = [obsids[i] for i in argsort]
     if return_basenames:
         sorted_obsids = [os.path.basename(obsid) for obsid in sorted_obsids]
 
