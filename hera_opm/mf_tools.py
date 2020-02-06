@@ -194,7 +194,7 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
 
 
 def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors="1",
-                                    centered=True):
+                                    centered=None):
     """
     Make a list of neighbors in time for prereqs.
 
@@ -230,6 +230,8 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
         not positive.
 
     """
+    if centered is None:
+        centered = True
     outfiles = []
 
     # extract the integer JD of the current file
@@ -237,7 +239,7 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
 
     # find the neighbors of current obsid in list of obsids
     obsids = sort_obsids(obsids, jd=jd)
-    )
+
     try:
         obs_idx = obsids.index(obsid)
     except ValueError:
@@ -591,6 +593,16 @@ def build_analysis_makeflow_from_config(
         if idx != len(workflow) - 1:
             raise ValueError("TEARDOWN must be last entry of workflow")
 
+    # Check for actions that use striding, make sure basename is last arg
+    for action in workflow:
+        stride_length = get_config_entry(config, action, "stride_length", required=False)
+        if stride_length is not None:
+            this_args = get_config_entry(config, action, "args", required=True)
+            bn_idx = this_args.index("{basename}")
+            if bn_idx != len(this_args) - 1:
+                raise ValueError("Basename must be last argument for action"
+                                 f" {action} because stride_length is specified.")
+
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
     source_script = get_config_entry(config, "Options", "source_script", required=False)
@@ -737,7 +749,12 @@ def build_analysis_makeflow_from_config(
                 stride_length = get_config_entry(config, action, "stride_length",
                                                  required=False)
                 if stride_length is not None:
-                    if obsind % int(stride_length) != 0:
+                    remainder = obsind % int(stride_length)
+                    if remainder != 0:
+                        # change outfiles_prev to look at first in the stride
+                        prev_obsind = obsind - remainder
+                        outfiles_prev = make_outfile_name(sorted_obsids[prev_obsind],
+                                                          action, pol_list=pol_list)
                         continue
                 # start list of input files
                 infiles = []
@@ -810,6 +827,9 @@ def build_analysis_makeflow_from_config(
                         n_neighbors = get_config_entry(
                             config, action, "n_time_neighbors", required=True
                         )
+                        time_centered = get_config_entry(
+                            config, action, "time_centered", required=False
+                        )
 
                         # get a copy of the infile list; we're going to add to it, but don't want these
                         # entries broadcast across pols
@@ -825,7 +845,8 @@ def build_analysis_makeflow_from_config(
                             # add neighbors for all pols
                             for pol2 in pol_list:
                                 tp_outfiles = make_time_neighbor_outfile_name(
-                                    filename, tp, obsids, pol2, n_neighbors
+                                    filename, tp, obsids, pol2, n_neighbors,
+                                    centered=time_centered
                                 )
                                 for of in tp_outfiles:
                                     infiles_pol.append(of)
