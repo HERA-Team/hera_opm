@@ -101,7 +101,7 @@ function inject_hh ()
 
 function inject_diff ()
 {
-  local fn_diff="${1%.uvh5}.diff.uvh5"
+  local fn_diff=`basename $1 | sed -E "s/\.sum\./.diff./g"`
   echo "$fn_diff"
 }
 
