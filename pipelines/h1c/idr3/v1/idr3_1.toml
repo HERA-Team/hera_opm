@@ -104,7 +104,7 @@ args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD
 prereqs = "XRFI_DAY_THRESHOLD"
 time_prereqs = "XRFI_DAY_THRESHOLD"
 n_time_neighbors = "all"
-mem = 32000
+mem = 48000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
         "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}",
@@ -126,7 +126,7 @@ args = ["{basename}"]
 prereqs = "CAL_SMOOTH"
 time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
-mem = 32000
+mem = 64000
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
 
 [CLEAN_FILES]
