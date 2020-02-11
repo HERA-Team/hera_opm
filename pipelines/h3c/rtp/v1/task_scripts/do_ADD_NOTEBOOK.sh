@@ -1,4 +1,4 @@
-set -e 
+set -e
 
 if [ $2 == "None" ];
 then
@@ -18,4 +18,4 @@ then
     --ExecutePreprocessor.timeout=-1 \
     --execute $BASENBDIR/data_inspect_H3C.ipynb
 fi
-~     
+~

@@ -1,4 +1,4 @@
-set -e 
+set -e
 
 if [ $2 == "None" ];
 then
@@ -6,7 +6,7 @@ then
     source ${src_dir}/_common.sh
 
     export DATA_PATH=`pwd`
-    
+
     jd=$(get_int_jd ${1})
 
     OUTPUT=data_inspect_"$jd".ipynb
@@ -18,4 +18,4 @@ then
     --ExecutePreprocessor.allow_errors=True \
     --ExecutePreprocessor.timeout=-1 \
     --execute $BASENBDIR/data_inspect_H3C.ipynb
-fi     
+fi
