@@ -35,6 +35,11 @@ if ! stringContain diff "${fn}"; then
   echo librarian upload local-rtp ${omnivis_f} ${jd}/${omnivis_f}
   librarian upload local-rtp ${omnivis_f} ${jd}/${omnivis_f}
 
+  # Upload omnical visibility solutions
+  omnimeta_f = `echo ${fn%.uvh5}.omni_meta.hdf5`
+  echo librarian upload local-rtp ${omnimeta_f} ${jd}/${omnimeta_f}
+  librarian upload local-rtp ${omnimeta_f} ${jd}/${omnimeta_f}
+
   # check if iter0 is not empty
   if [ ! -z "$iter0_prefix" ]; then
     iter0_firstcal_f=`echo ${fn%.uvh5}${iter0_prefix}.first.calfits`
@@ -56,6 +61,13 @@ if ! stringContain diff "${fn}"; then
     if [ -f "$iter0_omnivis_f" ]; then
         echo librarian upload local-rtp ${iter0_omnivis_f} ${jd}/${iter0_omnivis_f}
         librarian upload local-rtp ${iter0_omnivis_f} ${jd}/${iter0_omnivis_f}
+    fi
+
+    iter0_omnimeta_f=`echo ${fn%.uvh5}${iter0_prefix}.omni_meta.hdf5`
+    # check if iter0_omnimeta_f exists (not guaranteed if no re-run is triggered)
+    if [ -f "$iter0_omnivis_f" ]; then
+        echo librarian upload local-rtp ${iter0_omnimeta_f} ${jd}/${iter0_omnimeta_f}
+        librarian upload local-rtp ${iter0_omnimeta_f} ${jd}/${iter0_omnimeta_f}
     fi
   fi
 fi
