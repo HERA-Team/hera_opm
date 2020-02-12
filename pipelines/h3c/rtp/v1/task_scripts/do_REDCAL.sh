@@ -49,12 +49,14 @@ else
 fi
 
 # get metrics_json filename, removing extension and appending ant_metrics_extension
-metrics_f=`echo ${fn%.uvh5}${ant_metrics_extension}`
+# TODO: we currently do not trust the output of ant_metrics, so we are ignoring this
+# metrics_f=`echo ${fn%.uvh5}${ant_metrics_extension}`
+# --ant_metrics_file ${metrics_f}
 
 # run redcal
-echo redcal_run.py ${fn} --ex_ants ${ex_ants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} \
+echo redcal_run.py ${fn} --ex_ants ${ex_ants} --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} \
     --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} \
     --max_bl_cut ${max_bl_cut} --iter0_prefix ${iter0_prefix} --clobber --verbose
-redcal_run.py ${fn} --ex_ants ${ex_ants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} \
+redcal_run.py ${fn} --ex_ants ${ex_ants} --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} \
     --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} \
     --max_bl_cut ${max_bl_cut} --iter0_prefix ${iter0_prefix} --clobber --verbose
