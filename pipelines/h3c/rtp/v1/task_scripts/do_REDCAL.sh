@@ -18,26 +18,43 @@ source ${src_dir}/_common.sh
 # 9 - iter0_prefix: if not "", save omnical results after the 0th interation with this prefix iff there will be a rerun
 # 10 - ant_metrics_extension: file extension to replace .uvh5 with to get ant_metrics files
 fn="${1}"
-ant_z_thresh="${2}"
-solar_horizon="${3}"
-flag_nchan_low="${4}"
-flag_nchan_high="${5}"
-nInt_to_load="${6}"
-min_bl_cut="${7}"
-max_bl_cut="${8}"
-iter0_prefix="${9}"
-ant_metrics_extension="${10}"
+bad_ants_dir="${2}"
+ant_z_thresh="${3}"
+solar_horizon="${4}"
+flag_nchan_low="${5}"
+flag_nchan_high="${6}"
+nInt_to_load="${7}"
+min_bl_cut="${8}"
+max_bl_cut="${9}"
+iter0_prefix="${10}"
+ant_metrics_extension="${11}"
+good_statuses="${12}"
 
-# get exants
-# TODO: get exants from M&C
-exants=""
+# extract JD from filename
+jd=$(get_jd ${fn})
+
+# get exants from HERA CM database
+ex_ants_db=`query_ex_ants.py ${jd} ${good_statuses}`
+
+# use awk to round off fractional bit
+jd_int=`echo $jd | awk '{$1=int($1)}1'`
+
+# Get other bad antennas from bad_ants folder
+bad_ants_fn=`echo "${bad_ants_dir}/${jd_int}.txt"`
+if [ -f "${bad_ants_fn}" ]; then
+    ex_ants=$(prep_exants ${bad_ants_fn})
+    ex_ants=`echo "${ex_ants}","${ex_ants_db}"`
+else
+    ex_ants="${ex_ants_db}"
+fi
 
 # get metrics_json filename, removing extension and appending ant_metrics_extension
 metrics_f=`echo ${fn%.uvh5}${ant_metrics_extension}`
 
-echo redcal_run.py ${fn} --ex_ants ${exants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} \
+# run redcal
+echo redcal_run.py ${fn} --ex_ants ${ex_ants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} \
     --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} \
     --max_bl_cut ${max_bl_cut} --iter0_prefix ${iter0_prefix} --clobber --verbose
-redcal_run.py ${fn} --ex_ants ${exants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} \
+redcal_run.py ${fn} --ex_ants ${ex_ants} --ant_metrics_file ${metrics_f}  --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} \
     --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} \
     --max_bl_cut ${max_bl_cut} --iter0_prefix ${iter0_prefix} --clobber --verbose
