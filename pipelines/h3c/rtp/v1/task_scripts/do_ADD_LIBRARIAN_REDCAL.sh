@@ -23,7 +23,7 @@ if ! stringContain diff "${fn}"; then
   # Upload firstcal results
   firstcal_f = `echo ${fn%.uvh5}.first.calfits`
   echo librarian upload local-rtp ${firstcal_f} ${jd}/${firstcal_f}
-  librarian upload local-rtp ${firstcal_f} ${jd}/${firstcal_f}  
+  librarian upload local-rtp ${firstcal_f} ${jd}/${firstcal_f}
 
   # Upload omnical results
   omnical_f = `echo ${fn%.uvh5}.omni.calfits`
