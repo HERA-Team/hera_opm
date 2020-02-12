@@ -3,6 +3,7 @@ makeflow_type = "analysis"
 path_to_do_scripts = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/task_scripts"
 source_script = "~/.bashrc"
 conda_env = "RTP"
+ex_ants_path = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/bad_ants"
 base_mem = 8000
 base_cpu = 1
 batch_system = "slurm"
@@ -32,6 +33,7 @@ flag_nchan_high = 0
 min_bl_cut = 15
 max_bl_cut = 100
 iter0_prefix = ".iter0"
+good_statuses = "digital_ok,calibration_maintenance,calibration_triage,calibration_ok"
 
 [WorkFlow]
 actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
@@ -75,7 +77,7 @@ args = ["{basename}", "${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
 args = ["{basename}"]
 
 [REDCAL]
-args = ["{basename}", "${REDCAL_OPTS:ant_z_thresh}",
+args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
         "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
         "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}",
