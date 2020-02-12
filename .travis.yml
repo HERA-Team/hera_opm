@@ -25,7 +25,7 @@ install:
   - source activate testenv
   - conda install pytest pytest-runner pip numpy scipy matplotlib toml nose astropy ephem flake8 h5py scikit-learn pandas coverage
   - conda install -c conda-forge aipy pyephem
-  - pip install pre-commit black python-coveralls
+  - pip install pre-commit black coveralls
   - pip install git+https://github.com/HERA-Team/pyuvdata.git
   - pip install git+https://github.com/HERA-Team/linsolve.git
   - pip install git+https://github.com/HERA-Team/hera_qm.git
