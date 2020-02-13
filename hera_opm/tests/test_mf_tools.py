@@ -54,6 +54,9 @@ def config_options():
     config_dict["bad_teardown_config_file"] = os.path.join(
         BAD_CONFIG_PATH, "bad_teardown_example.toml"
     )
+    config_dict["stride_config_file"] = os.path.join(
+        DATA_PATH, "sample_config", "rtp_stride_length.toml"
+    )
     config_dict["obsids_pol"] = (
         "zen.2457698.40355.xx.HH.uvcA",
         "zen.2457698.40355.xy.HH.uvcA",
@@ -70,6 +73,12 @@ def config_options():
         "zen.2457698.30355.xx.HH.uvcA",
         "zen.2457698.40355.xx.HH.uvcA",
         "zen.2457698.50355.xx.HH.uvcA",
+    )
+    config_dict["obsids_time_discontinuous"] = (
+        "zen.2457698.30355.xx.HH.uvcA",
+        "zen.2457698.40355.xx.HH.uvcA",
+        "zen.2457698.50355.xx.HH.uvcA",
+        "zen.2457699.30355.xx.HH.uvcA",
     )
     return config_dict
 
@@ -1006,3 +1015,27 @@ def test_build_makeflow_from_config_errors():
         mt.build_makeflow_from_config(["obids"], 3)
 
     return
+
+
+def test_sort_obsids(config_options):
+    # get obsids
+    obsids = config_options["obsids_time"]
+
+    # scramble them and make sure we get a sorted list back
+    obsids_swap = list(obsids)
+    temp = obsids_swap[1]
+    obsids_swap[1] = obsids_swap[0]
+    obsids_swap[0] = temp
+
+    obsids_sort = mt.sort_obsids(obsids_swap)
+    assert tuple(obsids_sort) == obsids
+
+    # also check the "jd" option works
+    obsids_discontinuous = config_options["obsids_time_discontinuous"]
+    obsids_swap = list(obsids_discontinuous)
+    temp = obsids_swap[1]
+    obsids_swap[1] = obsids_swap[0]
+    obsids_swap[0] = temp
+
+    obsids_sort = mt.sort_obsids(obsids_swap, jd="2457698")
+    assert tuple(obsids_sort) == obsids_discontinuous[0:3]

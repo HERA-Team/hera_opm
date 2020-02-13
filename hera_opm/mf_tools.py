@@ -178,10 +178,13 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
         Obsids (basename or absolute path), sorted by filename for given Julian day.
     """
     if jd is None:
-        jd = ''
+        jd = ""
     # need to get just the filename, and just ones on the same day
-    keys = [os.path.basename(os.path.abspath(o)) for o in obsids
-            if jd in os.path.basename(os.path.abspath(o))]
+    keys = [
+        os.path.basename(os.path.abspath(o))
+        for o in obsids
+        if jd in os.path.basename(os.path.abspath(o))
+    ]
     to_sort = list(zip(keys, range(len(obsids))))
     temp = sorted(to_sort, key=lambda obs: obs[0])
     argsort = [obs[1] for obs in temp]
@@ -193,8 +196,9 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
     return sorted_obsids
 
 
-def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors="1",
-                                    centered=None):
+def make_time_neighbor_outfile_name(
+    obsid, action, obsids, pol=None, n_neighbors="1", centered=None
+):
     """
     Make a list of neighbors in time for prereqs.
 
@@ -345,7 +349,15 @@ def process_batch_options(
     return batch_options
 
 
-def prep_args(args, obsid, pol=None, obsids=None):
+def prep_args(
+    args,
+    obsid,
+    pol=None,
+    obsids=None,
+    n_neighbors="1",
+    centered=None,
+    collect_stragglers=None,
+):
     """
     Substitute the polarization string in a filename/obsid with the specified one.
 
@@ -360,6 +372,16 @@ def prep_args(args, obsid, pol=None, obsids=None):
         Polarization to substitute for the one found in obsid.
     obsids : list of str, optional
         Full list of obsids. Required when time-adjacent neighbors are desired.
+    n_neighbors : str
+        Number of neighboring time files to append to list. If set to the
+        string "all", then all neighbors from that JD are added.
+    centered : bool, optional
+        Whether the provided obsid should be in the center of the neighbors.
+        If True (default), returns n_neighbors on either side of obsid.
+        If False, returns original obsid _and_ n_neighbors following.
+    collect_stragglers : bool, optional
+        Whether to lump files close to the end of the list ("stragglers") into
+        the previous group, or belong to their own smaller group.
 
     Returns
     -------
@@ -428,6 +450,26 @@ def prep_args(args, obsid, pol=None, obsids=None):
             args = re.sub(r"\{next_basename\}", "None", args)
         else:
             args = re.sub(r"\{next_basename\}", oids[obs_idx + 1], args)
+
+    if re.search(r"\{obsid_list\}", args):
+        if centered is None:
+            centered = True
+        try:
+            n_neighbors = int(n_neighbors)
+        except ValueError:
+            raise ValueError("n_neighbors must be able to be interpreted as an int.")
+        obsids = sort_obsids(obsids)
+        obs_idx = obsids.index(obsids)
+        n_following = len(obsids) - obs_idx
+        if centered:
+            i1 = max(obs_idx - n_neighbors, 0)
+        else:
+            i1 = obs_idx
+        i2 = min(obs_idx + n_neighbors, len(obsids))
+        if n_following < n_neighbors and collect_stragglers:
+            i2 = len(obsids)
+        file_list = " ".join(obsids[i1:i2])
+        args = re.sub(r"\{stride_list\}", file_list, args)
 
     return args
 
@@ -595,13 +637,17 @@ def build_analysis_makeflow_from_config(
 
     # Check for actions that use striding, make sure basename is last arg
     for action in workflow:
-        stride_length = get_config_entry(config, action, "stride_length", required=False)
+        stride_length = get_config_entry(
+            config, action, "stride_length", required=False
+        )
         if stride_length is not None:
             this_args = get_config_entry(config, action, "args", required=True)
             bn_idx = this_args.index("{basename}")
             if bn_idx != len(this_args) - 1:
-                raise ValueError("Basename must be last argument for action"
-                                 f" {action} because stride_length is specified.")
+                raise ValueError(
+                    "Basename must be last argument for action"
+                    f" {action} because stride_length is specified."
+                )
 
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
@@ -746,15 +792,28 @@ def build_analysis_makeflow_from_config(
                     continue
                 if action == "TEARDOWN":
                     continue
-                stride_length = get_config_entry(config, action, "stride_length",
-                                                 required=False)
+                stride_length = get_config_entry(
+                    config, action, "stride_length", required=False
+                )
+                collect_stragglers = get_config_entry(
+                    config, action, "collect_stragglers", required=False
+                )
                 if stride_length is not None:
                     remainder = obsind % int(stride_length)
-                    if remainder != 0:
+                    if collect_stragglers:
+                        stride_idx = obsind // stride_length
+                        if obsind >= stride_idx * stride_length:
+                            part_of_stragglers = True
+                        else:
+                            part_of_stragglers = False
+                    else:
+                        part_of_stragglers = False
+                    if remainder != 0 and not part_of_stragglers:
                         # change outfiles_prev to look at first in the stride
                         prev_obsind = obsind - remainder
-                        outfiles_prev = make_outfile_name(sorted_obsids[prev_obsind],
-                                                          action, pol_list=pol_list)
+                        outfiles_prev = make_outfile_name(
+                            sorted_obsids[prev_obsind], action, pol_list=pol_list
+                        )
                         continue
                 # start list of input files
                 infiles = []
@@ -845,21 +904,73 @@ def build_analysis_makeflow_from_config(
                             # add neighbors for all pols
                             for pol2 in pol_list:
                                 tp_outfiles = make_time_neighbor_outfile_name(
-                                    filename, tp, obsids, pol2, n_neighbors,
-                                    centered=time_centered
+                                    filename,
+                                    tp,
+                                    obsids,
+                                    pol2,
+                                    n_neighbors,
+                                    centered=time_centered,
                                 )
                                 for of in tp_outfiles:
                                     infiles_pol.append(of)
 
+                        # handle striding options
+                        if stride_length is not None:
+                            n_neighbors = get_config_entry(
+                                config, action, "n_neighbors", required=True
+                            )
+                            centered = get_config_entry(
+                                config, action, "centered", required=True
+                            )
+                            collect_stragglers = get_config_entry(
+                                config, action, "collect_stragglers", required=True
+                            )
+                        else:
+                            n_neighbors = None
+                            centered = None
+                            collect_stragglers = None
+
                         # replace '{basename}' with actual filename
                         # also replace polarization string, and time neighbors
-                        prepped_args = prep_args(args, filename, pol, obsids)
+                        prepped_args = prep_args(
+                            args,
+                            filename,
+                            pol,
+                            obsids,
+                            n_neighbors,
+                            centered,
+                            collect_stragglers,
+                        )
                     else:
                         # just get a copy of the infiles as-is
                         infiles_pol = infiles
+
+                        # handle striding options
+                        if stride_length is not None:
+                            n_neighbors = get_config_entry(
+                                config, action, "n_neighbors", required=True
+                            )
+                            centered = get_config_entry(
+                                config, action, "centered", required=True
+                            )
+                            collect_stragglers = get_config_entry(
+                                config, action, "collect_stragglers", required=True
+                            )
+                        else:
+                            n_neighbors = None
+                            centered = None
+                            collect_stragglers = None
+
                         # replace '{basename}' with actual filename
                         # aslo replace polarization string
-                        prepped_args = prep_args(args, filename, pol)
+                        prepped_args = prep_args(
+                            args,
+                            filename,
+                            pol,
+                            n_neighbors=n_neighbors,
+                            centered=centered,
+                            collect_stragglers=collect_stragglers,
+                        )
 
                     # make logfile name
                     # logfile will capture stdout and stderr
