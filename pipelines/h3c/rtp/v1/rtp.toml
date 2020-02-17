@@ -38,7 +38,8 @@ good_statuses = "digital_ok,digital_maintenance,calibration_maintenance,calibrat
 [WorkFlow]
 actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
            "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
-           "ADD_LIBRARIAN_SSINS", "MAKE_NOTEBOOK", "ADD_RTP_PROCESS_RECORD"]
+           "ADD_LIBRARIAN_SSINS", "MAKE_NOTEBOOK", "ADD_RTP_PROCESS_RECORD",
+           "REDCAL", "ADD_LIBRARIAN_REDCAL"]
 
 [ANT_METRICS]
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
