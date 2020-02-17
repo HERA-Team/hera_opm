@@ -8,9 +8,9 @@ then
     export DATA_PATH=`pwd`
 
     jd=$(get_int_jd ${1})
-    
+
     export JULIANDATE=$jd
-    
+
     OUTPUT=data_inspect_"$jd".ipynb
     OUTPUTDIR=$3
     BASENBDIR=$3
