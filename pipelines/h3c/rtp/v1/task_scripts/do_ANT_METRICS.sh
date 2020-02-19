@@ -27,5 +27,5 @@ pol4="en"
 # make comma-separated list of polarizations
 pols=$(join_by , $pol1 $pol2 $pol3 $pol4)
 # We only want to run ant metrics on sum files
-echo ant_metrics_run.py -p $pols --crossCut=${crossCut} --deadCut=${deadCut} --extension=${extension} --vis_format=${vis_format} $fn
-ant_metrics_run.py -p $pols --crossCut=${crossCut} --deadCut=${deadCut} --extension=${extension} --vis_format=${vis_format} $fn
+echo ant_metrics_run.py -p $pols --crossCut=${crossCut} --deadCut=${deadCut} --extension=${extension} --vis_format=${vis_format} --skip_red_corr $fn
+ant_metrics_run.py -p $pols --crossCut=${crossCut} --deadCut=${deadCut} --extension=${extension} --vis_format=${vis_format} --skip_red_corr $fn
