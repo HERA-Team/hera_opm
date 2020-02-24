@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Tests for mf_tools.py."""
 import pytest
 import os
@@ -1039,3 +1040,118 @@ def test_sort_obsids(config_options):
 
     obsids_sort = mt.sort_obsids(obsids_swap, jd="2457698")
     assert tuple(obsids_sort) == obsids_discontinuous[0:3]
+
+    return
+
+
+def test_prep_args_obsid_list(config_options):
+    # define args to parse
+    obsids_list = config_options["obsids_time"]
+    args = "{obsid_list}"
+    obsid = obsids_list[1]
+
+    args = mt.prep_args(
+        args,
+        obsid,
+        obsids=obsids_list,
+        n_neighbors="1",
+        centered=None,
+        collect_stragglers=False,
+    )
+    prepped_args = " ".join(obsids_list[0:3])
+    assert args == prepped_args
+
+    return
+
+
+def test_prep_args_obsid_list_centered(config_options):
+    # define args to parse
+    obsids_list = config_options["obsids_time"]
+    args = "{obsid_list}"
+    obsid = obsids_list[1]
+
+    args = mt.prep_args(
+        args,
+        obsid,
+        obsids=obsids_list,
+        n_neighbors="1",
+        centered=True,
+        collect_stragglers=False,
+    )
+    prepped_args = " ".join(obsids_list[0:3])
+    assert args == prepped_args
+
+    return
+
+
+def test_prep_args_obsid_list_not_centered(config_options):
+    # define args to parse
+    obsids_list = config_options["obsids_time"]
+    args = "{obsid_list}"
+    obsid = obsids_list[1]
+
+    args = mt.prep_args(
+        args,
+        obsid,
+        obsids=obsids_list,
+        n_neighbors="1",
+        centered=False,
+        collect_stragglers=False,
+    )
+    prepped_args = " ".join(obsids_list[1:3])
+    assert args == prepped_args
+
+    return
+
+
+def test_prep_args_obsid_list_with_stragglers(config_options):
+    # define args to parse
+    obsids_list = config_options["obsids_time"]
+    args = "{obsid_list}"
+    obsid = obsids_list[0]
+
+    args = mt.prep_args(
+        args,
+        obsid,
+        obsids=obsids_list,
+        n_neighbors="1",
+        n_stride="2",
+        centered=False,
+        collect_stragglers=True,
+    )
+    prepped_args = " ".join(obsids_list)
+    assert args == prepped_args
+
+    return
+
+
+def test_prep_args_obsid_list_error(config_options):
+    # define args to parse
+    obsids_list = config_options["obsids_time"]
+    args = "{obsid_list}"
+    obsid = obsids_list[1]
+
+    with pytest.raises(ValueError) as cm:
+        args = mt.prep_args(
+            args,
+            obsid,
+            obsids=obsids_list,
+            n_neighbors="foo",
+            centered=True,
+            collect_stragglers=False,
+        )
+    assert str(cm.value).startswith("n_neighbors must be able to be interpreted")
+
+    with pytest.raises(ValueError) as cm:
+        args = mt.prep_args(
+            args,
+            obsid,
+            obsids=obsids_list,
+            n_neighbors="1",
+            n_stride="foo",
+            centered=True,
+            collect_stragglers=False,
+        )
+    assert str(cm.value).startswith("n_stride must be able to be interpreted")
+
+    return
