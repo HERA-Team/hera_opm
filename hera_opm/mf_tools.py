@@ -355,6 +355,7 @@ def prep_args(
     pol=None,
     obsids=None,
     n_neighbors="1",
+    n_stride="1",
     centered=None,
     collect_stragglers=None,
 ):
@@ -375,6 +376,9 @@ def prep_args(
     n_neighbors : str
         Number of neighboring time files to append to list. If set to the
         string "all", then all neighbors from that JD are added.
+    n_stride : str
+        Number of files to include in a stride. This interacts with
+        `n_neighbors` to define how arguments are generate.
     centered : bool, optional
         Whether the provided obsid should be in the center of the neighbors.
         If True (default), returns n_neighbors on either side of obsid.
@@ -458,18 +462,27 @@ def prep_args(
             n_neighbors = int(n_neighbors)
         except ValueError:
             raise ValueError("n_neighbors must be able to be interpreted as an int.")
+        try:
+            n_stride = int(n_stride)
+        except ValueError:
+            raise ValueError("n_stride must be able to be interpreted as an int.")
         obsids = sort_obsids(obsids)
-        obs_idx = obsids.index(obsids)
-        n_following = len(obsids) - obs_idx
+        obs_idx = obsids.index(obsid)
+        # Compute the number of remaining obsids to process.
+        # We account for the location of the next stride to determine if we
+        # should grab straggling obsids.
+        n_following = len(obsids) - (obs_idx + n_stride)
         if centered:
             i1 = max(obs_idx - n_neighbors, 0)
         else:
             i1 = obs_idx
-        i2 = min(obs_idx + n_neighbors, len(obsids))
-        if n_following < n_neighbors and collect_stragglers:
+        i2 = min(obs_idx + n_neighbors + 1, len(obsids))
+        if n_following < (n_neighbors + 1) and collect_stragglers:
             i2 = len(obsids)
+        print("i1, i2: ", i1, i2)
+        print("n_following: ", n_following)
         file_list = " ".join(obsids[i1:i2])
-        args = re.sub(r"\{stride_list\}", file_list, args)
+        args = re.sub(r"\{obsid_list\}", file_list, args)
 
     return args
 
@@ -642,7 +655,7 @@ def build_analysis_makeflow_from_config(
         )
         if stride_length is not None:
             this_args = get_config_entry(config, action, "args", required=True)
-            bn_idx = this_args.index("{basename}")
+            bn_idx = this_args.index("{obsid_list}")
             if bn_idx != len(this_args) - 1:
                 raise ValueError(
                     "Basename must be last argument for action"
