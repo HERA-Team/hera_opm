@@ -359,87 +359,87 @@ def test_process_batch_options_error():
 
 def test_determine_obsids_to_run_on(config_options):
     output = mt._determine_obsids_to_run_on(
-        config_options['obsids_long_dummy_list'],
+        config_options["obsids_long_dummy_list"],
         5,
-        'test',
+        "test",
         stride_length=1,
         n_time_neighbors=2,
         time_centered=True,
-        collect_stragglers=False
+        collect_stragglers=False,
     )
-    assert output == config_options['obsids_long_dummy_list'][3:8]
+    assert output == config_options["obsids_long_dummy_list"][3:8]
+
 
 def test_determine_obsids_to_run_on_stride_but_no_neighbors(config_options):
     with pytest.raises(ValueError):
         mt._determine_obsids_to_run_on(
-            config_options['obsids_long_dummy_list'],
+            config_options["obsids_long_dummy_list"],
             5,
-            'test',
+            "test",
             stride_length=1,
             time_centered=True,
-            collect_stragglers=False
+            collect_stragglers=False,
         )
+
 
 def test_determine_obsids_to_run_on_defaults(config_options):
     output = mt._determine_obsids_to_run_on(
-        config_options['obsids_long_dummy_list'],
+        config_options["obsids_long_dummy_list"],
         5,
-        'test',
+        "test",
         time_centered=True,
-        collect_stragglers=False
+        collect_stragglers=False,
     )
-    assert output == config_options['obsids_long_dummy_list'][5:6]
+    assert output == config_options["obsids_long_dummy_list"][5:6]
 
     output = mt._determine_obsids_to_run_on(
-        config_options['obsids_long_dummy_list'],
-        5,
-        'test',
-        n_time_neighbors=2,
+        config_options["obsids_long_dummy_list"], 5, "test", n_time_neighbors=2,
     )
-    assert output == config_options['obsids_long_dummy_list'][3:8]
+    assert output == config_options["obsids_long_dummy_list"][3:8]
+
 
 def test_determine_obsids_to_run_on_collect_stragglers(config_options):
     output = mt._determine_obsids_to_run_on(
-        config_options['obsids_long_dummy_list'],
+        config_options["obsids_long_dummy_list"],
         20,
-        'test',
+        "test",
         stride_length=4,
         n_time_neighbors=3,
         time_centered=False,
-        collect_stragglers=True
+        collect_stragglers=True,
     )
-    assert output == config_options['obsids_long_dummy_list'][20:]
+    assert output == config_options["obsids_long_dummy_list"][20:]
+
 
 def test_determine_obsids_to_run_on_errors(config_options):
     with pytest.raises(ValueError):
         mt._determine_obsids_to_run_on(
-            config_options['obsids_long_dummy_list'],
+            config_options["obsids_long_dummy_list"],
             5,
-            'test',
-            stride_length='foo',
-            n_time_neighbors=1
+            "test",
+            stride_length="foo",
+            n_time_neighbors=1,
         )
 
     with pytest.raises(ValueError):
         mt._determine_obsids_to_run_on(
-            config_options['obsids_long_dummy_list'],
-            5,
-            'test',
-            n_time_neighbors='foo',
+            config_options["obsids_long_dummy_list"], 5, "test", n_time_neighbors="foo",
         )
+
 
 @pytest.mark.filterwarnings("ignore:Collecting stragglers")
 def test_determine_obsids_to_run_on_noncontiguous_stragglers(config_options):
     output = mt._determine_obsids_to_run_on(
-        config_options['obsids_long_dummy_list'],
+        config_options["obsids_long_dummy_list"],
         20,
-        'test',
+        "test",
         stride_length=10,
         n_time_neighbors=1,
         time_centered=False,
-        collect_stragglers=True
+        collect_stragglers=True,
     )
-    assert output == config_options['obsids_long_dummy_list'][20:]
+    assert output == config_options["obsids_long_dummy_list"][20:]
+
 
 def test_build_analysis_makeflow_from_config(config_options):
     # define args

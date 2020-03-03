@@ -424,10 +424,10 @@ def _determine_obsids_to_run_on(
     if n_following < (n_time_neighbors + 1) and collect_stragglers:
         if n_time_neighbors + 1 < stride_length - n_time_neighbors * time_centered:
             warnings.warn(
-                f'Collecting stragglers with `n_time_neighbors` {n_time_neighbors}, '
-                f'stride_length {stride_length}, and time_centered {time_centered} '
-                'will result in grouping otherwise non-contiguous observations '
-                'together, along with observatinos between the final groups.'
+                f"Collecting stragglers with `n_time_neighbors` {n_time_neighbors}, "
+                f"stride_length {stride_length}, and time_centered {time_centered} "
+                "will result in grouping otherwise non-contiguous observations "
+                "together, along with observatinos between the final groups."
             )
         i2 = len(obsids)
     return obsids[i1:i2]
