@@ -58,6 +58,12 @@ def config_options():
     config_dict["stride_config_file"] = os.path.join(
         DATA_PATH, "sample_config", "rtp_stride_length.toml"
     )
+    config_dict["bad_stride_length_file"] = os.path.join(
+        BAD_CONFIG_PATH, "bad_example_stride_length.toml"
+    )
+    config_dict["bad_obsid_list_file"] = os.path.join(
+        BAD_CONFIG_PATH, "bad_example_obsid_list.toml"
+    )
     config_dict["obsids_pol"] = (
         "zen.2457698.40355.xx.HH.uvcA",
         "zen.2457698.40355.xy.HH.uvcA",
@@ -1153,5 +1159,29 @@ def test_prep_args_obsid_list_error(config_options):
             collect_stragglers=False,
         )
     assert str(cm.value).startswith("n_stride must be able to be interpreted")
+
+    return
+
+
+def test_build_analysis_makeflow_error_no_n_time_neighbors(config_options):
+    config_file = config_options["bad_stride_length_file"]
+    obsids = config_options["obsids_time"]
+    work_dir = os.path.join(DATA_PATH, "test_output")
+
+    with pytest.raises(ValueError) as cm:
+        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+    assert str(cm.value).startswith("`stride_length` was specified")
+
+    return
+
+
+def test_build_analysis_makeflow_error_obsid_list(config_options):
+    config_file = config_options["bad_obsid_list_file"]
+    obsids = config_options["obsids_time"]
+    work_dir = os.path.join(DATA_PATH, "test_output")
+
+    with pytest.raises(ValueError) as cm:
+        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
+    assert str(cm.value).startswith("{obsid_list} must be the last argument")
 
     return

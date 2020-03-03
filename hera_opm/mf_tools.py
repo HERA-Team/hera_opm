@@ -349,6 +349,66 @@ def process_batch_options(
     return batch_options
 
 
+def _determine_obsids_to_run_on(
+    obsids, obsidx, stride_length, n_time_neighbors, time_centered, collect_stragglers
+):
+    """
+    Parameters
+    ----------
+    obsids : list of str
+        The list of obsids.
+    obsidx : int
+        Index of target obsid.
+    stride_length : int
+        Length of the stride.
+    n_time_neighbors : int
+        Number of time neighbors.
+    time_centered : bool, optional
+        Whether to center the obsid and select n_time_neighbors on either side,
+        returning a total of 2 * n_time_neighbors + 1 obsids (True, default), or
+        a group starting with the selected obsid and a total of length
+        n_time_neighbors (False).
+    collect_stragglers : bool
+        When the list of files to work on is not divided evenly by the
+        combination of stride_length and n_time_neighbors, this option specifies
+        whether to include the straggler files into the last group (True) or
+        treat them as their own small group (False).
+
+    Returns
+    -------
+    list of str
+        The list of obsids that match the criteria.
+    """
+    if time_centered is None:
+        centered = True
+
+    try:
+        n_neighbors = int(n_neighbors)
+    except ValueError:
+        raise ValueError("n_neighbors must be able to be interpreted as an int.")
+    try:
+        n_stride = int(n_stride)
+    except ValueError:
+        raise ValueError("n_stride must be able to be interpreted as an int.")
+
+    # Compute the number of remaining obsids to process.
+    # We account for the location of the next stride to determine if we
+    # should grab straggling obsids.
+    n_following = len(obsids) - (obs_idx + stride_length)
+    if centered:
+        i1 = max(obs_idx - n_neighbors, 0)
+    else:
+        i1 = obs_idx
+    i2 = min(obs_idx + n_neighbors + 1, len(obsids))
+    ### TODO: Check this logic for centering=True
+    if n_following < (n_neighbors + 1) and collect_stragglers:
+        i2 = len(obsids)
+    print("i1, i2: ", i1, i2)
+    print("n_following: ", n_following)
+    file_list = " ".join(obsids[i1:i2])
+    args = re.sub(r"\{obsid_list\}", file_list, args)
+
+
 def prep_args(
     args,
     obsid,
@@ -654,11 +714,20 @@ def build_analysis_makeflow_from_config(
             config, action, "stride_length", required=False
         )
         if stride_length is not None:
+            n_time_neighbors = get_config_entry(
+                config, action, "n_time_neighbors", required=False
+            )
+            if n_time_neighbors is None:
+                raise ValueError(
+                    f"`stride_length` was specified for action {action}, but "
+                    "n_time_neighbors was not. When specifying stride_length "
+                    "for an action, n_time_neighbors must also be specified."
+                )
             this_args = get_config_entry(config, action, "args", required=True)
             bn_idx = this_args.index("{obsid_list}")
             if bn_idx != len(this_args) - 1:
                 raise ValueError(
-                    "Basename must be last argument for action"
+                    "{obsid_list} must be the last argument for action"
                     f" {action} because stride_length is specified."
                 )
 
@@ -691,7 +760,7 @@ def build_analysis_makeflow_from_config(
 
     # get the work directory
     if work_dir is None:
-        work_dir = os.getcwd()
+        work_dir = os.getcwd()  # pragma: no cover
     else:
         work_dir = os.path.abspath(work_dir)
     makeflowfile = os.path.join(work_dir, fn)
@@ -735,14 +804,12 @@ def build_analysis_makeflow_from_config(
             ncpu = get_config_entry(config, "SETUP", "ncpu", required=False)
             queue = get_config_entry(config, "SETUP", "queue", required=False)
             if queue is None:
-                queue = "hera"
+                queue = default_queue
             if mem is None:
                 mem = base_mem
             if ncpu is None:
                 if base_cpu is not None:
                     ncpu = base_cpu
-            if queue is None:
-                queue = default_queue
             batch_options = process_batch_options(
                 mem, ncpu, mail_user, queue, batch_system
             )
