@@ -400,8 +400,14 @@ def _determine_obsids_to_run_on(
     else:
         i1 = obs_idx
     i2 = min(obs_idx + n_neighbors + 1, len(obsids))
-    ### TODO: Check this logic for centering=True
     if n_following < (n_neighbors + 1) and collect_stragglers:
+        if n_neighbors + 1 < stride_length - n_neighbors * centering:
+            warnings.warn(
+                f'Collecting stragglers with `n_neighbors` {n_neighbors}, '
+                f'stride_length {stride_length}, and centering {centering} '
+                'will result in grouping otherwise non-contiguous observations '
+                'together, along with observatinos between the final groups.'
+            )
         i2 = len(obsids)
     print("i1, i2: ", i1, i2)
     print("n_following: ", n_following)
