@@ -350,61 +350,82 @@ def process_batch_options(
 
 
 def _determine_obsids_to_run_on(
-    obsids, obsidx, stride_length, n_time_neighbors, time_centered, collect_stragglers
+    obsids,
+    obs_idx,
+    action,
+    stride_length=None,
+    n_time_neighbors=None,
+    time_centered=None,
+    collect_stragglers=None,
 ):
     """
     Parameters
     ----------
     obsids : list of str
         The list of obsids.
-    obsidx : int
+    obs_idx : int
         Index of target obsid.
-    stride_length : int
-        Length of the stride.
-    n_time_neighbors : int
-        Number of time neighbors.
+    action : str
+        The current action.
+    stride_length : int, optional
+        Length of the stride. Default is 1.
+    n_time_neighbors : int, optional
+        Number of time neighbors. Required if `stride_length` is specified.
+        Otherwise optional, and default is 0.
     time_centered : bool, optional
         Whether to center the obsid and select n_time_neighbors on either side,
         returning a total of 2 * n_time_neighbors + 1 obsids (True, default), or
         a group starting with the selected obsid and a total of length
-        n_time_neighbors (False).
-    collect_stragglers : bool
+        n_time_neighbors + 1 (False).
+    collect_stragglers : bool, optional
         When the list of files to work on is not divided evenly by the
         combination of stride_length and n_time_neighbors, this option specifies
         whether to include the straggler files into the last group (True) or
-        treat them as their own small group (False).
+        treat them as their own small group (False, default).
 
     Returns
     -------
     list of str
         The list of obsids that match the criteria.
     """
+    if stride_length is not None and n_time_neighbors is None:
+        raise ValueError(
+            f"`stride_length` was specified for action {action}, but "
+            "n_time_neighbors was not. When specifying stride_length "
+            "for an action, n_time_neighbors must also be specified."
+        )
+    if stride_length is None:
+        stride_length = 1
+    if n_time_neighbors is None:
+        n_time_neighbors = 0
     if time_centered is None:
-        centered = True
+        time_centered = True
+    if collect_stragglers is None:
+        collect_stragglers = False
 
     try:
         n_time_neighbors = int(n_time_neighbors)
     except ValueError:
         raise ValueError("n_time_neighbors must be able to be interpreted as an int.")
     try:
-        n_stride = int(n_stride)
+        stride_length = int(stride_length)
     except ValueError:
-        raise ValueError("n_stride must be able to be interpreted as an int.")
+        raise ValueError("stride_length must be able to be interpreted as an int.")
 
     # Compute the number of remaining obsids to process.
     # We account for the location of the next stride to determine if we
     # should grab straggling obsids.
     n_following = len(obsids) - (obs_idx + stride_length)
-    if centered:
+    if time_centered:
         i1 = max(obs_idx - n_time_neighbors, 0)
     else:
         i1 = obs_idx
     i2 = min(obs_idx + n_time_neighbors + 1, len(obsids))
     if n_following < (n_time_neighbors + 1) and collect_stragglers:
-        if n_time_neighbors + 1 < stride_length - n_time_neighbors * centering:
+        if n_time_neighbors + 1 < stride_length - n_time_neighbors * time_centered:
             warnings.warn(
                 f'Collecting stragglers with `n_time_neighbors` {n_time_neighbors}, '
-                f'stride_length {stride_length}, and centering {centering} '
+                f'stride_length {stride_length}, and time_centered {time_centered} '
                 'will result in grouping otherwise non-contiguous observations '
                 'together, along with observatinos between the final groups.'
             )
