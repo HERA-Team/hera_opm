@@ -383,9 +383,9 @@ def _determine_obsids_to_run_on(
         centered = True
 
     try:
-        n_neighbors = int(n_neighbors)
+        n_time_neighbors = int(n_time_neighbors)
     except ValueError:
-        raise ValueError("n_neighbors must be able to be interpreted as an int.")
+        raise ValueError("n_time_neighbors must be able to be interpreted as an int.")
     try:
         n_stride = int(n_stride)
     except ValueError:
@@ -396,23 +396,20 @@ def _determine_obsids_to_run_on(
     # should grab straggling obsids.
     n_following = len(obsids) - (obs_idx + stride_length)
     if centered:
-        i1 = max(obs_idx - n_neighbors, 0)
+        i1 = max(obs_idx - n_time_neighbors, 0)
     else:
         i1 = obs_idx
-    i2 = min(obs_idx + n_neighbors + 1, len(obsids))
-    if n_following < (n_neighbors + 1) and collect_stragglers:
-        if n_neighbors + 1 < stride_length - n_neighbors * centering:
+    i2 = min(obs_idx + n_time_neighbors + 1, len(obsids))
+    if n_following < (n_time_neighbors + 1) and collect_stragglers:
+        if n_time_neighbors + 1 < stride_length - n_time_neighbors * centering:
             warnings.warn(
-                f'Collecting stragglers with `n_neighbors` {n_neighbors}, '
+                f'Collecting stragglers with `n_time_neighbors` {n_time_neighbors}, '
                 f'stride_length {stride_length}, and centering {centering} '
                 'will result in grouping otherwise non-contiguous observations '
                 'together, along with observatinos between the final groups.'
             )
         i2 = len(obsids)
-    print("i1, i2: ", i1, i2)
-    print("n_following: ", n_following)
-    file_list = " ".join(obsids[i1:i2])
-    args = re.sub(r"\{obsid_list\}", file_list, args)
+    return obsids[i1:i2]
 
 
 def prep_args(
