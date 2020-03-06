@@ -30,16 +30,17 @@ solar_horizon = 0.0
 nInt_to_load = 8
 flag_nchan_low = 0
 flag_nchan_high = 0
+oc_maxiter = 2000
 min_bl_cut = 15
 max_bl_cut = 100
 iter0_prefix = ".iter0"
-good_statuses = "digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
+good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
 
 [WorkFlow]
 actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
            "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
            "ADD_LIBRARIAN_SSINS", "MAKE_NOTEBOOK", "ADD_RTP_PROCESS_RECORD",
-           "REDCAL", "ADD_LIBRARIAN_REDCAL"]
+           "REDCAL", "MAKE_REDCAL_NOTEBOOK", "ADD_LIBRARIAN_REDCAL"]
 
 [ANT_METRICS]
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
@@ -58,12 +59,12 @@ args = ["{basename}"]
 [MAKE_SESSION]
 time_prereqs = "UPLOAD"
 n_time_neighbors = "all"
-args = ["{basename}","{prev_basename}"]
+args = ["{basename}", "{prev_basename}"]
 
 [MAKE_NOTEBOOK]
 time_prereqs = "UPLOAD"
 n_time_neighbors = "all"
-args = ["{basename}","{prev_basename}","${NB_OPTS:basenbdir}"]
+args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
 
 [ADD_RTP_PROCESS_RECORD]
 time_prereqs = "MAKE_SESSION"
@@ -78,12 +79,21 @@ args = ["{basename}", "${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
 args = ["{basename}"]
 
 [REDCAL]
+prereqs = "ANT_METRICS"
 args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
-        "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
-        "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}",
-        "${REDCAL_OPTS:iter0_prefix}", "${ANT_METRICS_OPTS:extension}",
-        "${REDCAL_OPTS:good_statuses}"]
+        "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:oc_maxiter}",
+        "${REDCAL_OPTS:nInt_to_load}", "${REDCAL_OPTS:min_bl_cut}",
+        "${REDCAL_OPTS:max_bl_cut}", "${REDCAL_OPTS:iter0_prefix}", 
+        "${ANT_METRICS_OPTS:extension}", "${REDCAL_OPTS:good_statuses}"]
+
+[MAKE_REDCAL_NOTEBOOK]
+prereqs = "REDCAL"
+time_prereqs = "REDCAL"
+n_time_neighbors = "all"
+mem = 64000
+args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
 
 [ADD_LIBRARIAN_REDCAL]
+prereqs = "REDCAL"
 args = ["{basename}", "${REDCAL_OPTS:iter0_prefix}"]
