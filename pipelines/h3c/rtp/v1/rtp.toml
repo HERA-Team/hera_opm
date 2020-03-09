@@ -84,7 +84,7 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
         "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:oc_maxiter}",
         "${REDCAL_OPTS:nInt_to_load}", "${REDCAL_OPTS:min_bl_cut}",
-        "${REDCAL_OPTS:max_bl_cut}", "${REDCAL_OPTS:iter0_prefix}", 
+        "${REDCAL_OPTS:max_bl_cut}", "${REDCAL_OPTS:iter0_prefix}",
         "${ANT_METRICS_OPTS:extension}", "${REDCAL_OPTS:good_statuses}"]
 
 [MAKE_REDCAL_NOTEBOOK]
