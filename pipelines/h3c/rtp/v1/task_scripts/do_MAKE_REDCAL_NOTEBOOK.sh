@@ -12,12 +12,20 @@ then
     export JULIANDATE=$jd
 
     OUTPUT=Redcal_Inspect_"$jd".ipynb
-    OUTPUTDIR=$3
     BASENBDIR=$3
 
-    jupyter nbconvert --output=$OUTPUTDIR/$OUTPUT \
+    cd ${BASENBDIR}
+
+    jupyter nbconvert --output=$OUTPUT \
     --to notebook \
     --ExecutePreprocessor.allow_errors=True \
     --ExecutePreprocessor.timeout=-1 \
-    --execute $BASENBDIR/Redcal_Inspect_H3C.ipynb
+    --execute Redcal_Inspect_H3C.ipynb
+
+    git pull origin master
+    git add ${OUTPUT}
+    git commit -m 'RTP redcal notebook commit for JD ${jd}'
+    git push origin master
+
+    cd ${src_dir}
 fi
