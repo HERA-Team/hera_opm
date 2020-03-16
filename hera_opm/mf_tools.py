@@ -349,9 +349,8 @@ def process_batch_options(
     return batch_options
 
 
-def _determine_obsids_to_run_on(
+def _determine_stride_partitioning(
     obsids,
-    obs_idx,
     action,
     stride_length=None,
     n_time_neighbors=None,
@@ -363,8 +362,6 @@ def _determine_obsids_to_run_on(
     ----------
     obsids : list of str
         The list of obsids.
-    obs_idx : int
-        Index of target obsid.
     action : str
         The current action.
     stride_length : int, optional
@@ -385,8 +382,20 @@ def _determine_obsids_to_run_on(
 
     Returns
     -------
-    list of str
-        The list of obsids that match the criteria.
+    primary_obsids : list of str
+        A list of obsids that consist of the "primary" obsids for the current
+        action, given the quantities specified. This list contains all obsids
+        that will "do work" this action, in the sense that they will run a "do"
+        script.
+    per_obsid_primary_obsids : list of list of str
+        A list of length `len(obsids)` that contains a list of "primary obsids"
+        for each entry. It is assumed that these primary obsids must be
+        completed for the current action before running the next action in the
+        workflow. An obsid may have itself as a primary obsid (e.g., if
+        stride_length == 1, then each obsid will have itself, as well as its
+        time neighbors, as primary obsids). If `stride_length` and
+        `n_time_neighbors` are such that there are obsids that do not belong to
+        any group, then the value is an empty list.
     """
     if stride_length is not None and n_time_neighbors is None:
         raise ValueError(
@@ -411,26 +420,57 @@ def _determine_obsids_to_run_on(
         stride_length = int(stride_length)
     except ValueError:
         raise ValueError("stride_length must be able to be interpreted as an int.")
+    if type(time_centered) is not bool:
+        raise ValueError(
+            "time_centered must be a boolean variable. When written into the "
+            "config file, do *not* use quotation marks."
+        )
+    if type(collect_stragglers) is not bool:
+        raise ValueError(
+            "collect_stragglers must be a boolean variable. When written into "
+            "the config file, do *not* use quotation marks."
+        )
 
-    # Compute the number of remaining obsids to process.
-    # We account for the location of the next stride to determine if we
-    # should grab straggling obsids.
-    n_following = len(obsids) - (obs_idx + stride_length)
-    if time_centered:
-        i1 = max(obs_idx - n_time_neighbors, 0)
-    else:
-        i1 = obs_idx
-    i2 = min(obs_idx + n_time_neighbors + 1, len(obsids))
-    if n_following < (n_time_neighbors + 1) and collect_stragglers:
-        if n_time_neighbors + 1 < stride_length - n_time_neighbors * time_centered:
-            warnings.warn(
-                f"Collecting stragglers with `n_time_neighbors` {n_time_neighbors}, "
-                f"stride_length {stride_length}, and time_centered {time_centered} "
-                "will result in grouping otherwise non-contiguous observations "
-                "together, along with observatinos between the final groups."
-            )
-        i2 = len(obsids)
-    return obsids[i1:i2]
+    primary_obsids = []
+    per_obsid_primary_obsids = [[] for i in range(len(obsids))]
+
+    for idx in range(time_centered * n_time_neighbors, len(obsids), stride_length):
+        # Compute the number of remaining obsids to process.
+        # We account for the location of the next stride to determine if we
+        # should grab straggling obsids.
+        n_following = len(obsids) - (idx + stride_length)
+        if time_centered:
+            i1 = max(idx - n_time_neighbors, 0)
+        else:
+            i1 = idx
+        i2 = min(idx + n_time_neighbors + 1, len(obsids))
+        if n_following < (n_time_neighbors + 1) and collect_stragglers:
+            # Figure out if any observations that would normally have been skipped
+            # will be lumped in by getting all remaining observations.
+            # "stride_length - 1" is the actual number of observations between
+            # current idx and next one given stride_length.
+            gap = (stride_length - 1) - n_time_neighbors * (1 + time_centered)
+            if gap > 0:
+                warnings.warn(
+                    f"Collecting stragglers with `n_time_neighbors` {n_time_neighbors}, "
+                    f"stride_length {stride_length}, and time_centered {time_centered} "
+                    "will result in grouping otherwise non-contiguous observations "
+                    "together, along with observatinos between the final groups."
+                )
+            i2 = len(obsids)
+            primary_obsids.append(obsids[idx])
+            for i in range(i1, i2):
+                per_obsid_primary_obsids[i].append(obsids[idx])
+
+            # skip what would have been the last iteration, because we've
+            # collected the remaining obsids
+            break
+        # assign indices
+        primary_obsids.append(obsids[idx])
+        for i in range(i1, i2):
+            per_obsid_primary_obsids[i].append(obsids[idx])
+
+    return primary_obsids, per_obsid_primary_obsids
 
 
 def prep_args(
@@ -684,6 +724,10 @@ def build_analysis_makeflow_from_config(
     adjacent to "{basename}", useful for specifying prereqs in time
 
     """
+    # make a cache dictionary
+    _cache_dict = {}
+
+    # load config file
     config = toml.load(config_file)
     workflow = get_config_entry(config, "WorkFlow", "actions")
     # make workflow options uppercase
@@ -899,26 +943,48 @@ def build_analysis_makeflow_from_config(
                 stride_length = get_config_entry(
                     config, action, "stride_length", required=False
                 )
+                n_time_neighbors = get_config_entry(
+                    config, action, "n_time_neighbors", required=False
+                )
+                time_centered = get_config_entry(
+                    config, action, "time_centered", required=False
+                )
                 collect_stragglers = get_config_entry(
                     config, action, "collect_stragglers", required=False
                 )
-                if stride_length is not None:
-                    remainder = obsind % int(stride_length)
-                    if collect_stragglers:
-                        stride_idx = obsind // stride_length
-                        if obsind >= stride_idx * stride_length:
-                            part_of_stragglers = True
-                        else:
-                            part_of_stragglers = False
-                    else:
-                        part_of_stragglers = False
-                    if remainder != 0 and not part_of_stragglers:
-                        # change outfiles_prev to look at first in the stride
-                        prev_obsind = obsind - remainder
-                        outfiles_prev = make_outfile_name(
-                            sorted_obsids[prev_obsind], action, pol_list=pol_list
+
+                if n_time_neighbors is not None:
+                    key1 = action + "_primary_obsids"
+                    key2 = action + "_per_obsid_primary_obsids"
+                    if key1 not in _cache_dict.keys():
+                        (
+                            primary_obsids,
+                            per_obsid_primary_obsids,
+                        ) = _determine_stride_partitioning(
+                            sorted_obsids,
+                            action,
+                            stride_length=stride_length,
+                            n_time_neighbors=n_time_neighbors,
+                            time_centered=time_centered,
+                            collect_stragglers=collect_stragglers,
                         )
+                        _cache_dict[key1] = primary_obsids
+                        _cache_dict[key2] = per_obsid_primary_obsids
+                    else:
+                        # fetch items from cache dict
+                        primary_obsids = _cache_dict[key1]
+                        per_obsid_primary_obsids = _cache_dict[key2]
+
+                    if obsid not in primary_obsids:
+                        # add obsid's primary obsids to list of previous
+                        # outfiles and continue
+                        outfiles_prev = []
+                        for oi in per_obsid_primary_obsids:
+                            outfile = make_outfile_name(oi, action, pol_list=pol_list)
+                            outfiles_prev.append(outfile)
+
                         continue
+
                 # start list of input files
                 infiles = []
 
