@@ -24,7 +24,7 @@ then
 
     git pull origin master
     git add ${OUTPUT}
-    git commit -m 'RTP redcal notebook commit for JD ${jd}'
+    git commit -m "RTP redcal notebook commit for JD ${jd}"
     git push origin master
 
     cd ${src_dir}
