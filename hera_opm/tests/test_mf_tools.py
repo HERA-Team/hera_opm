@@ -357,88 +357,192 @@ def test_process_batch_options_error():
     return
 
 
-def test_determine_obsids_to_run_on(config_options):
-    output = mt._determine_obsids_to_run_on(
-        config_options["obsids_long_dummy_list"],
-        5,
+def test_determine_stride_partitioning(config_options):
+    # grab the first part of the dummy list
+    input_obsids = list(config_options["obsids_long_dummy_list"][:9])
+    primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
+        input_obsids,
         "test",
         stride_length=1,
         n_time_neighbors=2,
         time_centered=True,
         collect_stragglers=False,
     )
-    assert output == config_options["obsids_long_dummy_list"][3:8]
+    # the `primary_obsids` list will only contain elements that have a
+    # sufficient number of neighbors on either side (because `time_centered` is
+    # True)
+    assert primary_obsids == list(input_obsids[2:-2])
+    # The `per_obsid_primary_obsids` list contains which obsids are considered
+    # "primary obsids" _for each entry_. The first entry in the list is not a
+    # primary obsid (and so does not depend on itself), and instead only depends
+    # on the 3rd element of the list. The number of entries grows and then
+    # shrinks as the number of available elements on either side changes based
+    # on the position in the list.
+    target_list = [
+        ["aac"],
+        ["aac", "aad"],
+        ["aac", "aad", "aae"],
+        ["aac", "aad", "aae", "aaf"],
+        ["aac", "aad", "aae", "aaf", "aag"],
+        ["aad", "aae", "aaf", "aag"],
+        ["aae", "aaf", "aag"],
+        ["aaf", "aag"],
+        ["aag"],
+    ]
+    assert len(per_obsid_primary_obsids) == len(input_obsids)
+    assert per_obsid_primary_obsids == target_list
+
+    return
 
 
-def test_determine_obsids_to_run_on_stride_but_no_neighbors(config_options):
-    with pytest.raises(ValueError):
-        mt._determine_obsids_to_run_on(
+def test_determine_stride_partitioning_stride_but_no_neighbors(config_options):
+    with pytest.raises(
+        ValueError,
+        match="`stride_length` was specified for action test, but n_time_neighbors was not",
+    ):
+        mt._determine_stride_partitioning(
             config_options["obsids_long_dummy_list"],
-            5,
             "test",
             stride_length=1,
             time_centered=True,
             collect_stragglers=False,
         )
 
+    return
 
-def test_determine_obsids_to_run_on_defaults(config_options):
-    output = mt._determine_obsids_to_run_on(
-        config_options["obsids_long_dummy_list"],
-        5,
+
+def test_determine_stride_partitioning_defaults(config_options):
+    input_obsids = list(config_options["obsids_long_dummy_list"][:9])
+    # run without specifying anything -- defaults to stride of 1 and 0 time
+    # neighbors
+    primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
+        input_obsids, "test", time_centered=True, collect_stragglers=False
+    )
+    assert primary_obsids == input_obsids
+    target_list = [input_obsids[idx : idx + 1] for idx in range(len(input_obsids))]
+    assert per_obsid_primary_obsids == target_list
+
+    # run again with n_time_neighbors = 2
+    primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
+        input_obsids,
         "test",
+        n_time_neighbors=2,
         time_centered=True,
         collect_stragglers=False,
     )
-    assert output == config_options["obsids_long_dummy_list"][5:6]
+    # the results should be the same as in test_determine_stride_partitioning
+    assert primary_obsids == list(input_obsids[2:-2])
+    target_list = [
+        ["aac"],
+        ["aac", "aad"],
+        ["aac", "aad", "aae"],
+        ["aac", "aad", "aae", "aaf"],
+        ["aac", "aad", "aae", "aaf", "aag"],
+        ["aad", "aae", "aaf", "aag"],
+        ["aae", "aaf", "aag"],
+        ["aaf", "aag"],
+        ["aag"],
+    ]
+    assert len(per_obsid_primary_obsids) == len(input_obsids)
+    assert per_obsid_primary_obsids == target_list
 
-    output = mt._determine_obsids_to_run_on(
-        config_options["obsids_long_dummy_list"], 5, "test", n_time_neighbors=2,
-    )
-    assert output == config_options["obsids_long_dummy_list"][3:8]
+    return
 
 
-def test_determine_obsids_to_run_on_collect_stragglers(config_options):
-    output = mt._determine_obsids_to_run_on(
-        config_options["obsids_long_dummy_list"],
-        20,
+def test_determine_stride_partitioning_collect_stragglers(config_options):
+    input_obsids = list(config_options["obsids_long_dummy_list"])
+    primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
+        input_obsids,
         "test",
         stride_length=4,
         n_time_neighbors=3,
         time_centered=False,
         collect_stragglers=True,
     )
-    assert output == config_options["obsids_long_dummy_list"][20:]
+    # Because time_centered is False, we should be getting every fourth entry,
+    # except for the last one because that one will be collected as a straggler.
+    target_obsids = input_obsids[::4][:-1]
+    assert primary_obsids == target_obsids
+    target_list = [[] for _ in input_obsids]
+    # For each entry, there will be a single obsid corresponding to its primary
+    # obsid.
+    for i, oid in enumerate(target_obsids):
+        idx = i * 4
+        for j in range(idx, idx + 4):
+            target_list[j].append(oid)
+
+    # clean up and add stragglers
+    target_list[24].append("aau")
+    target_list[25].append("aau")
+    assert per_obsid_primary_obsids == target_list
+
+    return
 
 
-def test_determine_obsids_to_run_on_errors(config_options):
-    with pytest.raises(ValueError):
-        mt._determine_obsids_to_run_on(
-            config_options["obsids_long_dummy_list"],
-            5,
+def test_determine_stride_partitioning_errors(config_options):
+    input_obsids = list(config_options["obsids_long_dummy_list"])
+    with pytest.raises(
+        ValueError, match="stride_length must be able to be interpreted as an int"
+    ):
+        mt._determine_stride_partitioning(
+            input_obsids, "test", stride_length="foo", n_time_neighbors=1
+        )
+
+    with pytest.raises(
+        ValueError, match="n_time_neighbors must be able to be interpreted as an int"
+    ):
+        mt._determine_stride_partitioning(input_obsids, "test", n_time_neighbors="foo")
+
+    with pytest.raises(ValueError, match="time_centered must be a boolean variable"):
+        mt._determine_stride_partitioning(
+            input_obsids,
             "test",
-            stride_length="foo",
+            stride_length=1,
             n_time_neighbors=1,
+            time_centered="False",
         )
 
-    with pytest.raises(ValueError):
-        mt._determine_obsids_to_run_on(
-            config_options["obsids_long_dummy_list"], 5, "test", n_time_neighbors="foo",
+    with pytest.raises(
+        ValueError, match="collect_stragglers must be a boolean variable"
+    ):
+        mt._determine_stride_partitioning(
+            input_obsids,
+            "test",
+            stride_length=1,
+            n_time_neighbors=1,
+            time_centered=False,
+            collect_stragglers="True",
         )
+
+    return
 
 
 @pytest.mark.filterwarnings("ignore:Collecting stragglers")
-def test_determine_obsids_to_run_on_noncontiguous_stragglers(config_options):
-    output = mt._determine_obsids_to_run_on(
-        config_options["obsids_long_dummy_list"],
-        20,
+def test_determine_stride_partitioning_noncontiguous_stragglers(config_options):
+    input_obsids = list(config_options["obsids_long_dummy_list"])
+    primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
+        input_obsids,
         "test",
         stride_length=10,
         n_time_neighbors=1,
         time_centered=False,
         collect_stragglers=True,
     )
-    assert output == config_options["obsids_long_dummy_list"][20:]
+    # in this case, because of the gap, we have the last hanging obsid
+    target_obsids = input_obsids[::10]
+    assert primary_obsids == target_obsids
+    # make empty list
+    target_list = [[] for _ in input_obsids]
+    # add non-zero entries
+    for i in [0, 1]:
+        target_list[i].append("aaa")
+    for i in [10, 11]:
+        target_list[i].append("aak")
+    for i in [20, 21]:
+        target_list[i].append("aau")
+    assert per_obsid_primary_obsids == target_list
+
+    return
 
 
 def test_build_analysis_makeflow_from_config(config_options):
