@@ -443,7 +443,14 @@ def _determine_stride_partitioning(
             i1 = max(idx - n_time_neighbors, 0)
         else:
             i1 = idx
-        i2 = min(idx + n_time_neighbors + 1, len(obsids))
+        i2 = idx + n_time_neighbors + 1
+        # Check to see if i2 would be past the end of the array. If
+        # `collect_stragglers` is True, then we would have broken out of the
+        # loop on the iteration previous to the current one. Otherwise we drop
+        # the remaining obsids because there are insufficient time neighbors to
+        # make a full set.
+        if i2 > len(obsids):
+            break
         if n_following < (n_time_neighbors + 1) and collect_stragglers:
             # Figure out if any observations that would normally have been skipped
             # will be lumped in by getting all remaining observations.
@@ -452,12 +459,11 @@ def _determine_stride_partitioning(
             gap = (stride_length - 1) - n_time_neighbors * (1 + time_centered)
             if gap > 0:
                 warnings.warn(
-                    f"Collecting stragglers with `n_time_neighbors` {n_time_neighbors}, "
-                    f"stride_length {stride_length}, and time_centered {time_centered} "
-                    "will result in grouping otherwise non-contiguous observations "
-                    "together, along with observatinos between the final groups."
+                    "Collecting stragglers is incompatible with gaps between "
+                    "consecutive strides. Not collecting stragglers..."
                 )
-            i2 = len(obsids)
+            else:
+                i2 = len(obsids)
             primary_obsids.append(obsids[idx])
             for i in range(i1, i2):
                 per_obsid_primary_obsids[i].append(obsids[idx])
