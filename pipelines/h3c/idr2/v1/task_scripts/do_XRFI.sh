@@ -19,13 +19,9 @@ bn=$(basename ${1})  # Basename
 # 4 - sig_init
 # 5 - sig_adj
 
-# make sure input file is correct uvh5 file
-uvh5_fn=$(remove_pol $fn)
-uvh5_fn=${uvh5_fn%.uv}.uvh5
+ocalfits_file=`echo ${fn%.*}.omni.calfits`
+acalfits_file=`echo ${fn%.*}.abs.calfits`
+model_file=`echo ${fn%.*}.omni_vis.uvh5`
 
-ocalfits_file=`echo ${uvh5_fn%.*}.omni.calfits`
-acalfits_file=`echo ${uvh5_fn%.*}.abs.calfits`
-model_file=`echo ${uvh5_fn%.*}.omni_vis.uvh5`
-
-echo xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${uvh5_fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --clobber
-xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${uvh5_fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --clobber
+echo xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --clobber
+xrfi_run.py --ocalfits_file=${ocalfits_file} --acalfits_file=${acalfits_file} --model_file=${model_file} --data_file=${fn} --kt_size=${2} --kf_size=${3} --sig_init=${4} --sig_adj=${5} --clobber

@@ -10,14 +10,10 @@ source ${src_dir}/_common.sh
 # 1 - filename
 fn="${1}"
 
-# make sure input file is correct uvh5 file
-uvh5_fn=$(remove_pol $fn)
-uvh5_fn=${uvh5_fn%.uv}.uvh5
-
 # get relevant files, removing base extension and appending new extensions
-omni_cal=`echo ${uvh5_fn%.*}.omni.calfits`
-smooth_abs_cal=`echo ${uvh5_fn%.*}.smooth_abs.calfits`
-omni_vis=`echo ${uvh5_fn%.*}.omni_vis.uvh5`
+omni_cal=`echo ${fn%.*}.omni.calfits`
+smooth_abs_cal=`echo ${fn%.*}.smooth_abs.calfits`
+omni_vis=`echo ${fn%.*}.omni_vis.uvh5`
 smooth_abs_vis=`echo ${fn%.*}.smooth_abs_vis.uvh5`
 
 # Update omnical visibility solution with smooth_abs calibration
