@@ -18,33 +18,29 @@ if [ "$#" -ge 4 ]; then
     calibration="${4}"
 fi
 
-# make sure input file is correct uvh5 file
-uvh5_fn=$(remove_pol $filename)
-uvh5_fn=${uvh5_fn%.uv}.uvh5
-
 # if calibration suffix is not empty, parse it and apply it
 if [ ! -z "${calibration}" ]; then
     # parse calibration suffix
-    cal_file="${uvh5_fn%.uvh5}.${calibration}"
-    echo apply_cal.py ${uvh5_fn} ${uvh5_fn%.uvh5}.calibrated.uvh5 --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5 --clobber
-    apply_cal.py ${uvh5_fn} ${uvh5_fn%.uvh5}.calibrated.uvh5 --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5 --clobber
-    uvh5_fn="${uvh5_fn%.uvh5}.calibrated.uvh5"
+    cal_file="${filename%.uvh5}.${calibration}"
+    echo apply_cal.py ${filename} ${filename%.uvh5}.calibrated.uvh5 --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5 --clobber
+    apply_cal.py ${filename} ${filename%.uvh5}.calibrated.uvh5 --new_cal ${cal_file} --filetype_in uvh5 --filetype_out uvh5 --clobber
+    filename="${filename%.uvh5}.calibrated.uvh5"
 fi
 
 # convert file to uvfits
-echo convert_to_uvfits.py ${uvh5_fn} --output_filename ${uvh5_fn%.uvh5}.uvfits --overwrite
-convert_to_uvfits.py ${uvh5_fn} --output_filename ${uvh5_fn%.uvh5}.uvfits --overwrite
+echo convert_to_uvfits.py ${filename} --output_filename ${filename%.uvh5}.uvfits --overwrite
+convert_to_uvfits.py ${filename} --output_filename ${filename%.uvh5}.uvfits --overwrite
 
 # get uvfits and ms filename
-uvfits_file="${uvh5_fn%.uvh5}.uvfits"
-uvfits_file_out="${uvh5_fn}.image"
-ms_file="${uvh5_fn%.uvh5}.ms"
+uvfits_file="${filename%.uvh5}.uvfits"
+uvfits_file_out="${filename}.image"
+ms_file="${filename%.uvh5}.ms"
 
 # get current directory
 cwd=`pwd`
 
 # make an imaging dir for outputs
-image_outdir="${uvh5_fn}_image"
+image_outdir="${filename}_image"
 mkdir -p ${image_outdir}
 cd ${image_outdir}
 
@@ -63,5 +59,5 @@ rm -r ${ms_file} || echo "No ${ms_file} to remove."
 
 # remove calibrated visibility
 if [ ! -z "${calibration}" ]; then
-    rm ${uvh5_fn}
+    rm ${filename}
 fi
