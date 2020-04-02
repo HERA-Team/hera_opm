@@ -1,0 +1,99 @@
+[Options]
+makeflow_type = "analysis"
+path_to_do_scripts = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/task_scripts"
+source_script = "~/.bashrc"
+conda_env = "RTP"
+ex_ants_path = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/bad_ants"
+base_mem = 8000
+base_cpu = 1
+batch_system = "slurm"
+default_queue = "hera,bigmem"
+mandc_report = true
+
+[ANT_METRICS_OPTS]
+crossCut = 5.0
+deadCut = 5.0
+extension = ".ant_metrics.hdf5"
+vis_format = "uvh5"
+
+[SSINS_OPTS]
+streak_sig = 20.0
+other_sig = 5.0
+N_samp_thresh = 0
+
+[NB_OPTS]
+basenbdir = '/home/obs/src/H3C_plots'
+
+[REDCAL_OPTS]
+ant_z_thresh = 4.0
+solar_horizon = 0.0
+nInt_to_load = 8
+flag_nchan_low = 0
+flag_nchan_high = 0
+oc_maxiter = 2000
+min_bl_cut = 15
+max_bl_cut = 100
+iter0_prefix = ".iter0"
+good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
+
+[WorkFlow]
+actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
+           "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
+           "ADD_LIBRARIAN_SSINS", "MAKE_NOTEBOOK", "ADD_RTP_PROCESS_RECORD",
+           "REDCAL", "MAKE_REDCAL_NOTEBOOK", "ADD_LIBRARIAN_REDCAL"]
+
+[ANT_METRICS]
+args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
+        "${ANT_METRICS_OPTS:deadCut}", "${ANT_METRICS_OPTS:extension}",
+        "${ANT_METRICS_OPTS:vis_format}"]
+
+[ADD_LIBRARIAN_ANT_METRICS]
+args = ["{basename}", "${ANT_METRICS_OPTS:extension}"]
+
+[ADD_MC_ANT_METRICS]
+args = ["{basename}", "${ANT_METRICS_OPTS:extension}"]
+
+[UPLOAD]
+args = ["{basename}"]
+
+[MAKE_SESSION]
+time_prereqs = "UPLOAD"
+n_time_neighbors = "all"
+args = ["{basename}", "{prev_basename}"]
+
+[MAKE_NOTEBOOK]
+time_prereqs = "UPLOAD"
+n_time_neighbors = "all"
+args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
+
+[ADD_RTP_PROCESS_RECORD]
+time_prereqs = "MAKE_SESSION"
+n_time_neighbors = "all"
+args = ["{basename}", "${WorkFlow:actions}"]
+
+[SSINS]
+args = ["{basename}", "${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
+        "${SSINS_OPTS:N_samp_thresh}"]
+
+[ADD_LIBRARIAN_SSINS]
+args = ["{basename}"]
+
+[REDCAL]
+prereqs = "ANT_METRICS"
+args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
+        "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
+        "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:oc_maxiter}",
+        "${REDCAL_OPTS:nInt_to_load}", "${REDCAL_OPTS:min_bl_cut}",
+        "${REDCAL_OPTS:max_bl_cut}", "${REDCAL_OPTS:iter0_prefix}",
+        "${ANT_METRICS_OPTS:extension}", "${REDCAL_OPTS:good_statuses}"]
+
+[MAKE_REDCAL_NOTEBOOK]
+prereqs = "REDCAL"
+time_prereqs = "REDCAL"
+n_time_neighbors = "all"
+mem = 64000
+args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
+
+[ADD_LIBRARIAN_REDCAL]
+prereqs = "REDCAL"
+args = ["{basename}", "${REDCAL_OPTS:iter0_prefix}"]
