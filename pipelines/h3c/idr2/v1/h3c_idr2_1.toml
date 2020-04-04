@@ -72,15 +72,15 @@ calibration = "smooth_abs.calfits"
 
 [WorkFlow]
 actions = ["ANT_METRICS",
-           "REDCAL", 
+           "REDCAL",
            "MAKE_REDCAL_NOTEBOOK",
-           "FIRSTCAL_METRICS", 
-           "ABSCAL", 
+           "FIRSTCAL_METRICS",
+           "ABSCAL",
            "XRFI",
            "XRFI_DAY_THRESHOLD",
-           "CAL_SMOOTH", 
+           "CAL_SMOOTH",
            "UPDATE_OMNISOL",
-           "NOISE", 
+           "NOISE",
            "IMAGING",
            "MAKE_NOTEBOOK"]
 
