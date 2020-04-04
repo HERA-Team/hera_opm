@@ -1,14 +1,13 @@
 [Options]
 makeflow_type = "analysis"
-path_to_do_scripts = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/task_scripts"
+path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/rtp/v1/task_scripts"
 source_script = "~/.bashrc"
-conda_env = "RTP"
-ex_ants_path = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/bad_ants"
+conda_env = "python3"
+ex_ants_path = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/rtp/v1/bad_ants"
 base_mem = 8000
 base_cpu = 1
-batch_system = "slurm"
-default_queue = "hera,bigmem"
-mandc_report = true
+timeout = "24h"
+pbs_mail_user = "jsdillon+nrao@berkeley.edu"
 
 [ANT_METRICS_OPTS]
 crossCut = 5.0
@@ -16,13 +15,8 @@ deadCut = 5.0
 extension = ".ant_metrics.hdf5"
 vis_format = "uvh5"
 
-[SSINS_OPTS]
-streak_sig = 20.0
-other_sig = 5.0
-N_samp_thresh = 0
-
 [NB_OPTS]
-basenbdir = '/home/obs/src/H3C_plots'
+basenbdir = '/users/jsdillon/Libraries/H3C_plots'
 
 [REDCAL_OPTS]
 ant_z_thresh = 4.0
@@ -36,47 +30,64 @@ max_bl_cut = 100
 iter0_prefix = ".iter0"
 good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
 
+[ABSCAL_OPTS]
+model_files_glob = "'/lustre/aoc/projects/hera/jsdillon/H3C_IDR2/abscal_model/midband_simple_cal/zen.2458838.?????.sum.midband_simple_cal.uvh5'"
+nInt_to_load = 6
+min_bl_cut = 1.0
+max_bl_cut = 100.0
+phs_max_iter = 100
+phs_conv_crit = 1e-6
+edge_cut = 100
+
+[XRFI_OPTS]
+kt_size = 8
+kf_size = 8
+sig_init = 5.0
+sig_adj = 2.0
+
+[XRFI_DAY_THRESHOLD_OPTS]
+nsig_f = 7.0
+nsig_t = 7.0
+nsig_f_adj = 3.0
+nsig_t_adj = 3.0
+
+[CAL_SMOOTH_OPTS]
+freq_scale = 10
+time_scale = 21600
+tol = 1e-6
+filter_mode = "rect"
+window = "tukey"
+maxiter = 100
+alpha = 0.3
+freq_threshold = 1.0
+time_threshold = 1.0
+ant_threshold = 0.5
+
+[IMAGING_OPTS]
+casa = "/home/casa/packages/RHEL7/release/casa-release-5.1.0-68/bin/casa"
+casa_imaging_scripts = "/users/heramgr/hera_software/casa_imaging/scripts"
+calibration = "smooth_abs.calfits"
+
+############################################################################################################
+
 [WorkFlow]
-actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
-           "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
-           "ADD_LIBRARIAN_SSINS", "MAKE_NOTEBOOK", "ADD_RTP_PROCESS_RECORD",
-           "REDCAL", "MAKE_REDCAL_NOTEBOOK", "ADD_LIBRARIAN_REDCAL"]
+actions = ["ANT_METRICS",
+           "REDCAL", 
+           "MAKE_REDCAL_NOTEBOOK",
+           "FIRSTCAL_METRICS", 
+           "ABSCAL", 
+           "XRFI",
+           "XRFI_DAY_THRESHOLD",
+           "CAL_SMOOTH", 
+           "UPDATE_OMNISOL",
+           "NOISE", 
+           "IMAGING",
+           "MAKE_NOTEBOOK"]
 
 [ANT_METRICS]
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}", "${ANT_METRICS_OPTS:extension}",
         "${ANT_METRICS_OPTS:vis_format}"]
-
-[ADD_LIBRARIAN_ANT_METRICS]
-args = ["{basename}", "${ANT_METRICS_OPTS:extension}"]
-
-[ADD_MC_ANT_METRICS]
-args = ["{basename}", "${ANT_METRICS_OPTS:extension}"]
-
-[UPLOAD]
-args = ["{basename}"]
-
-[MAKE_SESSION]
-time_prereqs = "UPLOAD"
-n_time_neighbors = "all"
-args = ["{basename}", "{prev_basename}"]
-
-[MAKE_NOTEBOOK]
-time_prereqs = "UPLOAD"
-n_time_neighbors = "all"
-args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
-
-[ADD_RTP_PROCESS_RECORD]
-time_prereqs = "MAKE_SESSION"
-n_time_neighbors = "all"
-args = ["{basename}", "${WorkFlow:actions}"]
-
-[SSINS]
-args = ["{basename}", "${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
-        "${SSINS_OPTS:N_samp_thresh}"]
-
-[ADD_LIBRARIAN_SSINS]
-args = ["{basename}"]
 
 [REDCAL]
 prereqs = "ANT_METRICS"
@@ -94,6 +105,57 @@ n_time_neighbors = "all"
 mem = 64000
 args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
 
-[ADD_LIBRARIAN_REDCAL]
+[ABSCAL]
 prereqs = "REDCAL"
-args = ["{basename}", "${REDCAL_OPTS:iter0_prefix}"]
+args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_load}",
+        "${ABSCAL_OPTS:min_bl_cut}", "${ABSCAL_OPTS:max_bl_cut}", "${ABSCAL_OPTS:phs_max_iter}",
+        "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:edge_cut}"]
+
+[XRFI]
+prereqs = "ABSCAL"
+args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
+        "${XRFI_OPTS:sig_adj}"]
+
+
+[XRFI_DAY_THRESHOLD]
+prereqs = "XRFI"
+time_prereqs = "XRFI"
+n_time_neighbors = "all"
+args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
+        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}"]
+
+[CAL_SMOOTH]
+prereqs = "XRFI_DAY_THRESHOLD"
+time_prereqs = "XRFI_DAY_THRESHOLD"
+n_time_neighbors = "all"
+mem = 48000
+args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
+        "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
+        "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}",
+        "${CAL_SMOOTH_OPTS:time_threshold}", "${CAL_SMOOTH_OPTS:ant_threshold}"]
+
+[UPDATE_OMNISOL]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
+args = ["{basename}"]
+
+[NOISE]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
+args = ["{basename}"]
+
+[IMAGING]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
+mem = 64000
+args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
+
+[MAKE_NOTEBOOK]
+prereqs = "ANT_METRICS"
+time_prereqs = "ANT_METRICS"
+n_time_neighbors = "all"
+mem = 64000
+args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
