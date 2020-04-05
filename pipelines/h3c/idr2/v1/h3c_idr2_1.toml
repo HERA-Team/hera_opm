@@ -98,6 +98,10 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:max_bl_cut}", "${REDCAL_OPTS:iter0_prefix}",
         "${ANT_METRICS_OPTS:extension}", "${REDCAL_OPTS:good_statuses}"]
 
+[FIRSTCAL_METRICS]
+prereqs = "REDCAL"
+args = "{basename}"
+
 [MAKE_REDCAL_NOTEBOOK]
 prereqs = "REDCAL"
 time_prereqs = "REDCAL"
