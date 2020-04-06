@@ -23,7 +23,7 @@ echo python -c "import numpy as np; \
 python -c "import numpy as np; \
            from pyuvdata import UVData; \
            uv = UVData(); \
-           uv.read('"${fn}"''); \
+           uv.read('"${fn}"'); \
            uv.flag_array = np.zeros_like(uv.flag_array); \
            uv.nsample_array = np.ones_like(uv.nsample_array); \
            uv.write_uvh5('"${fn}"', clobber=True)"
