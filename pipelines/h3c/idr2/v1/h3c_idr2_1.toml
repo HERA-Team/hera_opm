@@ -71,7 +71,8 @@ calibration = "smooth_abs.calfits"
 ############################################################################################################
 
 [WorkFlow]
-actions = ["ANT_METRICS",
+actions = ["FIX_DATAFILE",
+           "ANT_METRICS",
            "REDCAL",
            "MAKE_REDCAL_NOTEBOOK",
            "FIRSTCAL_METRICS",
@@ -84,7 +85,11 @@ actions = ["ANT_METRICS",
            "IMAGING",
            "MAKE_NOTEBOOK"]
 
+[FIX_DATAFILE]
+args = "{basename}"
+
 [ANT_METRICS]
+prereqs = "FIX_DATAFILE"
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}", "${ANT_METRICS_OPTS:extension}",
         "${ANT_METRICS_OPTS:vis_format}"]
