@@ -19,7 +19,7 @@ fn="${1}"
 
 jd=$(get_jd $fn)
 int_jd=${jd:0:7}
-data_files=`echo zen.${int_jd}.*.HH.uvh5`
+data_files=`echo zen.${int_jd}.*.sum.uvh5`
 
 echo xrfi_day_threshold_run.py ${data_files} --nsig_f=${2} --nsig_t=${3} --nsig_f_adj=${4} --nsig_t_adj=${5} --clobber --run_if_first ${fn}
 xrfi_day_threshold_run.py ${data_files} --nsig_f=${2} --nsig_t=${3} --nsig_f_adj=${4} --nsig_t_adj=${5} --clobber --run_if_first ${fn}
