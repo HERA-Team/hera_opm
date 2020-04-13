@@ -64,6 +64,9 @@ def config_options():
     config_dict["bad_obsid_list_file"] = os.path.join(
         BAD_CONFIG_PATH, "bad_example_obsid_list.toml"
     )
+    config_dict["bad_missing_prereq_file"] = os.path.join(
+        BAD_CONFIG_PATH, "bad_missing_prereq.toml"
+    )
     config_dict["obsids_pol"] = (
         "zen.2457698.40355.xx.HH.uvcA",
         "zen.2457698.40355.xy.HH.uvcA",
@@ -601,6 +604,26 @@ def test_build_analysis_makeflow_from_config(config_options):
     )
 
     assert os.path.exists(outfile)
+
+    # clean up after ourselves
+    os.remove(outfile)
+    mt.clean_wrapper_scripts(work_dir)
+
+    return
+
+
+def test_build_analysis_makeflow_from_config_missing_prereq(config_options):
+    # define args
+    obsids = config_options["obsids_pol"][:1]
+    config_file = config_options["bad_missing_prereq_file"]
+    work_dir = os.path.join(DATA_PATH, "test_output")
+
+    mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
+    outfile = os.path.join(work_dir, mf_output)
+    if os.path.exists(outfile):
+        os.remove(outfile)
+    with pytest.raises(ValueError, match='Prereq FIRSTCAL_METRICS for action'):
+        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
     # clean up after ourselves
     os.remove(outfile)
