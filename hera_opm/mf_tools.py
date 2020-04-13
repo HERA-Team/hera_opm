@@ -985,9 +985,11 @@ def build_analysis_makeflow_from_config(
                         # add obsid's primary obsids to list of previous
                         # outfiles and continue
                         outfiles_prev = []
-                        for oi in per_obsid_primary_obsids:
-                            outfile = make_outfile_name(oi, action, pol_list=pol_list)
-                            outfiles_prev.append(outfile)
+                        for oi_list in per_obsid_primary_obsids:
+                            for oi in oi_list:
+                                outfiles_prev.extend(make_outfile_name(oi, action,
+                                                                       pol_list=pol_list))
+                        outfiles_prev = list(set(outfiles_prev))
 
                         continue
 
