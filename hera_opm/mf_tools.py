@@ -1006,8 +1006,8 @@ def build_analysis_makeflow_from_config(
                             workflow.index(prereq)
                         except ValueError:
                             raise ValueError(
-                                'Prereq "{0}" for action "{1}" not found in main '
-                                "workflow".format(prereq, action)
+                                'Prereq {0} for action {1} not found in main '
+                                'workflow'.format(prereq, action)
                             )
                         outfiles = make_outfile_name(filename, prereq, pol_list)
                         for of in outfiles:
