@@ -629,14 +629,20 @@ def test_build_analysis_makeflow_from_config_time_neighbors(config_options):
         "FIRSTCAL",
         "FIRSTCAL_METRICS",
         "OMNICAL",
-        "OMNICAL_METRICS",
-        "OMNI_APPLY",
         "XRFI",
         "XRFI_APPLY",
     ]
+    ntime_actions = ["OMNICAL_METRICS", "OMNI_APPLY"]
     pols = config_options["pols"]
     for obsid in obsids:
         for action in actions:
+            for pol in pols:
+                wrapper_fn = "wrapper_" + obsid + "." + action + "." + pol + ".sh"
+                wrapper_fn = os.path.join(work_dir, wrapper_fn)
+                assert os.path.exists(wrapper_fn)
+    # some actions will not run for edge observations because they need time neighbors.
+    for obsid in obsids[1:-1]:
+        for action in ntime_actions:
             for pol in pols:
                 wrapper_fn = "wrapper_" + obsid + "." + action + "." + pol + ".sh"
                 wrapper_fn = os.path.join(work_dir, wrapper_fn)
