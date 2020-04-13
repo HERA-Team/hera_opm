@@ -1076,8 +1076,8 @@ def build_analysis_makeflow_from_config(
                                 workflow.index(tp)
                             except ValueError:
                                 raise ValueError(
-                                    'Time prereq "{0}" for action "{1}" not found in main '
-                                    "workflow".format(tp, action)
+                                    'Time prereq {0} for action {1} not found in main '
+                                    'workflow'.format(tp, action)
                                 )
                             # add neighbors for all pols
                             for pol2 in pol_list:
