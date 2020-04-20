@@ -197,7 +197,7 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
 
 
 def make_time_neighbor_outfile_name(
-    obsid, action, obsids, pol=None, n_neighbors="1", centered=None
+    obsid, action, obsids, pol=None, n_time_neighbors="1", centered=None
 ):
     """
     Make a list of neighbors in time for prereqs.
@@ -213,13 +213,13 @@ def make_time_neighbor_outfile_name(
         define neighbors
     pol : str, optional
         If present, polarization string to specify for output file.
-    n_neighbors : str
+    n_time_neighbors : str
         Number of neighboring time files to append to list. If set to the
         string "all", then all neighbors from that JD are added.
     centered : bool, optional
         Whether the provided obsid should be in the center of the neighbors.
-        If True (default), returns n_neighbors on either side of obsid.
-        If False, returns original obsid _and_ n_neighbors following.
+        If True (default), returns n_time_neighbors on either side of obsid.
+        If False, returns original obsid _and_ n_time_neighbors following.
 
     Returns
     -------
@@ -230,8 +230,8 @@ def make_time_neighbor_outfile_name(
     ------
     ValueError
         Raised if the specified obsid is not present in the full list, if
-        `n_neighbors` cannot be parsed as an int, or if `n_neighbors` is
-        not positive.
+        `n_time_neighbors` cannot be parsed as an int, or if `n_time_neighbors`
+        is negative.
 
     """
     if centered is None:
@@ -249,20 +249,20 @@ def make_time_neighbor_outfile_name(
     except ValueError:
         raise ValueError("obsid {} not found in list of obsids".format(obsid))
 
-    if n_neighbors == "all":
+    if n_time_neighbors == "all":
         i0 = 0
         i1 = len(obsids)
     else:
         # assume we got an integer as a string; try to make sense of it
         try:
-            n_neighbors = int(n_neighbors)
+            n_time_neighbors = int(n_time_neighbors)
         except ValueError:
-            raise ValueError("n_neighbors must be parsable as an int")
-        if n_neighbors <= 0:
-            raise ValueError("n_neighbors must be a postitive integer")
-        # get n_neighbors before and after; make sure we don't have an IndexError
-        i0 = max(obs_idx - centered * n_neighbors, 0)
-        i1 = min(obs_idx + n_neighbors + 1, len(obsids))
+            raise ValueError("n_time_neighbors must be parsable as an int")
+        if n_time_neighbors <= 0:
+            raise ValueError("n_time_neighbors must be a postitive integer")
+        # get n_time_neighbors before and after; make sure we don't have an IndexError
+        i0 = max(obs_idx - centered * n_time_neighbors, 0)
+        i1 = min(obs_idx + n_time_neighbors + 1, len(obsids))
 
     # build list of output files to wait for
     for i in range(i0, i1):
@@ -484,7 +484,7 @@ def prep_args(
     obsid,
     pol=None,
     obsids=None,
-    n_neighbors="1",
+    n_time_neighbors="1",
     n_stride="1",
     centered=None,
     collect_stragglers=None,
@@ -503,16 +503,16 @@ def prep_args(
         Polarization to substitute for the one found in obsid.
     obsids : list of str, optional
         Full list of obsids. Required when time-adjacent neighbors are desired.
-    n_neighbors : str
+    n_time_neighbors : str
         Number of neighboring time files to append to list. If set to the
         string "all", then all neighbors from that JD are added.
     n_stride : str
         Number of files to include in a stride. This interacts with
-        `n_neighbors` to define how arguments are generate.
+        `n_time_neighbors` to define how arguments are generate.
     centered : bool, optional
         Whether the provided obsid should be in the center of the neighbors.
-        If True (default), returns n_neighbors on either side of obsid.
-        If False, returns original obsid _and_ n_neighbors following.
+        If True (default), returns n_time_neighbors on either side of obsid.
+        If False, returns original obsid _and_ n_time_neighbors following.
     collect_stragglers : bool, optional
         Whether to lump files close to the end of the list ("stragglers") into
         the previous group, or belong to their own smaller group.
@@ -589,9 +589,11 @@ def prep_args(
         if centered is None:
             centered = True
         try:
-            n_neighbors = int(n_neighbors)
+            n_time_neighbors = int(n_time_neighbors)
         except ValueError:
-            raise ValueError("n_neighbors must be able to be interpreted as an int.")
+            raise ValueError(
+                "n_time_neighbors must be able to be interpreted as an int."
+            )
         try:
             n_stride = int(n_stride)
         except ValueError:
@@ -603,11 +605,11 @@ def prep_args(
         # should grab straggling obsids.
         n_following = len(obsids) - (obs_idx + n_stride)
         if centered:
-            i1 = max(obs_idx - n_neighbors, 0)
+            i1 = max(obs_idx - n_time_neighbors, 0)
         else:
             i1 = obs_idx
-        i2 = min(obs_idx + n_neighbors + 1, len(obsids))
-        if n_following < (n_neighbors + 1) and collect_stragglers:
+        i2 = min(obs_idx + n_time_neighbors + 1, len(obsids))
+        if n_following < (n_time_neighbors + 1) and collect_stragglers:
             i2 = len(obsids)
         print("i1, i2: ", i1, i2)
         print("n_following: ", n_following)
@@ -987,8 +989,9 @@ def build_analysis_makeflow_from_config(
                         outfiles_prev = []
                         for oi_list in per_obsid_primary_obsids:
                             for oi in oi_list:
-                                outfiles_prev.extend(make_outfile_name(oi, action,
-                                                                       pol_list=pol_list))
+                                outfiles_prev.extend(
+                                    make_outfile_name(oi, action, pol_list=pol_list)
+                                )
                         outfiles_prev = list(set(outfiles_prev))
 
                         continue
@@ -1006,8 +1009,8 @@ def build_analysis_makeflow_from_config(
                             workflow.index(prereq)
                         except ValueError:
                             raise ValueError(
-                                'Prereq {0} for action {1} not found in main '
-                                'workflow'.format(prereq, action)
+                                "Prereq {0} for action {1} not found in main "
+                                "workflow".format(prereq, action)
                             )
                         outfiles = make_outfile_name(filename, prereq, pol_list)
                         for of in outfiles:
@@ -1061,7 +1064,7 @@ def build_analysis_makeflow_from_config(
                         if not isinstance(time_prereqs, list):
                             time_prereqs = [time_prereqs]
                         # get how many neighbors we should be including
-                        n_neighbors = get_config_entry(
+                        n_time_neighbors = get_config_entry(
                             config, action, "n_time_neighbors", required=True
                         )
                         time_centered = get_config_entry(
@@ -1076,8 +1079,8 @@ def build_analysis_makeflow_from_config(
                                 workflow.index(tp)
                             except ValueError:
                                 raise ValueError(
-                                    'Time prereq {0} for action {1} not found in main '
-                                    'workflow'.format(tp, action)
+                                    "Time prereq {0} for action {1} not found in main "
+                                    "workflow".format(tp, action)
                                 )
                             # add neighbors for all pols
                             for pol2 in pol_list:
@@ -1086,7 +1089,7 @@ def build_analysis_makeflow_from_config(
                                     tp,
                                     obsids,
                                     pol2,
-                                    n_neighbors,
+                                    n_time_neighbors,
                                     centered=time_centered,
                                 )
                                 for of in tp_outfiles:
@@ -1094,8 +1097,8 @@ def build_analysis_makeflow_from_config(
 
                         # handle striding options
                         if stride_length is not None:
-                            n_neighbors = get_config_entry(
-                                config, action, "n_neighbors", required=True
+                            n_time_neighbors = get_config_entry(
+                                config, action, "n_time_neighbors", required=True
                             )
                             centered = get_config_entry(
                                 config, action, "centered", required=True
@@ -1104,7 +1107,7 @@ def build_analysis_makeflow_from_config(
                                 config, action, "collect_stragglers", required=True
                             )
                         else:
-                            n_neighbors = None
+                            n_time_neighbors = None
                             centered = None
                             collect_stragglers = None
 
@@ -1115,7 +1118,7 @@ def build_analysis_makeflow_from_config(
                             filename,
                             pol,
                             obsids,
-                            n_neighbors,
+                            n_time_neighbors,
                             centered,
                             collect_stragglers,
                         )
@@ -1125,8 +1128,8 @@ def build_analysis_makeflow_from_config(
 
                         # handle striding options
                         if stride_length is not None:
-                            n_neighbors = get_config_entry(
-                                config, action, "n_neighbors", required=True
+                            n_time_neighbors = get_config_entry(
+                                config, action, "n_time_neighbors", required=True
                             )
                             centered = get_config_entry(
                                 config, action, "centered", required=True
@@ -1135,7 +1138,7 @@ def build_analysis_makeflow_from_config(
                                 config, action, "collect_stragglers", required=True
                             )
                         else:
-                            n_neighbors = None
+                            n_time_neighbors = None
                             centered = None
                             collect_stragglers = None
 
@@ -1145,7 +1148,7 @@ def build_analysis_makeflow_from_config(
                             args,
                             filename,
                             pol,
-                            n_neighbors=n_neighbors,
+                            n_time_neighbors=n_time_neighbors,
                             centered=centered,
                             collect_stragglers=collect_stragglers,
                         )
