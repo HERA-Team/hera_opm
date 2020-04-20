@@ -195,7 +195,7 @@ def test_make_time_neighbor_outfile_name(config_options):
     # test asking for "all" neighbors
     assert set(
         mt.make_time_neighbor_outfile_name(
-            obsid, action, obsids_time, pol, n_neighbors="all"
+            obsid, action, obsids_time, pol, n_time_neighbors="all"
         )
     ) == set(outfiles)
 
@@ -235,13 +235,13 @@ def test_make_time_neighbor_outfile_name_errors(config_options):
     # test passing in nonsense for all_neighbors
     with pytest.raises(ValueError):
         mt.make_time_neighbor_outfile_name(
-            obsids_time[0], action, obsids_time, pol="xx", n_neighbors="blah"
+            obsids_time[0], action, obsids_time, pol="xx", n_time_neighbors="blah"
         )
 
     # test passing in a negative number of neighbors
     with pytest.raises(ValueError):
         mt.make_time_neighbor_outfile_name(
-            obsids_time[0], action, obsids_time, pol="xx", n_neighbors="-1"
+            obsids_time[0], action, obsids_time, pol="xx", n_time_neighbors="-1"
         )
 
     return
@@ -625,7 +625,7 @@ def test_build_analysis_makeflow_from_config_missing_prereq(config_options):
     outfile = os.path.join(work_dir, mf_output)
     if os.path.exists(outfile):
         os.remove(outfile)
-    with pytest.raises(ValueError, match='Prereq FIRSTCAL_METRICS for action'):
+    with pytest.raises(ValueError, match="Prereq FIRSTCAL_METRICS for action"):
         mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
     # clean up after ourselves
@@ -645,7 +645,7 @@ def test_build_analysis_makeflow_from_config_missing_time_prereq(config_options)
     outfile = os.path.join(work_dir, mf_output)
     if os.path.exists(outfile):
         os.remove(outfile)
-    with pytest.raises(ValueError, match='Time prereq GIBBLY_GOOP for action'):
+    with pytest.raises(ValueError, match="Time prereq GIBBLY_GOOP for action"):
         mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
     # clean up after ourselves
@@ -1328,7 +1328,7 @@ def test_prep_args_obsid_list(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_neighbors="1",
+        n_time_neighbors="1",
         centered=None,
         collect_stragglers=False,
     )
@@ -1348,7 +1348,7 @@ def test_prep_args_obsid_list_centered(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_neighbors="1",
+        n_time_neighbors="1",
         centered=True,
         collect_stragglers=False,
     )
@@ -1368,7 +1368,7 @@ def test_prep_args_obsid_list_not_centered(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_neighbors="1",
+        n_time_neighbors="1",
         centered=False,
         collect_stragglers=False,
     )
@@ -1388,7 +1388,7 @@ def test_prep_args_obsid_list_with_stragglers(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_neighbors="1",
+        n_time_neighbors="1",
         n_stride="2",
         centered=False,
         collect_stragglers=True,
@@ -1410,18 +1410,18 @@ def test_prep_args_obsid_list_error(config_options):
             args,
             obsid,
             obsids=obsids_list,
-            n_neighbors="foo",
+            n_time_neighbors="foo",
             centered=True,
             collect_stragglers=False,
         )
-    assert str(cm.value).startswith("n_neighbors must be able to be interpreted")
+    assert str(cm.value).startswith("n_time_neighbors must be able to be interpreted")
 
     with pytest.raises(ValueError) as cm:
         args = mt.prep_args(
             args,
             obsid,
             obsids=obsids_list,
-            n_neighbors="1",
+            n_time_neighbors="1",
             n_stride="foo",
             centered=True,
             collect_stragglers=False,

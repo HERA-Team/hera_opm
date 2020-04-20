@@ -85,6 +85,48 @@ step before the associated `ant_metrics` thread has finished running. By adding
 attempting to execute *any* `FIRSTCAL` steps. This ensures that all
 prerequisites have been met in terms of expected output files being produced.
 
+### n_time_neighbors
+
+When running a workflow, it is sometimes desirable to operate on several files
+contiguous in time as a single chunk. There are several options that control how
+a full list of files is partitioned into a series of time-contiguous chunks that
+are all operated on together as a single job in the workflow, referred to as
+"time neighbors". When evaluating the workflow to determine which obsids to
+operate on, the code defines a notion of "primary obsids". For each primary
+obsid, a task script is run. Each obsid could be a primary obsid.  However, it
+is also possible to partition the list such that, e.g., every tenth file is a
+primary obsid, and the others do not have corresponding task scripts generated
+for them. The specific keywords that may be specified are:
+
+* `n_time_neighbors`: the number of files that are considered "time neighbors"
+  for a given primiary obsid. Must be a non-negative integer. Default is 0
+  (i.e., no time neighbors will be used unless specified).
+* `time_centered`: whether to treat a chunk of files such that the primary obsid
+  is in the center, with `n_time_neighbors` on either side for a total length of
+  2 * `n_time_neighbors` + 1 (True), or as the start of a chunk of files with
+  total length of `n_time_neighbors` + 1 (False). Default is True.
+* `stride_length`: the number of obsids to stride by when generating the list of
+  primary obsids. For example, if `stride_length = 11`, and `n_time_neighbors =
+  10`, and `time_centered` is `False`, the list will be partitioned into chunks
+  11 files long with no overlap. Default is 1 (i.e., every obsid will be treated
+  as a primary obsid with the exception of those files within `n_time_neighbors`
+  of the edge).
+* `collect_stragglers`: determine how to handle lists that are not evenly
+  divided by `stride_length`. If True, any files that would not evenly be added
+  to a full group are instead added to the second-to-last group to make an
+  "extra large" group, ensuring that all files are accounted for when
+  processing. If False, these obsids will not be included in the list. Default
+  is False.
+
+
+### time_prereqs
+
+Pre-requisite steps can also have a "time" component, where a previous step in
+the workflow must complete for a given file and all of its time neighbors. The
+chunking keywords listed above are used to determine which files are primary
+obsids for a given file, and hence which steps must be completed before
+launching a particular task script.
+
 ### mem
 
 The required memory for each task, in MB. This is for scheduling purposes to
