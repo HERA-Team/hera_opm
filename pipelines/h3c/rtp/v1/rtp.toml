@@ -21,6 +21,18 @@ streak_sig = 20.0
 other_sig = 5.0
 N_samp_thresh = 0
 
+[XRFI_OPTS]
+kt_size = 8
+kf_size = 8
+sig_init = 5.0
+sig_adj = 2.0
+
+[XRFI_DAY_THRESHOLD_OPTS]
+nsig_f = 7.0
+nsig_t = 7.0
+nsig_f_adj = 3.0
+nsig_t_adj = 3.0
+
 [NB_OPTS]
 basenbdir = '/home/obs/src/H3C_plots'
 
@@ -39,8 +51,10 @@ good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,cal
 [WorkFlow]
 actions = ["SETUP", "UPLOAD","MAKE_SESSION", "ANT_METRICS",
            "ADD_LIBRARIAN_ANT_METRICS", "ADD_MC_ANT_METRICS", "SSINS",
+           "XRFI",
            "ADD_LIBRARIAN_SSINS", "MAKE_NOTEBOOK", "ADD_RTP_PROCESS_RECORD",
-           "REDCAL", "MAKE_REDCAL_NOTEBOOK", "ADD_LIBRARIAN_REDCAL"]
+           "REDCAL", "MAKE_REDCAL_NOTEBOOK", "ADD_LIBRARIAN_REDCAL",
+           "XRFI_DAY_THRESHOLD"]
 
 [ANT_METRICS]
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
@@ -77,6 +91,19 @@ args = ["{basename}", "${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
 stride_length = 10
 n_time_neighbors = 9
 
+[XRFI]
+args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
+        "${XRFI_OPTS:sig_adj}"]
+# xrfi will drop data within kt_size of time edge. Total integrations read in
+# must be greater than 2 * kt_size. With 2 integrations per file, and kt_size=8,
+# n_time_neighbors must be >= 4 (with centered==True).
+# Larger n_time_neighbors will reduce redundant i/o and median filter calculation.
+# The numbers below result in about 35% redundancy.
+n_time_neighbors = 15
+stride_length = 23
+collect_stragglers = True
+
+
 [ADD_LIBRARIAN_SSINS]
 args = ["{basename}"]
 
@@ -99,3 +126,10 @@ args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
 [ADD_LIBRARIAN_REDCAL]
 prereqs = "REDCAL"
 args = ["{basename}", "${REDCAL_OPTS:iter0_prefix}"]
+
+[XRFI_DAY_THRESHOLD]
+prereqs = "XRFI"
+time_prereqs = "XRFI"
+n_time_neighbors = "all"
+args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
+        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}"]
