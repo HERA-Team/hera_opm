@@ -1122,6 +1122,7 @@ def build_analysis_makeflow_from_config(
                         args,
                         filename,
                         pol,
+                        obsids=obsids,
                         n_time_neighbors=n_time_neighbors,
                         centered=centered,
                         collect_stragglers=collect_stragglers,
