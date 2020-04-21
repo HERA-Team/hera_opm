@@ -1389,7 +1389,7 @@ def test_prep_args_obsid_list_with_stragglers(config_options):
         obsid,
         obsids=obsids_list,
         n_time_neighbors="1",
-        n_stride="2",
+        stride_length="2",
         centered=False,
         collect_stragglers=True,
     )
@@ -1422,11 +1422,11 @@ def test_prep_args_obsid_list_error(config_options):
             obsid,
             obsids=obsids_list,
             n_time_neighbors="1",
-            n_stride="foo",
+            stride_length="foo",
             centered=True,
             collect_stragglers=False,
         )
-    assert str(cm.value).startswith("n_stride must be able to be interpreted")
+    assert str(cm.value).startswith("stride_length must be able to be interpreted")
 
     return
 

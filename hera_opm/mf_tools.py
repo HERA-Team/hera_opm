@@ -485,7 +485,7 @@ def prep_args(
     pol=None,
     obsids=None,
     n_time_neighbors="1",
-    n_stride="1",
+    stride_length="1",
     centered=None,
     collect_stragglers=None,
 ):
@@ -506,7 +506,7 @@ def prep_args(
     n_time_neighbors : str
         Number of neighboring time files to append to list. If set to the
         string "all", then all neighbors from that JD are added.
-    n_stride : str
+    stride_length : str
         Number of files to include in a stride. This interacts with
         `n_time_neighbors` to define how arguments are generate.
     centered : bool, optional
@@ -595,15 +595,15 @@ def prep_args(
                 "n_time_neighbors must be able to be interpreted as an int."
             )
         try:
-            n_stride = int(n_stride)
+            stride_length = int(stride_length)
         except ValueError:
-            raise ValueError("n_stride must be able to be interpreted as an int.")
+            raise ValueError("stride_length must be able to be interpreted as an int.")
         obsids = sort_obsids(obsids)
         obs_idx = obsids.index(obsid)
         # Compute the number of remaining obsids to process.
         # We account for the location of the next stride to determine if we
         # should grab straggling obsids.
-        n_following = len(obsids) - (obs_idx + n_stride)
+        n_following = len(obsids) - (obs_idx + stride_length)
         if centered:
             i1 = max(obs_idx - n_time_neighbors, 0)
         else:
@@ -800,12 +800,13 @@ def build_analysis_makeflow_from_config(
                     "for an action, n_time_neighbors must also be specified."
                 )
             this_args = get_config_entry(config, action, "args", required=True)
-            bn_idx = this_args.index("{obsid_list}")
-            if bn_idx != len(this_args) - 1:
-                raise ValueError(
-                    "{obsid_list} must be the last argument for action"
-                    f" {action} because stride_length is specified."
-                )
+            if "{obsid_list}" in this_args:
+                bn_idx = this_args.index("{obsid_list}")
+                if bn_idx != len(this_args) - 1:
+                    raise ValueError(
+                        "{obsid_list} must be the last argument for action"
+                        f" {action} because stride_length is specified."
+                    )
 
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
