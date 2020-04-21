@@ -1096,63 +1096,36 @@ def build_analysis_makeflow_from_config(
                                 for of in tp_outfiles:
                                     infiles_pol.append(of)
 
-                        # handle striding options
-                        if stride_length is not None:
-                            n_time_neighbors = get_config_entry(
-                                config, action, "n_time_neighbors", required=True
-                            )
-                            centered = get_config_entry(
-                                config, action, "centered", required=True
-                            )
-                            collect_stragglers = get_config_entry(
-                                config, action, "collect_stragglers", required=True
-                            )
-                        else:
-                            n_time_neighbors = None
-                            centered = None
-                            collect_stragglers = None
-
-                        # replace '{basename}' with actual filename
-                        # also replace polarization string, and time neighbors
-                        prepped_args = prep_args(
-                            args,
-                            filename,
-                            pol,
-                            obsids,
-                            n_time_neighbors,
-                            centered,
-                            collect_stragglers,
-                        )
                     else:
                         # just get a copy of the infiles as-is
                         infiles_pol = infiles
 
-                        # handle striding options
-                        if stride_length is not None:
-                            n_time_neighbors = get_config_entry(
-                                config, action, "n_time_neighbors", required=True
-                            )
-                            centered = get_config_entry(
-                                config, action, "centered", required=True
-                            )
-                            collect_stragglers = get_config_entry(
-                                config, action, "collect_stragglers", required=True
-                            )
-                        else:
-                            n_time_neighbors = None
-                            centered = None
-                            collect_stragglers = None
-
-                        # replace '{basename}' with actual filename
-                        # aslo replace polarization string
-                        prepped_args = prep_args(
-                            args,
-                            filename,
-                            pol,
-                            n_time_neighbors=n_time_neighbors,
-                            centered=centered,
-                            collect_stragglers=collect_stragglers,
+                    # handle striding options
+                    if stride_length is not None:
+                        n_time_neighbors = get_config_entry(
+                            config, action, "n_time_neighbors", required=False
                         )
+                        centered = get_config_entry(
+                            config, action, "centered", required=False
+                        )
+                        collect_stragglers = get_config_entry(
+                            config, action, "collect_stragglers", required=False
+                        )
+                    else:
+                        n_time_neighbors = None
+                        centered = None
+                        collect_stragglers = None
+
+                    # replace '{basename}' with actual filename
+                    # aslo replace polarization string
+                    prepped_args = prep_args(
+                        args,
+                        filename,
+                        pol,
+                        n_time_neighbors=n_time_neighbors,
+                        centered=centered,
+                        collect_stragglers=collect_stragglers,
+                    )
 
                     # make logfile name
                     # logfile will capture stdout and stderr
