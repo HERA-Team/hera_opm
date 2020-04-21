@@ -149,7 +149,9 @@ One of the entries replaced in the `args` section is `{basename}` (that exact
 string, including the curly braces), which is the root name of the file. For
 instance, if the obsid specified when constructing the makeflow file is
 `zen.2458000.12345.xx.uv`, then this name will be replaced anytime `{basename}`
-is encountered in the `args`.
+is encountered in the `args`. If chunking multiple files using n_time_neighbors,
+this argument should instead be replaced with '{obsid_list}', and should be
+placed as the last argument in the list.
 
 In addition to the `{basename}` substitution, entries from other parts of the
 config file can be substituted. The syntax for this is to use:
