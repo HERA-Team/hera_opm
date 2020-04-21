@@ -38,7 +38,7 @@ args = ["{basename}", "{prev_basename}", "{next_basename}"]
 [OMNI_APPLY]
 prereqs = "OMNICAL_METRICS"
 n_time_neighbors = 1
-n_stride = 2
+stride_length = 2
 # args = ["{basename}", "{obsid_list}"]
 args = "{basename}"
 
