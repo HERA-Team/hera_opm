@@ -93,7 +93,7 @@ n_time_neighbors = 9
 
 [XRFI]
 args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
-        "${XRFI_OPTS:sig_adj}"]
+        "${XRFI_OPTS:sig_adj}", "{obsid_list}"]
 # xrfi will drop data within kt_size of time edge. Total integrations read in
 # must be greater than 2 * kt_size. With 2 integrations per file, and kt_size=8,
 # n_time_neighbors must be >= 4 (with centered==True).
