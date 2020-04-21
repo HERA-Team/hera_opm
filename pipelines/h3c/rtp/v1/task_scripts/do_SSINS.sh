@@ -18,8 +18,10 @@ other_sig=${2}
 N_samp_thresh=${3}
 fn=${4}
 
-# Get the right raw file
-prefix="${fn%.*}"
+# Get the first filename in the list (should work if only one file)
+first_file="${fn%" "*}"
+# Set the prefix based on the first filename
+prefix="${first_file%.*}"
 
 echo Run_HERA_SSINS.py -f $fn -s $streak_sig -o $other_sig -p $prefix -N $N_samp_thresh -c
 Run_HERA_SSINS.py -f $fn -s $streak_sig -o $other_sig -p $prefix -N $N_samp_thresh -c
