@@ -196,6 +196,41 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
     return sorted_obsids
 
 
+def _parse_int(param, maximum):
+    """
+    Parse a length parameter (e.g. n_time_neighbors or stride_length).
+
+    If None, return None. Otherwise if input is interpretable as an integer,
+    return that integer. Otherwise, if 'all', return the maximum. Otherwise
+    raise exception.
+
+    Parameters
+    ----------
+    param: int or str or None
+        Parameter to be parsed
+    maximum: int
+        Maximum value to replace 'all' with.
+
+    Returns
+    -------
+    value : int
+        int(param) or maximum
+    """
+
+    if param is None:
+        value = None
+    else:
+        try:
+            value = int(param)
+        except ValueError:
+            if param == 'all':
+                value = maximum
+            else:
+                raise(ValueError, f"Parameter {param} is not interpretable as "
+                      "an integer or 'all'")
+    return value
+
+
 def make_time_neighbor_outfile_name(
     obsid, action, obsids, pol=None, n_time_neighbors="1", centered=None
 ):
@@ -789,10 +824,12 @@ def build_analysis_makeflow_from_config(
         stride_length = get_config_entry(
             config, action, "stride_length", required=False
         )
+        stride_length = _parse_int(stride_length, len(obsids))
         if stride_length is not None:
             n_time_neighbors = get_config_entry(
                 config, action, "n_time_neighbors", required=False
             )
+            n_time_neighbors = _parse_int(n_time_neighbors, len(obsids))
             if n_time_neighbors is None:
                 raise ValueError(
                     f"`stride_length` was specified for action {action}, but "
@@ -952,9 +989,11 @@ def build_analysis_makeflow_from_config(
                 stride_length = get_config_entry(
                     config, action, "stride_length", required=False
                 )
+                stride_length = _parse_int(stride_length, len(obsids))
                 n_time_neighbors = get_config_entry(
                     config, action, "n_time_neighbors", required=False
                 )
+                n_time_neighbors = _parse_int(n_time_neighbors, len(obsids))
                 time_centered = get_config_entry(
                     config, action, "time_centered", required=False
                 )
@@ -1068,6 +1107,7 @@ def build_analysis_makeflow_from_config(
                         n_time_neighbors = get_config_entry(
                             config, action, "n_time_neighbors", required=True
                         )
+                        n_time_neighbors = _parse_int(n_time_neighbors, len(obsids))
                         time_centered = get_config_entry(
                             config, action, "time_centered", required=False
                         )
@@ -1105,6 +1145,7 @@ def build_analysis_makeflow_from_config(
                         n_time_neighbors = get_config_entry(
                             config, action, "n_time_neighbors", required=False
                         )
+                        n_time_neighbors = _parse_int(n_time_neighbors, len(obsids))
                         centered = get_config_entry(
                             config, action, "centered", required=False
                         )
