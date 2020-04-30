@@ -138,7 +138,7 @@ args = ["${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
 # The numbers below result in about 35% redundancy.
 n_time_neighbors = 15
 stride_length = 23
-collect_stragglers = True
+collect_stragglers = False
 
 
 [XRFI_DAY_THRESHOLD]
