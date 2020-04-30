@@ -33,6 +33,9 @@ def config_options():
     config_dict["config_file_time_neighbors"] = os.path.join(
         DATA_PATH, "sample_config", "nrao_rtp_time_neighbors.toml"
     )
+    config_dict["config_file_time_neighbors_all"] = os.path.join(
+        DATA_PATH, "sample_config", "nrao_rtp_time_neighbors_all.toml"
+    )
     config_dict["config_file_options"] = os.path.join(
         DATA_PATH, "sample_config", "nrao_rtp_options.toml"
     )
@@ -152,6 +155,14 @@ def test_get_config_entry(config_options):
     with pytest.raises(AssertionError):
         mt.get_config_entry(config, header, item)
     return
+
+
+def test_get_config_entry_maximum(config_options):
+    """Test setting a maximum for an entry."""
+    # retreive config
+    config = toml.load(config_options["config_file_time_neighbors_all"])
+
+    assert mt.get_config_entry(config, "XRFI", "n_time_neighbors", maximum=14) == '14'
 
 
 def test_make_outfile_name(config_options):
