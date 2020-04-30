@@ -72,7 +72,8 @@ def _interpolate_config(config, entry):
         return entry
 
 
-def get_config_entry(config, header, item, required=True, interpolate=True):
+def get_config_entry(config, header, item, required=True, interpolate=True,
+                     maximum=1):
     """Extract a specific entry from config file.
 
     Parameters
@@ -91,6 +92,11 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
         config file. Interpolation is triggered by a string with the template
         "${header:item}". If the corresponding key is not defined in that part
         of the config file, an error is raised. Default is True.
+    maximum : int, optional
+        If this parameter belongs to the special group of
+        [stride_length, n_time_neighbors],
+        the entry will be further parsed to interpret 'all', and be replaced
+        with maximum
 
     Returns
     -------
@@ -113,6 +119,9 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
                     entries[i] = _interpolate_config(config, entry)
             else:
                 entries = _interpolate_config(config, entries)
+        if item in ['stride_length', 'n_time_neighbors']:
+            if entries == 'all':
+                entries = str(maximum)
         return entries
     except KeyError:
         if not required:
@@ -194,41 +203,6 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
         sorted_obsids = [os.path.basename(obsid) for obsid in sorted_obsids]
 
     return sorted_obsids
-
-
-def _parse_int(param, maximum):
-    """
-    Parse a length parameter (e.g. n_time_neighbors or stride_length).
-
-    If None, return None. Otherwise if input is interpretable as an integer,
-    return that integer. Otherwise, if 'all', return the maximum. Otherwise
-    raise exception.
-
-    Parameters
-    ----------
-    param: int or str or None
-        Parameter to be parsed
-    maximum: int
-        Maximum value to replace 'all' with.
-
-    Returns
-    -------
-    value : int
-        int(param) or maximum
-    """
-
-    if param is None:
-        value = None
-    else:
-        try:
-            value = int(param)
-        except ValueError:
-            if param == 'all':
-                value = maximum
-            else:
-                raise(ValueError, f"Parameter {param} is not interpretable as "
-                      "an integer or 'all'")
-    return value
 
 
 def make_time_neighbor_outfile_name(
@@ -822,14 +796,13 @@ def build_analysis_makeflow_from_config(
     # Check for actions that use striding, make sure basename is last arg
     for action in workflow:
         stride_length = get_config_entry(
-            config, action, "stride_length", required=False
+            config, action, "stride_length", required=False, maximum=len(obsids)
         )
-        stride_length = _parse_int(stride_length, len(obsids))
         if stride_length is not None:
             n_time_neighbors = get_config_entry(
-                config, action, "n_time_neighbors", required=False
+                config, action, "n_time_neighbors", required=False,
+                maximum = len(obsids)
             )
-            n_time_neighbors = _parse_int(n_time_neighbors, len(obsids))
             if n_time_neighbors is None:
                 raise ValueError(
                     f"`stride_length` was specified for action {action}, but "
@@ -987,13 +960,13 @@ def build_analysis_makeflow_from_config(
                 if action == "TEARDOWN":
                     continue
                 stride_length = get_config_entry(
-                    config, action, "stride_length", required=False
+                    config, action, "stride_length", required=False,
+                    maximum=len(obsids)
                 )
-                stride_length = _parse_int(stride_length, len(obsids))
                 n_time_neighbors = get_config_entry(
-                    config, action, "n_time_neighbors", required=False
+                    config, action, "n_time_neighbors", required=False,
+                    maximum=len(obsids)
                 )
-                n_time_neighbors = _parse_int(n_time_neighbors, len(obsids))
                 time_centered = get_config_entry(
                     config, action, "time_centered", required=False
                 )
@@ -1105,9 +1078,9 @@ def build_analysis_makeflow_from_config(
                             time_prereqs = [time_prereqs]
                         # get how many neighbors we should be including
                         n_time_neighbors = get_config_entry(
-                            config, action, "n_time_neighbors", required=True
+                            config, action, "n_time_neighbors", required=True,
+                            maximum=len(obsids)
                         )
-                        n_time_neighbors = _parse_int(n_time_neighbors, len(obsids))
                         time_centered = get_config_entry(
                             config, action, "time_centered", required=False
                         )
@@ -1143,9 +1116,9 @@ def build_analysis_makeflow_from_config(
                     # handle striding options
                     if stride_length is not None:
                         n_time_neighbors = get_config_entry(
-                            config, action, "n_time_neighbors", required=False
+                            config, action, "n_time_neighbors", required=False,
+                            maximum=len(obsids)
                         )
-                        n_time_neighbors = _parse_int(n_time_neighbors, len(obsids))
                         centered = get_config_entry(
                             config, action, "centered", required=False
                         )
