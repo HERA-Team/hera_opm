@@ -129,16 +129,27 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 [XRFI]
 prereqs = "ABSCAL"
 mem = 64000
-args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
-        "${XRFI_OPTS:sig_adj}"]
+args = ["${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
+        "${XRFI_OPTS:sig_adj}", "{obsid_list}"]
+# xrfi will drop data within kt_size of time edge. Total integrations read in
+# must be greater than 2 * kt_size. With 2 integrations per file, and kt_size=8,
+# n_time_neighbors must be >= 4 (with centered==True).
+# Larger n_time_neighbors will reduce redundant i/o and median filter calculation.
+# The numbers below result in about 35% redundancy.
+n_time_neighbors = 15
+stride_length = 23
+collect_stragglers = True
 
 
 [XRFI_DAY_THRESHOLD]
 prereqs = "XRFI"
 time_prereqs = "XRFI"
 n_time_neighbors = "all"
-args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
-        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}"]
+args = ["${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
+        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}",
+        "{obsid_list}"]
+n_time_neighbors = "all"
+stride_length = "all"
 
 [CAL_SMOOTH]
 prereqs = "XRFI_DAY_THRESHOLD"
