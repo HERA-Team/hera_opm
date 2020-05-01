@@ -138,7 +138,8 @@ args = ["${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
 # The numbers below result in about 35% redundancy.
 n_time_neighbors = 15
 stride_length = 23
-collect_stragglers = False
+time_centered = true
+collect_stragglers = true
 
 
 [XRFI_DAY_THRESHOLD]
@@ -150,6 +151,7 @@ args = ["${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}"
         "{obsid_list}"]
 n_time_neighbors = "all"
 stride_length = "all"
+time_centered = false
 
 [CAL_SMOOTH]
 prereqs = "XRFI_DAY_THRESHOLD"
