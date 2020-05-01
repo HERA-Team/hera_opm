@@ -129,6 +129,7 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 [XRFI]
 prereqs = "ABSCAL"
 mem = 64000
+time_prereqs = "ABSCAL"
 args = ["${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
         "${XRFI_OPTS:sig_adj}", "{obsid_list}"]
 # xrfi will drop data within kt_size of time edge. Total integrations read in
@@ -145,7 +146,6 @@ collect_stragglers = true
 [XRFI_DAY_THRESHOLD]
 prereqs = "XRFI"
 time_prereqs = "XRFI"
-n_time_neighbors = "all"
 args = ["${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
         "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}",
         "{obsid_list}"]
