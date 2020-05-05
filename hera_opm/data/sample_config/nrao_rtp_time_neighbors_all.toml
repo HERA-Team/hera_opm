@@ -17,3 +17,13 @@ actions = ["XRFI"]
 [XRFI]
 args = "{basename}"
 n_time_neighbors = 'all'
+
+[XRFI_CENTERED]
+args = "{basename}"
+n_time_neighbors = 'all'
+time_centered = true
+
+[XRFI_NOT_CENTERED]
+args = "{basename}"
+n_time_neighbors = 'all'
+time_centered = false

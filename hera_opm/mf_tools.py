@@ -73,7 +73,7 @@ def _interpolate_config(config, entry):
 
 
 def get_config_entry(config, header, item, required=True, interpolate=True,
-                     maximum=1):
+                     total_length=1):
     """Extract a specific entry from config file.
 
     Parameters
@@ -92,11 +92,12 @@ def get_config_entry(config, header, item, required=True, interpolate=True,
         config file. Interpolation is triggered by a string with the template
         "${header:item}". If the corresponding key is not defined in that part
         of the config file, an error is raised. Default is True.
-    maximum : int, optional
+    total_length : int, optional
         If this parameter belongs to the special group of
         [stride_length, n_time_neighbors],
         the entry will be further parsed to interpret 'all', and be replaced
-        with maximum
+        with (total_length - 1) // 2 if time_centered is True (default) or
+        with (total_length - 1) if time_centered is False.
 
     Returns
     -------
@@ -120,8 +121,13 @@ def get_config_entry(config, header, item, required=True, interpolate=True,
             else:
                 entries = _interpolate_config(config, entries)
         if item in ['stride_length', 'n_time_neighbors']:
+            time_centered = get_config_entry(config, header, 'time_centered',
+                                             required=False)
             if entries == 'all':
-                entries = str(maximum)
+                if time_centered or time_centered is None:
+                    entries = str((total_length - 1) // 2)
+                else:
+                    entries = str(total_length - 1)
         return entries
     except KeyError:
         if not required:
@@ -796,12 +802,12 @@ def build_analysis_makeflow_from_config(
     # Check for actions that use striding, make sure basename is last arg
     for action in workflow:
         stride_length = get_config_entry(
-            config, action, "stride_length", required=False, maximum=len(obsids)
+            config, action, "stride_length", required=False, total_length=len(obsids)
         )
         if stride_length is not None:
             n_time_neighbors = get_config_entry(
                 config, action, "n_time_neighbors", required=False,
-                maximum = len(obsids)
+                total_length=len(obsids)
             )
             if n_time_neighbors is None:
                 raise ValueError(
@@ -961,11 +967,11 @@ def build_analysis_makeflow_from_config(
                     continue
                 stride_length = get_config_entry(
                     config, action, "stride_length", required=False,
-                    maximum=len(obsids)
+                    total_length=len(obsids)
                 )
                 n_time_neighbors = get_config_entry(
                     config, action, "n_time_neighbors", required=False,
-                    maximum=len(obsids)
+                    total_length=len(obsids)
                 )
                 time_centered = get_config_entry(
                     config, action, "time_centered", required=False
@@ -1079,7 +1085,7 @@ def build_analysis_makeflow_from_config(
                         # get how many neighbors we should be including
                         n_time_neighbors = get_config_entry(
                             config, action, "n_time_neighbors", required=True,
-                            maximum=len(obsids)
+                            total_length=len(obsids)
                         )
                         time_centered = get_config_entry(
                             config, action, "time_centered", required=False
@@ -1117,10 +1123,10 @@ def build_analysis_makeflow_from_config(
                     if stride_length is not None:
                         n_time_neighbors = get_config_entry(
                             config, action, "n_time_neighbors", required=False,
-                            maximum=len(obsids)
+                            total_length=len(obsids)
                         )
                         centered = get_config_entry(
-                            config, action, "centered", required=False
+                            config, action, "time_centered", required=False
                         )
                         collect_stragglers = get_config_entry(
                             config, action, "collect_stragglers", required=False
