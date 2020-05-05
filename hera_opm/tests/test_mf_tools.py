@@ -157,12 +157,18 @@ def test_get_config_entry(config_options):
     return
 
 
-def test_get_config_entry_maximum(config_options):
-    """Test setting a maximum for an entry."""
+def test_get_config_entry_total_length(config_options):
+    """Test setting a total_length for an entry."""
     # retreive config
     config = toml.load(config_options["config_file_time_neighbors_all"])
 
-    assert mt.get_config_entry(config, "XRFI", "n_time_neighbors", maximum=14) == '14'
+    # Default is to time center
+    assert mt.get_config_entry(config, "XRFI", "n_time_neighbors",
+                               total_length=15) == '7'
+    assert mt.get_config_entry(config, "XRFI_CENTERED", 'n_time_neighbors',
+                               total_length=21) == '10'
+    assert mt.get_config_entry(config, "XRFI_NOT_CENTERED", 'n_time_neighbors',
+                               total_length=7) == '6'
 
 
 def test_make_outfile_name(config_options):
