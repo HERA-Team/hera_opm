@@ -22,12 +22,4 @@ for filename in args.filenames:
     uv.flag_array = np.zeros_like(uv.flag_array)
     uv.nsample_array = np.ones_like(uv.nsample_array)
     uv.history += 'Corrected flag_array and nsmaple_array with hera_opm/fix_h3c_data_file.py'
-    if not 'sum' in filename:
-        # Rename file to convention zen.JD.JD.sum.uvh5)
-        dirname = os.path.dirname(os.path.abspath(filename))
-        new_filename = '.'.join(os.path.basename(filename).split('.')[0:3] + ['sum', 'uvh5']
-        print(f'changing file {filename} to {new_filename}')
-        uv.write_uvh5(os.path.join(dirname, new_filename), clobber=True)
-        os.remove(filename)
-    else:
-        uv.write_uvh5(filename, clobber=True)
+    uv.write_uvh5(filename, clobber=True)
