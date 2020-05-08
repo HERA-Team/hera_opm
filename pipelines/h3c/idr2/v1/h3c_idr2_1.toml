@@ -93,7 +93,7 @@ args = "{basename}"
 args = ["{basename}"]
 
 [ANT_METRICS]
-prereqs = "FIX_DATAFILE"
+# prereqs = "FIX_DATAFILE"
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}", "${ANT_METRICS_OPTS:extension}",
         "${ANT_METRICS_OPTS:vis_format}"]
