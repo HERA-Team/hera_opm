@@ -18,10 +18,10 @@ vis_format = "uvh5"
 basenbdir = '/users/jsdillon/Libraries/H3C_plots'
 
 [REDCAL_OPTS]
-ant_z_thresh = 4.0
+ant_z_thresh = 1e100
 solar_horizon = 0.0
 nInt_to_load = 8
-flag_nchan_low = 0
+flag_nchan_low = 256
 flag_nchan_high = 0
 oc_maxiter = 2000
 min_bl_cut = 15
@@ -30,10 +30,10 @@ iter0_prefix = ".iter0"
 good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
 
 [ABSCAL_OPTS]
-model_files_glob = "'/lustre/aoc/projects/hera/jsdillon/H3C_IDR2/abscal_model/midband_simple_cal/zen.2458838.?????.sum.midband_simple_cal.uvh5'"
+model_files_glob = "'/lustre/aoc/projects/hera/H3C/abscal_models/RIMEz_Red_Only_Rescaled/zen.2458790.?????.uvh5'"
 nInt_to_load = 6
-min_bl_cut = 1.0
-max_bl_cut = 100.0
+min_bl_cut = 40.0
+max_bl_cut = 140.0
 phs_max_iter = 100
 phs_conv_crit = 1e-6
 edge_cut = 100
