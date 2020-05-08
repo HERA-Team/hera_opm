@@ -4,7 +4,7 @@ path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/t
 source_script = "~/.bashrc"
 conda_env = "python3"
 ex_ants_path = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/bad_ants"
-base_mem = 8000
+base_mem = 16000
 base_cpu = 1
 timeout = "24h"
 
@@ -94,6 +94,7 @@ args = ["{basename}"]
 
 [ANT_METRICS]
 # prereqs = "FIX_DATAFILE"
+mem = 32000
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}", "${ANT_METRICS_OPTS:extension}",
         "${ANT_METRICS_OPTS:vis_format}"]
