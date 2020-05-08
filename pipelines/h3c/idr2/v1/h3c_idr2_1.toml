@@ -71,7 +71,8 @@ calibration = "smooth_abs.calfits"
 ############################################################################################################
 
 [WorkFlow]
-actions = ["FIX_DATAFILE",
+actions = [#"FIX_DATAFILE",
+           "EXTRACT_AUTOS",
            "ANT_METRICS",
            "REDCAL",
            "MAKE_REDCAL_NOTEBOOK",
@@ -87,6 +88,9 @@ actions = ["FIX_DATAFILE",
 
 [FIX_DATAFILE]
 args = "{basename}"
+
+[EXTRACT_AUTOS]
+args = ["{basename}"]
 
 [ANT_METRICS]
 prereqs = "FIX_DATAFILE"
