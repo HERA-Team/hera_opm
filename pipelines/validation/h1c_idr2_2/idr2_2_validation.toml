@@ -1,0 +1,168 @@
+[Options]
+makeflow_type = "analysis"
+path_to_do_scripts = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v2/task_scripts"
+source_script = "~/.bashrc"
+conda_env = "hera3"
+ex_ants_path = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v2/bad_ants"
+base_mem = 8000
+base_cpu = 1
+timeout = "24h"
+pbs_mail_user = "plaplant@sas.upenn.edu"
+
+[REDCAL_OPTS]
+ant_z_thresh = 4.0
+solar_horizon = 0.0
+nInt_to_load = 8
+flag_nchan_low = 50
+flag_nchan_high = 50
+min_bl_cut = 15
+max_bl_cut = 90
+
+[ABSCAL_OPTS]
+model_files_glob = "'/lustre/aoc/projects/hera/nkern/idr3_abscal_models/full_model/zen.2458042.*.HH.uvRXLS.uvh5'"
+nInt_to_load = 6
+min_bl_cut = 1.0
+max_bl_cut = 100.0
+phs_max_iter = 100
+phs_conv_crit = 1e-6
+edge_cut = 100
+
+[XRFI_OPTS]
+kt_size = 8
+kf_size = 8
+sig_init = 5.0
+sig_adj = 2.0
+
+[XRFI_DAY_THRESHOLD_OPTS]
+nsig_f = 7.0
+nsig_t = 7.0
+nsig_f_adj = 3.0
+nsig_t_adj = 3.0
+
+[CAL_SMOOTH_OPTS]
+freq_scale = 10
+time_scale = 21600
+tol = 1e-6
+filter_mode = "rect"
+window = "tukey"
+maxiter = 100
+alpha = 0.3
+freq_threshold = 1.0
+time_threshold = 1.0
+ant_threshold = 0.5
+
+[DELAY_OPTS]
+partial_load_Nbls = 100
+standoff = 15
+horizon = 1
+tol = 1e-9
+window = "tukey"
+skip_wgt = 0.1
+maxiter = 100
+alpha = 0.5
+
+[REFLECTIONS_OPTS]
+time_avg = "False"
+dly_ranges = "1000,1500" # note, no space is the correct syntax
+window = "tukey"
+alpha = 0.2
+tol = 1e-7
+gain = 1e-1
+maxiter = 100
+skip_wgt = 0.1
+edgecut_low = 100
+edgecut_hi = 75
+zeropad = 512
+min_dly = 500
+opt_maxiter = 10
+opt_method = "BFGS"
+opt_tol = 1e-3
+
+[IMAGING_OPTS]
+casa = "/home/casa/packages/RHEL7/release/casa-release-5.1.0-68/bin/casa"
+casa_imaging_scripts = "/users/heramgr/hera_software/casa_imaging/scripts"
+calibration = "smooth_abs.calfits"
+
+############################################################################################################
+
+[WorkFlow]
+actions = ["EXTRACT_AUTOS", "REDCAL", "FIRSTCAL_METRICS", "ABSCAL", "XRFI", "XRFI_DAY_THRESHOLD", "CAL_SMOOTH", "UPDATE_OMNISOL", "NOISE", "REFLECTIONS", "IMAGING", "DELAY"]
+
+[EXTRACT_AUTOS]
+args = ["{basename}"]
+
+[REDCAL]
+args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
+        "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
+        "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
+        "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}"]
+
+[FIRSTCAL_METRICS]
+prereqs = "REDCAL"
+args = "{basename}"
+
+[ABSCAL]
+prereqs = "REDCAL"
+args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_load}",
+        "${ABSCAL_OPTS:min_bl_cut}", "${ABSCAL_OPTS:max_bl_cut}", "${ABSCAL_OPTS:phs_max_iter}",
+        "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:edge_cut}"]
+
+[XRFI]
+prereqs = "ABSCAL"
+mem = 32000
+args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
+        "${XRFI_OPTS:sig_adj}"]
+
+[XRFI_DAY_THRESHOLD]
+prereqs = "XRFI"
+time_prereqs = "XRFI"
+n_time_neighbors = "all"
+args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
+        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}"]
+
+[CAL_SMOOTH]
+prereqs = "XRFI_DAY_THRESHOLD"
+time_prereqs = "XRFI_DAY_THRESHOLD"
+n_time_neighbors = "all"
+mem = 32000
+args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
+        "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
+        "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}",
+        "${CAL_SMOOTH_OPTS:time_threshold}", "${CAL_SMOOTH_OPTS:ant_threshold}"]
+
+[UPDATE_OMNISOL]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
+args = ["{basename}"]
+
+[NOISE]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
+args = ["{basename}"]
+
+[REFLECTIONS]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
+args = ["{basename}", "${REFLECTIONS_OPTS:dly_ranges}", "${REFLECTIONS_OPTS:window}", "${REFLECTIONS_OPTS:alpha}",
+        "${REFLECTIONS_OPTS:tol}", "${REFLECTIONS_OPTS:gain}", "${REFLECTIONS_OPTS:maxiter}",
+        "${REFLECTIONS_OPTS:skip_wgt}", "${REFLECTIONS_OPTS:edgecut_low}", "${REFLECTIONS_OPTS:edgecut_hi}",
+        "${REFLECTIONS_OPTS:zeropad}", "${REFLECTIONS_OPTS:min_dly}", "${REFLECTIONS_OPTS:time_avg}",
+        "${REFLECTIONS_OPTS:opt_maxiter}", "${REFLECTIONS_OPTS:opt_method}", "${REFLECTIONS_OPTS:opt_tol}"]
+
+[IMAGING]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
+mem = 32000
+args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
+
+[DELAY]
+prereqs = "CAL_SMOOTH"
+time_prereqs = "CAL_SMOOTH"
+n_time_neighbors = "all"
+args = ["{basename}", "${DELAY_OPTS:partial_load_Nbls}", "${DELAY_OPTS:standoff}",
+        "${DELAY_OPTS:horizon}", "${DELAY_OPTS:tol}", "${DELAY_OPTS:window}",
+        "${DELAY_OPTS:skip_wgt}", "${DELAY_OPTS:maxiter}", "${DELAY_OPTS:alpha}"]
