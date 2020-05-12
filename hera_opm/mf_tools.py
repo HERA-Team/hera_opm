@@ -139,7 +139,7 @@ def get_config_entry(config, header, item, required=True, interpolate=True,
             )
 
 
-def make_outfile_name(obsid, action, pol_list=[]):
+def make_outfile_name(obsid, action):
     """Make a list of unique output files names for each stage and polarization.
 
     Parameters
@@ -148,28 +148,15 @@ def make_outfile_name(obsid, action, pol_list=[]):
         The obsid of the file.
     action : str
         The action corresponding to the output name.
-    pol_list : list of str
-        List denoting polarizations in files; if an empty list,
-        then all polarizations in a single file is assumed. (Default empty list)
 
     Returns
     -------
     outfiles : list of str
         A list of files that represent output produced for `action`
-        corresponding to `obsid`. For multiple polarizations, contains one
-        string per polarization. For one or no polarizations, just a list with
-        a single entry is returned.
+        corresponding to `obsid`.
 
     """
-    outfiles = []
-    if len(pol_list) > 1 and pol_list[0] is not None:
-        for pol in pol_list:
-            of = "{0}.{1}.{2}.out".format(obsid, action, pol)
-            outfiles.append(of)
-    else:
-        of = "{0}.{1}.out".format(obsid, action)
-        outfiles.append(of)
-    return outfiles
+    return [f'{obsid}.{action}.out']
 
 
 def sort_obsids(obsids, jd=None, return_basenames=True):
@@ -212,7 +199,7 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
 
 
 def make_time_neighbor_outfile_name(
-    obsid, action, obsids, pol=None, n_time_neighbors="1", centered=None
+    obsid, action, obsids, n_time_neighbors="1", centered=None
 ):
     """
     Make a list of neighbors in time for prereqs.
@@ -226,8 +213,6 @@ def make_time_neighbor_outfile_name(
     obsids : list of str
         A list of all obsids for the given day; uses this list (sorted) to
         define neighbors
-    pol : str, optional
-        If present, polarization string to specify for output file.
     n_time_neighbors : str
         Number of neighboring time files to append to list. If set to the
         string "all", then all neighbors from that JD are added.
@@ -284,14 +269,7 @@ def make_time_neighbor_outfile_name(
         outfiles.append(obsids[i])
 
     # finalize the names of files
-    if pol is None:
-        for i, of in enumerate(outfiles):
-            of = "{0}.{1}.out".format(of, action)
-            outfiles[i] = of
-    else:
-        for i, of in enumerate(outfiles):
-            of = "{0}.{1}.{2}.out".format(of, action, pol)
-            outfiles[i] = of
+    outfiles [f'{of}.{action}.out' for of in outfiles]
 
     return outfiles
 
@@ -497,7 +475,6 @@ def _determine_stride_partitioning(
 def prep_args(
     args,
     obsid,
-    pol=None,
     obsids=None,
     n_time_neighbors="1",
     stride_length="1",
@@ -514,8 +491,6 @@ def prep_args(
         to be substituted.
     obsid : str
         Filename/obsid to be substituted.
-    pol : str, optional
-        Polarization to substitute for the one found in obsid.
     obsids : list of str, optional
         Full list of obsids. Required when time-adjacent neighbors are desired.
     n_time_neighbors : str
@@ -538,20 +513,8 @@ def prep_args(
         `args` string with mini-language and polarization substitutions.
 
     """
-    if pol is not None:
-        # replace pol if present
-        match = re.search(r"zen\.\d{7}\.\d{5}\.(.*?)\.", obsid)
-        if match:
-            obs_pol = match.group(1)
-            basename = re.sub(obs_pol, pol, obsid)
-        else:
-            basename = obsid
-        # replace {basename} with actual basename
-        args = re.sub(r"\{basename\}", basename, args)
-
-    else:
-        basename = obsid
-        args = re.sub(r"\{basename\}", basename, args)
+    basename = obsid
+    args = re.sub(r"\{basename\}", basename, args)
 
     # also replace time-adjacent basenames if requested
     if re.search(r"\{prev_basename\}", args):
