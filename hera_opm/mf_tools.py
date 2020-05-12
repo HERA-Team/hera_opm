@@ -21,8 +21,7 @@ def get_jd(filename):
     ----------
     filename : str
         File name. Assumed to follow standard convention where name is
-        `zen.xxxxxxx.xxxxx.uv` (potentially with polarization and subarray
-        information mixed in).
+        `zen.xxxxxxx.xxxxx.uv`.
 
     Returns
     -------
@@ -482,12 +481,12 @@ def prep_args(
     collect_stragglers=None,
 ):
     """
-    Substitute the polarization string in a filename/obsid with the specified one.
+    Substitute mini-language in a filename/obsid.
 
     Parameters
     ----------
     args : str
-        String containing the arguments where polarization and mini-language is
+        String containing the arguments where mini-language is
         to be substituted.
     obsid : str
         Filename/obsid to be substituted.
@@ -510,7 +509,7 @@ def prep_args(
     Returns
     -------
     output : str
-        `args` string with mini-language and polarization substitutions.
+        `args` string with mini-language substitutions.
 
     """
     basename = obsid
@@ -682,10 +681,6 @@ def build_analysis_makeflow_from_config(
 
     Raises
     ------
-    AssertionError
-        This is raised if a polarization list is specified, and no polarization
-        is detected for the input files, or if not all input obsids have the
-        same polarization.
     ValueError
         This is raised if the SETUP entry in the workflow is specified, but is
         not the first entry. Similarly, it is raised if the TEARDOWN is in the
@@ -720,30 +715,6 @@ def build_analysis_makeflow_from_config(
     workflow = [w.upper() for w in workflow]
 
     # get general options
-    pol_list = get_config_entry(config, "Options", "pols", required=False)
-    if pol_list is None:
-        # make a dummy list of length 1, to ensure we perform actions later
-        pol_list = [None]
-    else:
-        # make sure that we were only passed in a single polarization in our obsids
-        for i, obsid in enumerate(obsids):
-            match = re.search(r"zen\.\d{7}\.\d{5}\.(.*?)\.", obsid)
-            if match:
-                obs_pol = match.group(1)
-            else:
-                raise AssertionError(
-                    "Polarization not detected for input" " obsid {}".format(obsid)
-                )
-            for j in range(i + 1, len(obsids)):
-                obsid2 = obsids[j]
-                match2 = re.search(r"zen\.\d{7}\.\d{5}\.(.*?)\.", obsid2)
-                if match2:
-                    obs_pol2 = match2.group(1)
-                    if obs_pol != obs_pol2:
-                        raise AssertionError(
-                            "Polarizations do not match for"
-                            " obsids {} and {}".format(obsid, obsid2)
-                        )
     mandc_report = get_config_entry(config, "Options", "mandc_report", required=False)
 
     # make sure that SETUP and TEARDOWN are in the right spots, if they are in the workflow
@@ -972,7 +943,7 @@ def build_analysis_makeflow_from_config(
                         for oi_list in per_obsid_primary_obsids:
                             for oi in oi_list:
                                 outfiles_prev.extend(
-                                    make_outfile_name(oi, action, pol_list=pol_list)
+                                    make_outfile_name(oi, action)
                                 )
                         outfiles_prev = list(set(outfiles_prev))
 
@@ -994,7 +965,7 @@ def build_analysis_makeflow_from_config(
                                 "Prereq {0} for action {1} not found in main "
                                 "workflow".format(prereq, action)
                             )
-                        outfiles = make_outfile_name(filename, prereq, pol_list)
+                        outfiles = make_outfile_name(filename, prereq)
                         for of in outfiles:
                             infiles.append(of)
 
@@ -1019,7 +990,7 @@ def build_analysis_makeflow_from_config(
                 args = " ".join(list(map(str, args)))
 
                 # make outfile name
-                outfiles = make_outfile_name(filename, action, pol_list)
+                outfiles = make_outfile_name(filename, action)
 
                 # get processing options
                 mem = get_config_entry(config, action, "mem", required=False)
@@ -1038,7 +1009,7 @@ def build_analysis_makeflow_from_config(
                 print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
                 # make rules
-                for pol, outfile in zip(pol_list, outfiles):
+                for outfile in outfiles:
                     time_prereqs = get_config_entry(
                         config, action, "time_prereqs", required=False
                     )
@@ -1054,9 +1025,6 @@ def build_analysis_makeflow_from_config(
                             config, action, "time_centered", required=False
                         )
 
-                        # get a copy of the infile list; we're going to add to it, but don't want these
-                        # entries broadcast across pols
-                        infiles_pol = infiles
                         for tp in time_prereqs:
                             try:
                                 workflow.index(tp)
@@ -1065,22 +1033,16 @@ def build_analysis_makeflow_from_config(
                                     "Time prereq {0} for action {1} not found in main "
                                     "workflow".format(tp, action)
                                 )
-                            # add neighbors for all pols
-                            for pol2 in pol_list:
-                                tp_outfiles = make_time_neighbor_outfile_name(
-                                    filename,
-                                    tp,
-                                    obsids,
-                                    pol2,
-                                    n_time_neighbors,
-                                    centered=time_centered,
-                                )
-                                for of in tp_outfiles:
-                                    infiles_pol.append(of)
-
-                    else:
-                        # just get a copy of the infiles as-is
-                        infiles_pol = infiles
+                            # add neighbors
+                            tp_outfiles = make_time_neighbor_outfile_name(
+                                filename,
+                                tp,
+                                obsids,
+                                n_time_neighbors,
+                                centered=time_centered,
+                            )
+                            for of in tp_outfiles:
+                                infiles.append(of)
 
                     # handle striding options
                     if stride_length is not None:
@@ -1100,11 +1062,9 @@ def build_analysis_makeflow_from_config(
                         collect_stragglers = None
 
                     # replace '{basename}' with actual filename
-                    # aslo replace polarization string
                     prepped_args = prep_args(
                         args,
                         filename,
-                        pol,
                         obsids=obsids,
                         n_time_neighbors=n_time_neighbors,
                         centered=centered,
@@ -1169,8 +1129,8 @@ def build_analysis_makeflow_from_config(
 
                     # first line lists target file to make (dummy output file), and requirements
                     # second line is "build rule", which runs the shell script and makes the output file
-                    infiles_pol = " ".join(infiles_pol)
-                    line1 = "{0}: {1}".format(outfile, infiles_pol)
+                    infiles = " ".join(infiles)
+                    line1 = "{0}: {1}".format(outfile, infiles)
                     line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
                     print(line1, file=f)
                     print(line2, file=f)
@@ -1197,7 +1157,7 @@ def build_analysis_makeflow_from_config(
                 abspath = os.path.abspath(obsid)
                 parent_dir = os.path.dirname(abspath)
                 filename = os.path.basename(abspath)
-                outfiles = make_outfile_name(filename, prereq, pol_list)
+                outfiles = make_outfile_name(filename, prereq)
                 for of in outfiles:
                     infiles.append(of)
 
@@ -1309,9 +1269,6 @@ def build_lstbin_makeflow_from_config(
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
 
     # get general options
-    pol_list = get_config_entry(config, "Options", "pols", required=False)
-    if not isinstance(pol_list, list):
-        pol_list = [pol_list]
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
     source_script = get_config_entry(config, "Options", "source_script", required=False)
@@ -1373,129 +1330,119 @@ def build_lstbin_makeflow_from_config(
         )
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
-        # loop over polarizations
-        for pol in pol_list:
-            # get data files and substitute w/ pol
-            datafiles = get_config_entry(
-                config, "LSTBIN_OPTS", "data_files", required=True
+        # get data files
+        datafiles = get_config_entry(
+            config, "LSTBIN_OPTS", "data_files", required=True
+        )
+        # encapsulate in double quotes
+        datafiles = [
+            "'{}'".format(
+                '"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'")))
             )
-            if pol is not None:
-                datafiles = [df.format(pol=pol) for df in datafiles]
-            # encapsulate in double quotes
-            datafiles = [
-                "'{}'".format(
-                    '"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'")))
+            for df in datafiles
+        ]
+
+        # get number of output files
+        if parallelize:
+            # get LST-specific config options
+            dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst", required=True)
+            if dlst == "None":
+                dlst = None
+            else:
+                dlst = float(dlst)
+            lst_start = float(
+                get_config_entry(config, "LSTBIN_OPTS", "lst_start", required=True)
+            )
+            fixed_lst_start = bool(
+                get_config_entry(
+                    config, "LSTBIN_OPTS", "fixed_lst_start", required=True
                 )
-                for df in datafiles
+            )
+            ntimes_per_file = int(
+                get_config_entry(
+                    config, "LSTBIN_OPTS", "ntimes_per_file", required=True
+                )
+            )
+
+            # pre-process files to determine the number of output files
+            _datafiles = [
+                sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
             ]
 
-            # get number of output files for this pol
+            output = lstbin.config_lst_bin_files(
+                _datafiles,
+                dlst=dlst,
+                lst_start=lst_start,
+                fixed_lst_start=fixed_lst_start,
+                ntimes_per_file=ntimes_per_file,
+            )
+            nfiles = len(output[2])
+        else:
+            nfiles = 1
+
+        # loop over output files
+        for output_file_index in range(nfiles):
+            # if parallize, update output_file_select
             if parallelize:
-                # get LST-specific config options
-                dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst", required=True)
-                if dlst == "None":
-                    dlst = None
-                else:
-                    dlst = float(dlst)
-                lst_start = float(
-                    get_config_entry(config, "LSTBIN_OPTS", "lst_start", required=True)
-                )
-                fixed_lst_start = bool(
-                    get_config_entry(
-                        config, "LSTBIN_OPTS", "fixed_lst_start", required=True
+                config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
+
+            # make outfile list
+            outfile = f'lstbin_outfile_{output_file_index}.LSTBIN.out'
+
+            # get args list for lst-binning step
+            _args = [
+                get_config_entry(config, "LSTBIN_OPTS", a, required=True)
+                for a in lstbin_args
+            ]
+            args = []
+            for a in _args:
+                args.append(str(a))
+
+            # extend datafiles
+            args.extend(datafiles)
+
+            # turn into string
+            args = " ".join(args)
+
+            # make logfile name
+            # logfile will capture stdout and stderr
+            logfile = re.sub(r"\.out", ".log", outfile)
+            logfile = os.path.join(work_dir, logfile)
+
+            # make a small wrapper script that will run the actual command
+            # can't embed if; then statements in makeflow script
+            wrapper_script = re.sub(r"\.out", ".sh", outfile)
+            wrapper_script = "wrapper_{}".format(wrapper_script)
+            wrapper_script = os.path.join(work_dir, wrapper_script)
+            with open(wrapper_script, "w") as f2:
+                print("#!/bin/bash", file=f2)
+                if source_script is not None:
+                    print("source {}".format(source_script), file=f2)
+                if conda_env is not None:
+                    print("conda activate {}".format(conda_env), file=f2)
+                print("date", file=f2)
+                print("cd {}".format(parent_dir), file=f2)
+                if timeout is not None:
+                    print(
+                        "timeout {0} {1} {2}".format(timeout, command, args),
+                        file=f2,
                     )
-                )
-                ntimes_per_file = int(
-                    get_config_entry(
-                        config, "LSTBIN_OPTS", "ntimes_per_file", required=True
-                    )
-                )
-
-                # pre-process files to determine the number of output files
-                _datafiles = [
-                    sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
-                ]
-
-                output = lstbin.config_lst_bin_files(
-                    _datafiles,
-                    dlst=dlst,
-                    lst_start=lst_start,
-                    fixed_lst_start=fixed_lst_start,
-                    ntimes_per_file=ntimes_per_file,
-                )
-                nfiles = len(output[2])
-            else:
-                nfiles = 1
-
-            # loop over output files
-            for output_file_index in range(nfiles):
-                # if parallize, update output_file_select
-                if parallelize:
-                    config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
-
-                # make outfile list
-                if pol is not None:
-                    polstr = ".{}".format(pol)
                 else:
-                    polstr = ""
-                outfile = "lstbin_outfile_{}.{}{}.out".format(
-                    output_file_index, "LSTBIN", polstr
-                )
+                    print("{0} {1}".format(command, args), file=f2)
+                print("if [ $? -eq 0 ]; then", file=f2)
+                print("  cd {}".format(work_dir), file=f2)
+                print("  touch {}".format(outfile), file=f2)
+                print("fi", file=f2)
+                print("date", file=f2)
+            # make file executable
+            os.chmod(wrapper_script, 0o755)
 
-                # get args list for lst-binning step
-                _args = [
-                    get_config_entry(config, "LSTBIN_OPTS", a, required=True)
-                    for a in lstbin_args
-                ]
-                args = []
-                for a in _args:
-                    args.append(str(a))
-
-                # extend datafiles
-                args.extend(datafiles)
-
-                # turn into string
-                args = " ".join(args)
-
-                # make logfile name
-                # logfile will capture stdout and stderr
-                logfile = re.sub(r"\.out", ".log", outfile)
-                logfile = os.path.join(work_dir, logfile)
-
-                # make a small wrapper script that will run the actual command
-                # can't embed if; then statements in makeflow script
-                wrapper_script = re.sub(r"\.out", ".sh", outfile)
-                wrapper_script = "wrapper_{}".format(wrapper_script)
-                wrapper_script = os.path.join(work_dir, wrapper_script)
-                with open(wrapper_script, "w") as f2:
-                    print("#!/bin/bash", file=f2)
-                    if source_script is not None:
-                        print("source {}".format(source_script), file=f2)
-                    if conda_env is not None:
-                        print("conda activate {}".format(conda_env), file=f2)
-                    print("date", file=f2)
-                    print("cd {}".format(parent_dir), file=f2)
-                    if timeout is not None:
-                        print(
-                            "timeout {0} {1} {2}".format(timeout, command, args),
-                            file=f2,
-                        )
-                    else:
-                        print("{0} {1}".format(command, args), file=f2)
-                    print("if [ $? -eq 0 ]; then", file=f2)
-                    print("  cd {}".format(work_dir), file=f2)
-                    print("  touch {}".format(outfile), file=f2)
-                    print("fi", file=f2)
-                    print("date", file=f2)
-                # make file executable
-                os.chmod(wrapper_script, 0o755)
-
-                # first line lists target file to make (dummy output file), and requirements
-                # second line is "build rule", which runs the shell script and makes the output file
-                line1 = "{0}: {1}".format(outfile, command)
-                line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
-                print(line1, file=f)
-                print(line2, file=f)
+            # first line lists target file to make (dummy output file), and requirements
+            # second line is "build rule", which runs the shell script and makes the output file
+            line1 = "{0}: {1}".format(outfile, command)
+            line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
+            print(line1, file=f)
+            print(line2, file=f)
 
     return
 
