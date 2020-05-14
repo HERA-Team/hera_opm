@@ -1346,7 +1346,7 @@ def test_prep_args_obsid_list(config_options):
         obsid,
         obsids=obsids_list,
         n_time_neighbors="1",
-        centered=None,
+        time_centered=None,
         collect_stragglers=False,
     )
     prepped_args = " ".join(obsids_list[0:3])
@@ -1366,7 +1366,7 @@ def test_prep_args_obsid_list_centered(config_options):
         obsid,
         obsids=obsids_list,
         n_time_neighbors="1",
-        centered=True,
+        time_centered=True,
         collect_stragglers=False,
     )
     prepped_args = " ".join(obsids_list[0:3])
@@ -1386,7 +1386,7 @@ def test_prep_args_obsid_list_not_centered(config_options):
         obsid,
         obsids=obsids_list,
         n_time_neighbors="1",
-        centered=False,
+        time_centered=False,
         collect_stragglers=False,
     )
     prepped_args = " ".join(obsids_list[1:3])
@@ -1407,7 +1407,7 @@ def test_prep_args_obsid_list_with_stragglers(config_options):
         obsids=obsids_list,
         n_time_neighbors="1",
         stride_length="2",
-        centered=False,
+        time_centered=False,
         collect_stragglers=True,
     )
     prepped_args = " ".join(obsids_list)
@@ -1428,7 +1428,7 @@ def test_prep_args_obsid_list_error(config_options):
             obsid,
             obsids=obsids_list,
             n_time_neighbors="foo",
-            centered=True,
+            time_centered=True,
             collect_stragglers=False,
         )
     assert str(cm.value).startswith("n_time_neighbors must be able to be interpreted")
@@ -1440,22 +1440,10 @@ def test_prep_args_obsid_list_error(config_options):
             obsids=obsids_list,
             n_time_neighbors="1",
             stride_length="foo",
-            centered=True,
+            time_centered=True,
             collect_stragglers=False,
         )
     assert str(cm.value).startswith("stride_length must be able to be interpreted")
-
-    return
-
-
-def test_build_analysis_makeflow_error_no_n_time_neighbors(config_options):
-    config_file = config_options["bad_stride_length_file"]
-    obsids = config_options["obsids_time"]
-    work_dir = os.path.join(DATA_PATH, "test_output")
-
-    with pytest.raises(ValueError) as cm:
-        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
-    assert str(cm.value).startswith("`stride_length` was specified")
 
     return
 
