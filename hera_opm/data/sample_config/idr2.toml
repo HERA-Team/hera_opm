@@ -1,6 +1,5 @@
 [Options]
 makeflow_type = "analysis"
-pols = ["xx", "xy", "yx", "yy"]
 path_to_do_scripts = "~/hera/RTP/scripts/hera"
 conda_env = "hera"
 ex_ants = "~/hera/hera_cal/hera_cal/calibrations/herahex_ex_ants.txt"

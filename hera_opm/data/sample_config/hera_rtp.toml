@@ -3,7 +3,6 @@
 
 [Options]
 makeflow_type = "analysis"
-pols = ["xx", "xy", "yx", "yy"]
 path_to_do_scripts = "/home/obs/src/RTP/scripts/hera"
 lib_conn = 'local-rtp'
 parent_dirs = '/data/'
