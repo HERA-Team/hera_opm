@@ -1,6 +1,5 @@
 [Options]
 makeflow_type = "lstbin"
-pols = "xx"
 path_to_do_scripts = "~/hera/hera_opm/hera_opm/data/sample_task_scripts"
 source_script = "~/.bashrc"
 conda_env = "hera"
