@@ -17,11 +17,6 @@ parts of the file.
 The `Options` section specifies general settings that apply to the entire
 workflow. We list several below, but the list is by no means exhaustive.
 
-### pols
-
-This lists the polarizations to be used, as a comma-separated list. This option
-is not required unless processing polarization-separated files.
-
 ### path_to_do_scripts
 
 This lists the absolute path to the task scripts (also called "do_scripts" due
@@ -67,23 +62,6 @@ of the files.
 
 The arguments that should be passed in to the corresponding task script. See the
 Replacement section below for further explanation.
-
-### prereqs
-
-Pre-requisite steps that must be completed (for all polarizations) before a task
-is executed. Due to the sequential nature of the pipeline, this option is not
-necessary for instances where there is only a single polarization to be
-analyzed. However, for instances where multiple polarizations are present, these
-actions act as a "barrier" to further progress. For instance, before the `yy`
-polarization can run the `firstcal` step, it requires information about excluded
-antennas, determined by the `ant_metrics` analysis. This analysis is only
-performed for the `xx` task thread (though it requires all 4
-polarizations). Therefore, the `yy` pipeline thread may arrive at the `firstcal`
-step before the associated `ant_metrics` thread has finished running. By adding
-`ANT_METRICS` to the `FIRSTCAL::prereqs` section, we ensure that the
-`ANT_METRICS` step has completed for *all* polarization threads before
-attempting to execute *any* `FIRSTCAL` steps. This ensures that all
-prerequisites have been met in terms of expected output files being produced.
 
 ### n_time_neighbors
 
