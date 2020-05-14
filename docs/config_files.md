@@ -63,6 +63,14 @@ of the files.
 The arguments that should be passed in to the corresponding task script. See the
 Replacement section below for further explanation.
 
+### time_prereqs
+
+Pre-requisite steps can also have a "time" component, where a previous step in
+the workflow must complete for a given file and all of its time neighbors. The
+chunking keywords listed above are used to determine which files are primary
+obsids for a given file, and hence which steps must be completed before
+launching a particular task script.
+
 ### n_time_neighbors
 
 When running a workflow, it is sometimes desirable to operate on several files
@@ -96,14 +104,6 @@ for them. The specific keywords that may be specified are:
   processing. If False, these obsids will not be included in the list. Default
   is False.
 
-
-### time_prereqs
-
-Pre-requisite steps can also have a "time" component, where a previous step in
-the workflow must complete for a given file and all of its time neighbors. The
-chunking keywords listed above are used to determine which files are primary
-obsids for a given file, and hence which steps must be completed before
-launching a particular task script.
 
 ### mem
 
