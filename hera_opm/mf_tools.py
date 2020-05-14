@@ -198,7 +198,7 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
 
 
 def make_time_neighbor_outfile_name(
-    obsid, action, obsids, n_time_neighbors="0", time_centered=None
+    obsid, action, obsids, n_time_neighbors=None, time_centered=None
 ):
     """
     Make a list of neighbors in time for prereqs.
@@ -235,6 +235,8 @@ def make_time_neighbor_outfile_name(
     """
     if time_centered is None:
         time_centered = True
+    if n_time_neighbors is None:
+        n_time_neighbors = "0"
     outfiles = []
 
     # extract the integer JD of the current file
