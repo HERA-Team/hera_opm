@@ -208,7 +208,7 @@ def make_time_neighbor_outfile_name(
     obsid : str
         The obsid of the current file.
     action : str
-        The action corresponding to the time prereqs.
+        The action corresponding to the prereqs.
     obsids : list of str
         A list of all obsids for the given day; uses this list (sorted) to
         define neighbors
@@ -692,7 +692,7 @@ def build_analysis_makeflow_from_config(
     Config file structure:
 
     [STAGENAME]
-    time_prereqs = STAGENAME1, STAGENAME2
+    prereqs = STAGENAME1, STAGENAME2
     args = arg1, arg2
     ncpu = 1
     mem = 5000 (MB)
@@ -702,7 +702,7 @@ def build_analysis_makeflow_from_config(
     "{basename}" = "zen.2458000.12345.uv"
 
     "{prev_basename}" and "{next_basename}" are previous and subsequent files
-    adjacent to "{basename}", useful for specifying prereqs in time
+    adjacent to "{basename}", useful for specifying prereqs
 
     """
     # make a cache dictionary
@@ -990,12 +990,12 @@ def build_analysis_makeflow_from_config(
 
                 # make rules
                 for outfile in outfiles:
-                    time_prereqs = get_config_entry(
-                        config, action, "time_prereqs", required=False
+                    prereqs = get_config_entry(
+                        config, action, "prereqs", required=False
                     )
-                    if time_prereqs is not None:
-                        if not isinstance(time_prereqs, list):
-                            time_prereqs = [time_prereqs]
+                    if prereqs is not None:
+                        if not isinstance(prereqs, list):
+                            prereqs = [prereqs]
                         # get how many neighbors we should be including
                         n_time_neighbors = get_config_entry(
                             config, action, "n_time_neighbors", required=True,
@@ -1005,12 +1005,12 @@ def build_analysis_makeflow_from_config(
                             config, action, "time_centered", required=False
                         )
 
-                        for tp in time_prereqs:
+                        for tp in prereqs:
                             try:
                                 workflow.index(tp)
                             except ValueError:
                                 raise ValueError(
-                                    "Time prereq {0} for action {1} not found in main "
+                                    "Prereq {0} for action {1} not found in main "
                                     "workflow".format(tp, action)
                                 )
                             # add neighbors
