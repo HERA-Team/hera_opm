@@ -198,7 +198,7 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
 
 
 def make_time_neighbor_outfile_name(
-    obsid, action, obsids, n_time_neighbors="0", centered=None
+    obsid, action, obsids, n_time_neighbors="0", time_centered=None
 ):
     """
     Make a list of neighbors in time for prereqs.
@@ -215,7 +215,7 @@ def make_time_neighbor_outfile_name(
     n_time_neighbors : str
         Number of neighboring time files to append to list. If set to the
         string "all", then all neighbors from that JD are added. Default is "0"
-    centered : bool, optional
+    time_centered : bool, optional
         Whether the provided obsid should be in the center of the neighbors.
         If True (default), returns n_time_neighbors on either side of obsid.
         If False, returns original obsid _and_ n_time_neighbors following.
@@ -233,8 +233,8 @@ def make_time_neighbor_outfile_name(
         is negative.
 
     """
-    if centered is None:
-        centered = True
+    if time_centered is None:
+        time_centered = True
     outfiles = []
 
     # extract the integer JD of the current file
@@ -260,7 +260,7 @@ def make_time_neighbor_outfile_name(
         if n_time_neighbors < 0:
             raise ValueError("n_time_neighbors must be an integer >= 0.")
         # get n_time_neighbors before and after; make sure we don't have an IndexError
-        i0 = max(obs_idx - centered * n_time_neighbors, 0)
+        i0 = max(obs_idx - time_centered * n_time_neighbors, 0)
         i1 = min(obs_idx + n_time_neighbors + 1, len(obsids))
 
     # build list of output files to wait for
@@ -470,7 +470,7 @@ def prep_args(
     obsids=None,
     n_time_neighbors="0",
     stride_length="1",
-    centered=None,
+    time_centered=None,
     collect_stragglers=None,
 ):
     """
@@ -491,7 +491,7 @@ def prep_args(
     stride_length : str
         Number of files to include in a stride. This interacts with
         `n_time_neighbors` to define how arguments are generate.
-    centered : bool, optional
+    time_centered : bool, optional
         Whether the provided obsid should be in the center of the neighbors.
         If True (default), returns n_time_neighbors on either side of obsid.
         If False, returns original obsid _and_ n_time_neighbors following.
@@ -556,8 +556,8 @@ def prep_args(
             args = re.sub(r"\{next_basename\}", oids[obs_idx + 1], args)
 
     if re.search(r"\{obsid_list\}", args):
-        if centered is None:
-            centered = True
+        if time_centered is None:
+            time_centered = True
         try:
             n_time_neighbors = int(n_time_neighbors)
         except ValueError:
@@ -574,7 +574,7 @@ def prep_args(
         # We account for the location of the next stride to determine if we
         # should grab straggling obsids.
         n_following = len(obsids) - (obs_idx + stride_length)
-        if centered:
+        if time_centered:
             i1 = max(obs_idx - n_time_neighbors, 0)
         else:
             i1 = obs_idx
@@ -1002,7 +1002,7 @@ def build_analysis_makeflow_from_config(
                                 tp,
                                 obsids,
                                 n_time_neighbors,
-                                centered=time_centered,
+                                time_centered=time_centered,
                             )
                             for of in tp_outfiles:
                                 infiles.append(of)
@@ -1013,7 +1013,7 @@ def build_analysis_makeflow_from_config(
                         filename,
                         obsids=obsids,
                         n_time_neighbors=n_time_neighbors,
-                        centered=centered,
+                        time_centered=time_centered,
                         collect_stragglers=collect_stragglers,
                     )
 
