@@ -17,6 +17,7 @@ flag_nchan_low = 50
 flag_nchan_high = 50
 min_bl_cut = 15
 max_bl_cut = 90
+oc_maxiter = 5000
 
 [ABSCAL_OPTS]
 model_files_glob = "'/lustre/aoc/projects/hera/Validation/test-4.0.0/data/visibilities/abscal_model/zen.*.M.uvh5'"
@@ -56,7 +57,8 @@ args = ["{basename}"]
 args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
         "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:nInt_to_load}",
-        "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}"]
+        "${REDCAL_OPTS:min_bl_cut}", "${REDCAL_OPTS:max_bl_cut}",
+        "${REDCAL_OPTS:oc_maxiter}"]
 
 [FIRSTCAL_METRICS]
 prereqs = "REDCAL"

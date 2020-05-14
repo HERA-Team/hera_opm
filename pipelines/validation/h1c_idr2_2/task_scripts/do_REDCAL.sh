@@ -16,6 +16,7 @@ source ${src_dir}/_common.sh
 # 7 - nInt_to_load: number of integrations to load and calibrate simultaneously. Lower numbers save memory, but incur a CPU overhead.
 # 8 - min_bl_cut: cut redundant groups with average baseline lengths shorter than this length in meters
 # 9 - max_bl_cut: cut redundant groups with average baseline lengths longer than this length in meters
+# 10 - oc_maxiter: maximum number of omnical iterations allowed before it gives up
 fn="${1}"
 bad_ants_dir="${2}"
 ant_z_thresh="${3}"
@@ -25,6 +26,7 @@ flag_nchan_high="${6}"
 nInt_to_load="${7}"
 min_bl_cut="${8}"
 max_bl_cut="${9}"
+oc_maxiter="${10}"
 
 # assume second argument is location of ex_ants folder
 # extract JD from filename
@@ -37,5 +39,5 @@ jd_int=`echo $jd | awk '{$1=int($1)}1'`
 bad_ants_fn=`echo "${bad_ants_dir}/${jd_int}.txt"`
 exants=$(prep_exants ${bad_ants_fn})
 
-echo redcal_run.py ${fn} --ex_ants ${exants} --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} --max_bl_cut ${max_bl_cut} --clobber --verbose
-redcal_run.py ${fn} --ex_ants ${exants} --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} --max_bl_cut ${max_bl_cut} --clobber --verbose
+echo redcal_run.py ${fn} --ex_ants ${exants} --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} --max_bl_cut ${max_bl_cut} --oc_maxiter ${oc_maxiter} --clobber --verbose
+redcal_run.py ${fn} --ex_ants ${exants} --ant_z_thresh ${ant_z_thresh} --solar_horizon ${solar_horizon} --flag_nchan_low ${flag_nchan_low} --flag_nchan_high ${flag_nchan_high} --nInt_to_load ${nInt_to_load} --min_bl_cut ${min_bl_cut} --max_bl_cut ${max_bl_cut} --oc_maxiter ${oc_maxiter} --clobber --verbose
