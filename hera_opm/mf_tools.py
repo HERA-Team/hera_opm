@@ -268,7 +268,7 @@ def make_time_neighbor_outfile_name(
         outfiles.append(obsids[i])
 
     # finalize the names of files
-    outfiles [f'{of}.{action}.out' for of in outfiles]
+    outfiles = [f'{of}.{action}.out' for of in outfiles]
 
     return outfiles
 
