@@ -82,7 +82,7 @@ def get_config_entry(config, header, item, required=True, interpolate=True,
     header : str
         The entry in a config file to get the item of, e.g., 'OMNICAL'.
     item : str
-        The attribute to retreive, e.g., 'prereqs'.
+        The attribute to retreive, e.g., 'mem'.
     required : bool
         Whether the attribute is required or not. If required and not present,
         an error is raised. Default is True.
@@ -692,7 +692,7 @@ def build_analysis_makeflow_from_config(
     Config file structure:
 
     [STAGENAME]
-    prereqs = STAGENAME1, STAGENAME2
+    time_prereqs = STAGENAME1, STAGENAME2
     args = arg1, arg2
     ncpu = 1
     mem = 5000 (MB)
@@ -952,23 +952,6 @@ def build_analysis_makeflow_from_config(
                 # start list of input files
                 infiles = []
 
-                # get dependencies
-                prereqs = get_config_entry(config, action, "prereqs", required=False)
-                if prereqs is not None:
-                    if not isinstance(prereqs, list):
-                        prereqs = [prereqs]
-                    for prereq in prereqs:
-                        try:
-                            workflow.index(prereq)
-                        except ValueError:
-                            raise ValueError(
-                                "Prereq {0} for action {1} not found in main "
-                                "workflow".format(prereq, action)
-                            )
-                        outfiles = make_outfile_name(filename, prereq)
-                        for of in outfiles:
-                            infiles.append(of)
-
                 # add command to infile list
                 # this implicitly checks that do_{STAGENAME}.sh script exists
                 command = "do_{}.sh".format(action)
@@ -978,10 +961,7 @@ def build_analysis_makeflow_from_config(
                 # also add previous outfiles to input requirements
                 if ia > 0:
                     for of in outfiles_prev:
-                        # we might already have the output in the list if the
-                        # previous step is a prereq
-                        if of not in infiles:
-                            infiles.append(of)
+                        infiles.append(of)
 
                 # make argument list
                 args = get_config_entry(config, action, "args", required=False)
