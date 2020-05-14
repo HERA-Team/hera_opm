@@ -198,7 +198,7 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
 
 
 def make_time_neighbor_outfile_name(
-    obsid, action, obsids, n_time_neighbors="1", centered=None
+    obsid, action, obsids, n_time_neighbors="0", centered=None
 ):
     """
     Make a list of neighbors in time for prereqs.
@@ -214,7 +214,7 @@ def make_time_neighbor_outfile_name(
         define neighbors
     n_time_neighbors : str
         Number of neighboring time files to append to list. If set to the
-        string "all", then all neighbors from that JD are added.
+        string "all", then all neighbors from that JD are added. Default is "0"
     centered : bool, optional
         Whether the provided obsid should be in the center of the neighbors.
         If True (default), returns n_time_neighbors on either side of obsid.
@@ -257,8 +257,8 @@ def make_time_neighbor_outfile_name(
             n_time_neighbors = int(n_time_neighbors)
         except ValueError:
             raise ValueError("n_time_neighbors must be parsable as an int")
-        if n_time_neighbors <= 0:
-            raise ValueError("n_time_neighbors must be a postitive integer")
+        if n_time_neighbors < 0:
+            raise ValueError("n_time_neighbors must be an integer >= 0.")
         # get n_time_neighbors before and after; make sure we don't have an IndexError
         i0 = max(obs_idx - centered * n_time_neighbors, 0)
         i1 = min(obs_idx + n_time_neighbors + 1, len(obsids))
@@ -359,8 +359,7 @@ def _determine_stride_partitioning(
     stride_length : int, optional
         Length of the stride. Default is 1.
     n_time_neighbors : int, optional
-        Number of time neighbors. Required if `stride_length` is specified.
-        Otherwise optional, and default is 0.
+        Number of time neighbors. Optional, default is 0.
     time_centered : bool, optional
         Whether to center the obsid and select n_time_neighbors on either side,
         returning a total of 2 * n_time_neighbors + 1 obsids (True, default), or
@@ -389,12 +388,6 @@ def _determine_stride_partitioning(
         `n_time_neighbors` are such that there are obsids that do not belong to
         any group, then the value is an empty list.
     """
-    if stride_length is not None and n_time_neighbors is None:
-        raise ValueError(
-            f"`stride_length` was specified for action {action}, but "
-            "n_time_neighbors was not. When specifying stride_length "
-            "for an action, n_time_neighbors must also be specified."
-        )
     if stride_length is None:
         stride_length = 1
     if n_time_neighbors is None:
@@ -475,7 +468,7 @@ def prep_args(
     args,
     obsid,
     obsids=None,
-    n_time_neighbors="1",
+    n_time_neighbors="0",
     stride_length="1",
     centered=None,
     collect_stragglers=None,
@@ -733,29 +726,19 @@ def build_analysis_makeflow_from_config(
         if idx != len(workflow) - 1:
             raise ValueError("TEARDOWN must be last entry of workflow")
 
-    # Check for actions that use striding, make sure basename is last arg
+    # Check for actions that use n_time_neighbors, make sure obsid_list is last arg
     for action in workflow:
-        stride_length = get_config_entry(
-            config, action, "stride_length", required=False, total_length=len(obsids)
+        n_time_neighbors = get_config_entry(
+            config, action, "n_time_neighbors", required=False, total_length=len(obsids)
         )
-        if stride_length is not None:
-            n_time_neighbors = get_config_entry(
-                config, action, "n_time_neighbors", required=False,
-                total_length=len(obsids)
-            )
-            if n_time_neighbors is None:
-                raise ValueError(
-                    f"`stride_length` was specified for action {action}, but "
-                    "n_time_neighbors was not. When specifying stride_length "
-                    "for an action, n_time_neighbors must also be specified."
-                )
+        if n_time_neighbors is not None:
             this_args = get_config_entry(config, action, "args", required=True)
             if "{obsid_list}" in this_args:
                 bn_idx = this_args.index("{obsid_list}")
                 if bn_idx != len(this_args) - 1:
                     raise ValueError(
                         "{obsid_list} must be the last argument for action"
-                        f" {action} because stride_length is specified."
+                        f" {action} because n_time_neighbors is specified."
                     )
 
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
@@ -998,7 +981,7 @@ def build_analysis_makeflow_from_config(
                             prereqs = [prereqs]
                         # get how many neighbors we should be including
                         n_time_neighbors = get_config_entry(
-                            config, action, "n_time_neighbors", required=True,
+                            config, action, "n_time_neighbors", required=False,
                             total_length=len(obsids)
                         )
                         time_centered = get_config_entry(
@@ -1023,23 +1006,6 @@ def build_analysis_makeflow_from_config(
                             )
                             for of in tp_outfiles:
                                 infiles.append(of)
-
-                    # handle striding options
-                    if stride_length is not None:
-                        n_time_neighbors = get_config_entry(
-                            config, action, "n_time_neighbors", required=False,
-                            total_length=len(obsids)
-                        )
-                        centered = get_config_entry(
-                            config, action, "time_centered", required=False
-                        )
-                        collect_stragglers = get_config_entry(
-                            config, action, "collect_stragglers", required=False
-                        )
-                    else:
-                        n_time_neighbors = None
-                        centered = None
-                        collect_stragglers = None
 
                     # replace '{basename}' with actual filename
                     prepped_args = prep_args(
