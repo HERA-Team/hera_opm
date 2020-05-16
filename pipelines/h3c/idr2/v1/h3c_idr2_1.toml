@@ -18,12 +18,12 @@ vis_format = "uvh5"
 basenbdir = '/users/jsdillon/Libraries/H3C_plots'
 
 [REDCAL_OPTS]
-ant_z_thresh = 1e100
+ant_z_thresh = 4
 solar_horizon = 0.0
-nInt_to_load = 8
-flag_nchan_low = 256
+nInt_to_load = 10
+flag_nchan_low = 0
 flag_nchan_high = 0
-oc_maxiter = 2000
+oc_maxiter = 5000
 min_bl_cut = 15
 max_bl_cut = 100
 iter0_prefix = ".iter0"
