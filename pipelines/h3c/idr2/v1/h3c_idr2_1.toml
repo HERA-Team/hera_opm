@@ -28,7 +28,7 @@ min_bl_cut = 15
 max_bl_cut = 100
 iter0_prefix = ".iter0"
 # good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
-good_statuses = dish_maintenance,dish_ok,RF_maintenance,RF_ok,digital_maintenance,digital_ok,calibration_maintenance,calibration_ok,calibration_triage,passed_checks,needs_checking,known_bad,not_connected
+good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok,known_bad,not_connected"
 
 [ABSCAL_OPTS]
 model_files_glob = "'/lustre/aoc/projects/hera/H3C/abscal_models/RIMEz_Red_Only_Rescaled/zen.2458790.?????.uvh5'"
