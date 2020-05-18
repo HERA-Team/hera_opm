@@ -70,9 +70,6 @@ def config_options():
     config_dict["bad_missing_prereq_file"] = os.path.join(
         BAD_CONFIG_PATH, "bad_missing_prereq.toml"
     )
-    config_dict["bad_missing_time_prereq_file"] = os.path.join(
-        BAD_CONFIG_PATH, "bad_missing_time_prereq.toml"
-    )
     config_dict["obsids_pol"] = (
         "zen.2457698.40355.xx.HH.uvcA",
         "zen.2457698.40355.xy.HH.uvcA",
@@ -80,10 +77,6 @@ def config_options():
         "zen.2457698.40355.yy.HH.uvcA",
     )
     config_dict["obsids_nopol"] = ("zen.2457698.40355.HH.uvcA",)
-    config_dict["obsids_lstbin"] = (
-        sorted(glob.glob(DATA_PATH + "/zen.245804{}.*.xx.HH.uvXRAA".format(i)))
-        for i in [3, 4, 5]
-    )
     config_dict["pols"] = ("xx", "xy", "yx", "yy")
     config_dict["obsids_time"] = (
         "zen.2457698.30355.xx.HH.uvcA",
@@ -176,69 +169,45 @@ def test_make_outfile_name(config_options):
     # define args
     obsid = config_options["obsids_pol"][0]
     action = "OMNICAL"
-    pols = config_options["pols"]
     outfiles = set(
         [
-            "zen.2457698.40355.xx.HH.uvcA.OMNICAL.xx.out",
-            "zen.2457698.40355.xx.HH.uvcA.OMNICAL.xy.out",
-            "zen.2457698.40355.xx.HH.uvcA.OMNICAL.yx.out",
-            "zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out",
+            "zen.2457698.40355.xx.HH.uvcA.OMNICAL.out",
         ]
     )
-    assert set(mt.make_outfile_name(obsid, action, pols)) == outfiles
-
-    # run for no polarizations
-    pols = []
-    outfiles = ["zen.2457698.40355.xx.HH.uvcA.OMNICAL.out"]
-    assert mt.make_outfile_name(obsid, action, pols) == outfiles
-    return
+    assert set(mt.make_outfile_name(obsid, action)) == outfiles
 
 
 def test_make_time_neighbor_outfile_name(config_options):
     # define args
     obsid = config_options["obsids_time"][1]
     action = "OMNICAL"
-    pol = config_options["pols"][3]
     outfiles = [
-        "zen.2457698.30355.xx.HH.uvcA.OMNICAL.yy.out",
-        "zen.2457698.40355.xx.HH.uvcA.OMNICAL.yy.out",
-        "zen.2457698.50355.xx.HH.uvcA.OMNICAL.yy.out",
+        "zen.2457698.30355.xx.HH.uvcA.OMNICAL.out",
+        "zen.2457698.40355.xx.HH.uvcA.OMNICAL.out",
+        "zen.2457698.50355.xx.HH.uvcA.OMNICAL.out",
     ]
     obsids_time = config_options["obsids_time"]
     assert set(
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, pol)
+        mt.make_time_neighbor_outfile_name(obsid, action, obsids=obsids_time,
+                                           n_time_neighbors=1)
     ) == set(outfiles)
 
     # test asking for "all" neighbors
     assert set(
         mt.make_time_neighbor_outfile_name(
-            obsid, action, obsids_time, pol, n_time_neighbors="all"
+            obsid, action, obsids_time, n_time_neighbors="all"
         )
     ) == set(outfiles)
 
     # test edge cases
     obsid = obsids_time[0]
     assert set(
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, pol)
+        mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, n_time_neighbors=1)
     ) == set(outfiles[:2])
     obsid = obsids_time[2]
     assert set(
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, pol)
+        mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, n_time_neighbors=1)
     ) == set(outfiles[1:])
-
-    # run for no polarizations
-    obsid = obsids_time[1]
-    outfiles = set(
-        [
-            "zen.2457698.30355.xx.HH.uvcA.OMNICAL.out",
-            "zen.2457698.40355.xx.HH.uvcA.OMNICAL.out",
-            "zen.2457698.50355.xx.HH.uvcA.OMNICAL.out",
-        ]
-    )
-    assert (
-        set(mt.make_time_neighbor_outfile_name(obsid, action, obsids_time)) == outfiles
-    )
-    return
 
 
 def test_make_time_neighbor_outfile_name_errors(config_options):
@@ -252,35 +221,19 @@ def test_make_time_neighbor_outfile_name_errors(config_options):
     # test passing in nonsense for all_neighbors
     with pytest.raises(ValueError):
         mt.make_time_neighbor_outfile_name(
-            obsids_time[0], action, obsids_time, pol="xx", n_time_neighbors="blah"
+            obsids_time[0], action, obsids_time, n_time_neighbors="blah"
         )
 
     # test passing in a negative number of neighbors
     with pytest.raises(ValueError):
         mt.make_time_neighbor_outfile_name(
-            obsids_time[0], action, obsids_time, pol="xx", n_time_neighbors="-1"
+            obsids_time[0], action, obsids_time, n_time_neighbors="-1"
         )
 
     return
 
 
 def test_prep_args(config_options):
-    # define args
-    obsid = config_options["obsids_pol"][0]
-    args = "{basename}"
-    pol = config_options["pols"][3]
-    output = "zen.2457698.40355.yy.HH.uvcA"
-    assert mt.prep_args(args, obsid, pol) == output
-
-    # test requesting polarization, but none found in file
-    obsid = "zen.2457698.40355.uv"
-    assert mt.prep_args(args, obsid, pol) == obsid
-
-    # test not requesting polarization
-    obsid = config_options["obsids_pol"][0]
-    output = "zen.2457698.40355.xx.HH.uvcA"
-    assert mt.prep_args(args, obsid) == output
-
     # test having time-adjacent keywords
     obsid = config_options["obsids_time"][1]
     obsids = config_options["obsids_time"]
@@ -414,22 +367,6 @@ def test_determine_stride_partitioning(config_options):
     ]
     assert len(per_obsid_primary_obsids) == len(input_obsids)
     assert per_obsid_primary_obsids == target_list
-
-    return
-
-
-def test_determine_stride_partitioning_stride_but_no_neighbors(config_options):
-    with pytest.raises(
-        ValueError,
-        match="`stride_length` was specified for action test, but n_time_neighbors was not",
-    ):
-        mt._determine_stride_partitioning(
-            config_options["obsids_long_dummy_list"],
-            "test",
-            stride_length=1,
-            time_centered=True,
-            collect_stragglers=False,
-        )
 
     return
 
@@ -594,11 +531,9 @@ def test_build_analysis_makeflow_from_config(config_options):
         "XRFI",
         "XRFI_APPLY",
     ]
-    pols = config_options["pols"]
     for obsid in obsids:
         for action in actions:
-            for pol in pols:
-                wrapper_fn = "wrapper_" + obsid + "." + action + "." + pol + ".sh"
+                wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
                 wrapper_fn = os.path.join(work_dir, wrapper_fn)
                 assert os.path.exists(wrapper_fn)
 
@@ -652,26 +587,6 @@ def test_build_analysis_makeflow_from_config_missing_prereq(config_options):
     return
 
 
-def test_build_analysis_makeflow_from_config_missing_time_prereq(config_options):
-    # define args
-    obsids = config_options["obsids_pol"][:1]
-    config_file = config_options["bad_missing_time_prereq_file"]
-    work_dir = os.path.join(DATA_PATH, "test_output")
-
-    mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
-    outfile = os.path.join(work_dir, mf_output)
-    if os.path.exists(outfile):
-        os.remove(outfile)
-    with pytest.raises(ValueError, match="Time prereq GIBBLY_GOOP for action"):
-        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
-
-    # clean up after ourselves
-    os.remove(outfile)
-    mt.clean_wrapper_scripts(work_dir)
-
-    return
-
-
 def test_build_analysis_makeflow_from_config_time_neighbors(config_options):
     # define args
     obsids = config_options["obsids_time"]
@@ -699,39 +614,19 @@ def test_build_analysis_makeflow_from_config_time_neighbors(config_options):
     pols = config_options["pols"]
     for obsid in obsids:
         for action in actions:
-            for pol in pols:
-                wrapper_fn = "wrapper_" + obsid + "." + action + "." + pol + ".sh"
-                wrapper_fn = os.path.join(work_dir, wrapper_fn)
-                assert os.path.exists(wrapper_fn)
+            wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
+            wrapper_fn = os.path.join(work_dir, wrapper_fn)
+            assert os.path.exists(wrapper_fn)
     # some actions will not run for edge observations because they need time neighbors.
     for obsid in obsids[1:-1]:
         for action in ntime_actions:
-            for pol in pols:
-                wrapper_fn = "wrapper_" + obsid + "." + action + "." + pol + ".sh"
-                wrapper_fn = os.path.join(work_dir, wrapper_fn)
-                assert os.path.exists(wrapper_fn)
+            wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
+            wrapper_fn = os.path.join(work_dir, wrapper_fn)
+            assert os.path.exists(wrapper_fn)
 
     # clean up after ourselves
     os.remove(outfile)
     mt.clean_wrapper_scripts(work_dir)
-
-    return
-
-
-def test_build_analysis_makeflow_from_config_errors(config_options):
-    # define args
-    obsids = config_options["obsids_pol"][:2]
-    config_file = config_options["config_file"]
-    work_dir = os.path.join(DATA_PATH, "test_output")
-
-    # raise an error for passing in obsids with different polarizations
-    with pytest.raises(AssertionError):
-        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
-
-    # raise an error for passing in an obsid with no polarization string
-    obsids = ["zen.2458000.12345.uv"]
-    with pytest.raises(AssertionError):
-        mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
     return
 
@@ -766,10 +661,9 @@ def test_build_analysis_makeflow_from_config_options(config_options):
     pols = config_options["pols"]
     for obsid in obsids:
         for action in actions:
-            for pol in pols:
-                wrapper_fn = "wrapper_" + obsid + "." + action + "." + pol + ".sh"
-                wrapper_fn = os.path.join(work_dir, wrapper_fn)
-                assert os.path.exists(wrapper_fn)
+            wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
+            wrapper_fn = os.path.join(work_dir, wrapper_fn)
+            assert os.path.exists(wrapper_fn)
 
     # clean up after ourselves
     os.remove(outfile)
@@ -883,19 +777,18 @@ def test_build_analysis_makeflow_from_config_setup_teardown(config_options):
     pols = config_options["pols"]
     for obsid in obsids:
         for action in actions:
-            for pol in pols:
-                wrapper_fn = "wrapper_" + obsid + "." + action + "." + pol + ".sh"
-                wrapper_fn = os.path.join(work_dir, wrapper_fn)
-                print("wrapper_fn: ", wrapper_fn)
-                assert os.path.exists(wrapper_fn)
+            wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
+            wrapper_fn = os.path.join(work_dir, wrapper_fn)
+            print("wrapper_fn: ", wrapper_fn)
+            assert os.path.exists(wrapper_fn)
 
-                # check that the wrapper scripts have the right lines in them
-                with open(wrapper_fn) as infile:
-                    lines = infile.readlines()
-                assert lines[0].strip() == "#!/bin/bash"
-                assert lines[1].strip() == "source ~/.bashrc"
-                assert lines[2].strip() == "conda activate hera"
-                assert lines[3].strip() == "date"
+            # check that the wrapper scripts have the right lines in them
+            with open(wrapper_fn) as infile:
+                lines = infile.readlines()
+            assert lines[0].strip() == "#!/bin/bash"
+            assert lines[1].strip() == "source ~/.bashrc"
+            assert lines[2].strip() == "conda activate hera"
+            assert lines[3].strip() == "date"
 
     # clean up after ourselves
     os.remove(outfile)
