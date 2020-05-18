@@ -70,24 +70,15 @@ def config_options():
     config_dict["bad_missing_prereq_file"] = os.path.join(
         BAD_CONFIG_PATH, "bad_missing_prereq.toml"
     )
-    config_dict["obsids_pol"] = (
-        "zen.2457698.40355.xx.HH.uvcA",
-        "zen.2457698.40355.xy.HH.uvcA",
-        "zen.2457698.40355.yx.HH.uvcA",
-        "zen.2457698.40355.yy.HH.uvcA",
-    )
-    config_dict["obsids_nopol"] = ("zen.2457698.40355.HH.uvcA",)
-    config_dict["pols"] = ("xx", "xy", "yx", "yy")
-    config_dict["obsids_time"] = (
-        "zen.2457698.30355.xx.HH.uvcA",
-        "zen.2457698.40355.xx.HH.uvcA",
-        "zen.2457698.50355.xx.HH.uvcA",
+    config_dict["obsids"] = (
+        "zen.2458043.40141.HH.uvh5",
+        "zen.2458043.40887.HH.uvh5",
+        "zen.2458043.41632.HH.uvh5"
     )
     config_dict["obsids_time_discontinuous"] = (
-        "zen.2457698.30355.xx.HH.uvcA",
-        "zen.2457698.40355.xx.HH.uvcA",
-        "zen.2457698.50355.xx.HH.uvcA",
-        "zen.2457699.30355.xx.HH.uvcA",
+        "zen.2458043.40141.HH.uvh5",
+        "zen.2458044.40141.HH.uvh5",
+        "zen.2458045.40140.HH.uvh5"
     )
     config_dict["obsids_long_dummy_list"] = (
         "aaa",
@@ -167,11 +158,11 @@ def test_get_config_entry_total_length(config_options):
 def test_make_outfile_name(config_options):
     """Test making the name of an output file for a specific step."""
     # define args
-    obsid = config_options["obsids_pol"][0]
+    obsid = config_options["obsids"][0]
     action = "OMNICAL"
     outfiles = set(
         [
-            "zen.2457698.40355.xx.HH.uvcA.OMNICAL.out",
+            "zen.2458043.40141.HH.uvh5.OMNICAL.out",
         ]
     )
     assert set(mt.make_outfile_name(obsid, action)) == outfiles
@@ -179,34 +170,30 @@ def test_make_outfile_name(config_options):
 
 def test_make_time_neighbor_outfile_name(config_options):
     # define args
-    obsid = config_options["obsids_time"][1]
+    obsid = config_options["obsids"][1]
     action = "OMNICAL"
-    outfiles = [
-        "zen.2457698.30355.xx.HH.uvcA.OMNICAL.out",
-        "zen.2457698.40355.xx.HH.uvcA.OMNICAL.out",
-        "zen.2457698.50355.xx.HH.uvcA.OMNICAL.out",
-    ]
-    obsids_time = config_options["obsids_time"]
+    obsids = config_options["obsids"]
+    outfiles = [obs + ".OMNICAL.out" for obs in obsids[:3]]
     assert set(
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids=obsids_time,
+        mt.make_time_neighbor_outfile_name(obsid, action, obsids=obsids,
                                            n_time_neighbors=1)
     ) == set(outfiles)
 
     # test asking for "all" neighbors
     assert set(
         mt.make_time_neighbor_outfile_name(
-            obsid, action, obsids_time, n_time_neighbors="all"
+            obsid, action, obsids, n_time_neighbors="all"
         )
     ) == set(outfiles)
 
     # test edge cases
-    obsid = obsids_time[0]
+    obsid = obsids[0]
     assert set(
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, n_time_neighbors=1)
+        mt.make_time_neighbor_outfile_name(obsid, action, obsids, n_time_neighbors=1)
     ) == set(outfiles[:2])
-    obsid = obsids_time[2]
+    obsid = obsids[2]
     assert set(
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids_time, n_time_neighbors=1)
+        mt.make_time_neighbor_outfile_name(obsid, action, obsids, n_time_neighbors=1)
     ) == set(outfiles[1:])
 
 
@@ -214,20 +201,20 @@ def test_make_time_neighbor_outfile_name_errors(config_options):
     # test not having the obsid in the supplied list
     obsid = "zen.1234567.12345.xx.HH.uvcA"
     action = "OMNICAL"
-    obsids_time = config_options["obsids_time"]
+    obsids = config_options["obsids"]
     with pytest.raises(ValueError):
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids_time)
+        mt.make_time_neighbor_outfile_name(obsid, action, obsids)
 
     # test passing in nonsense for all_neighbors
     with pytest.raises(ValueError):
         mt.make_time_neighbor_outfile_name(
-            obsids_time[0], action, obsids_time, n_time_neighbors="blah"
+            obsids[0], action, obsids, n_time_neighbors="blah"
         )
 
     # test passing in a negative number of neighbors
     with pytest.raises(ValueError):
         mt.make_time_neighbor_outfile_name(
-            obsids_time[0], action, obsids_time, n_time_neighbors="-1"
+            obsids[0], action, obsids, n_time_neighbors="-1"
         )
 
     return
@@ -235,19 +222,19 @@ def test_make_time_neighbor_outfile_name_errors(config_options):
 
 def test_prep_args(config_options):
     # test having time-adjacent keywords
-    obsid = config_options["obsids_time"][1]
-    obsids = config_options["obsids_time"]
+    obsid = config_options["obsids"][1]
+    obsids = config_options["obsids"]
     args = "{basename} {prev_basename} {next_basename}"
-    output = "zen.2457698.40355.xx.HH.uvcA zen.2457698.30355.xx.HH.uvcA zen.2457698.50355.xx.HH.uvcA"
+    output = " ".join([obsids[1], obsids[0], obsids[2]])
     assert mt.prep_args(args, obsid, obsids=obsids) == output
 
     # test edge cases
-    obsid = config_options["obsids_time"][0]
-    output = "zen.2457698.30355.xx.HH.uvcA None zen.2457698.40355.xx.HH.uvcA"
+    obsid = config_options["obsids"][0]
+    output = " ".join([obsids[0], "None", obsids[1]])
     assert mt.prep_args(args, obsid, obsids=obsids) == output
 
-    obsid = config_options["obsids_time"][2]
-    output = "zen.2457698.50355.xx.HH.uvcA zen.2457698.40355.xx.HH.uvcA None"
+    obsid = config_options["obsids"][2]
+    output = " ".join([obsids[2], obsids[1], "None"])
     assert mt.prep_args(args, obsid, obsids=obsids) == output
 
     return
@@ -255,18 +242,22 @@ def test_prep_args(config_options):
 
 def test_prep_args_errors(config_options):
     # define args
-    obsid = config_options["obsids_time"][0]
-    obsids = config_options["obsids_pol"]
+    obsid = config_options["obsids"][0]
+    obsids = config_options["obsids_long_dummy_list"]
     args = "{basename} {prev_basename}"
-    with pytest.raises(ValueError):
+    # Error if requesting time-adjacent obsids without obsids list
+    with pytest.raises(ValueError, match='when requesting time-adjacent'):
         mt.prep_args(args, obsid)
-    with pytest.raises(ValueError):
+    # Error if obsid is not in obsids
+    with pytest.raises(ValueError, match=f'{obsid} not found in list of obsids'):
         mt.prep_args(args, obsid, obsids=obsids)
 
     args = "{basename} {next_basename}"
     with pytest.raises(ValueError):
+        # Error if requesting time-adjacent obsids without obsids list
         mt.prep_args(args, obsid)
     with pytest.raises(ValueError):
+        # Error if obsid is not in obsids
         mt.prep_args(args, obsid, obsids=obsids)
 
     return
@@ -507,7 +498,7 @@ def test_determine_stride_partitioning_noncontiguous_stragglers(config_options):
 
 def test_build_analysis_makeflow_from_config(config_options):
     # define args
-    obsids = config_options["obsids_pol"][:1]
+    obsids = config_options["obsids"][:1]
     config_file = config_options["config_file"]
     work_dir = os.path.join(DATA_PATH, "test_output")
 
@@ -569,7 +560,7 @@ def test_build_analysis_makeflow_from_config(config_options):
 
 def test_build_analysis_makeflow_from_config_missing_prereq(config_options):
     # define args
-    obsids = config_options["obsids_pol"][:1]
+    obsids = config_options["obsids"][:1]
     config_file = config_options["bad_missing_prereq_file"]
     work_dir = os.path.join(DATA_PATH, "test_output")
 
@@ -589,7 +580,7 @@ def test_build_analysis_makeflow_from_config_missing_prereq(config_options):
 
 def test_build_analysis_makeflow_from_config_time_neighbors(config_options):
     # define args
-    obsids = config_options["obsids_time"]
+    obsids = config_options["obsids"]
     config_file = config_options["config_file_time_neighbors"]
     work_dir = os.path.join(DATA_PATH, "test_output")
 
@@ -611,7 +602,6 @@ def test_build_analysis_makeflow_from_config_time_neighbors(config_options):
         "XRFI_APPLY",
     ]
     ntime_actions = ["OMNICAL_METRICS", "OMNI_APPLY"]
-    pols = config_options["pols"]
     for obsid in obsids:
         for action in actions:
             wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
@@ -634,7 +624,7 @@ def test_build_analysis_makeflow_from_config_time_neighbors(config_options):
 @pytest.mark.filterwarnings("ignore:A value for the")
 def test_build_analysis_makeflow_from_config_options(config_options):
     # define args
-    obsids = config_options["obsids_pol"][:1]
+    obsids = config_options["obsids"][:1]
     config_file = config_options["config_file_options"]
     work_dir = os.path.join(DATA_PATH, "test_output")
 
@@ -658,67 +648,10 @@ def test_build_analysis_makeflow_from_config_options(config_options):
         "XRFI",
         "XRFI_APPLY",
     ]
-    pols = config_options["pols"]
     for obsid in obsids:
         for action in actions:
             wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
             wrapper_fn = os.path.join(work_dir, wrapper_fn)
-            assert os.path.exists(wrapper_fn)
-
-    # clean up after ourselves
-    os.remove(outfile)
-    mt.clean_wrapper_scripts(work_dir)
-
-    # also test providing the name of the output file
-    mf_output = "output.mf"
-    outfile = os.path.join(work_dir, mf_output)
-    if os.path.exists(outfile):
-        os.remove(outfile)
-    mt.build_analysis_makeflow_from_config(
-        obsids, config_file, mf_name=outfile, work_dir=work_dir
-    )
-
-    assert os.path.exists(outfile)
-
-    # clean up after ourselves
-    os.remove(outfile)
-    mt.clean_wrapper_scripts(work_dir)
-
-    return
-
-
-def test_build_analysis_makeflow_from_config_nopol(config_options):
-    # define args
-    obsids = config_options["obsids_nopol"]
-    config_file = config_options["config_file_nopol"]
-    work_dir = os.path.join(DATA_PATH, "test_output")
-
-    mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
-    outfile = os.path.join(work_dir, mf_output)
-    if os.path.exists(outfile):
-        os.remove(outfile)
-    mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=work_dir)
-
-    # make sure the output files we expected appeared
-    assert os.path.exists(outfile)
-
-    # also make sure the wrapper scripts were made
-    actions = [
-        "ANT_METRICS",
-        "FIRSTCAL",
-        "FIRSTCAL_METRICS",
-        "OMNICAL",
-        "OMNICAL_METRICS",
-        "OMNI_APPLY",
-        "XRFI",
-        "XRFI_APPLY",
-    ]
-    for obsid in obsids:
-        for action in actions:
-            wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
-            wrapper_fn = os.path.join(work_dir, wrapper_fn)
-            print("obsid, action: ", obsid, action)
-            print("work_dir: ", work_dir)
             assert os.path.exists(wrapper_fn)
 
     # clean up after ourselves
@@ -745,7 +678,7 @@ def test_build_analysis_makeflow_from_config_nopol(config_options):
 
 def test_build_analysis_makeflow_from_config_setup_teardown(config_options):
     # define args
-    obsids = config_options["obsids_pol"][:1]
+    obsids = config_options["obsids"][:1]
     config_file = config_options["config_file_setup_teardown"]
     work_dir = os.path.join(DATA_PATH, "test_output")
 
@@ -774,7 +707,6 @@ def test_build_analysis_makeflow_from_config_setup_teardown(config_options):
     wrapper_fn_teardown = os.path.join(work_dir, "wrapper_teardown.sh")
     assert os.path.exists(wrapper_fn_setup)
     assert os.path.exists(wrapper_fn_teardown)
-    pols = config_options["pols"]
     for obsid in obsids:
         for action in actions:
             wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
@@ -815,7 +747,7 @@ def test_build_analysis_makeflow_from_config_setup_teardown(config_options):
 def test_setup_teardown_errors(config_options):
     # define config to load
     config_file = config_options["bad_setup_config_file"]
-    obsids = config_options["obsids_pol"][:1]
+    obsids = config_options["obsids"][:1]
 
     # test bad setup location
     with pytest.raises(ValueError):
@@ -944,7 +876,7 @@ def test_build_lstbin_makeflow_from_config_options(config_options):
 
 def test_build_makeflow_from_config(config_options):
     # define args
-    obsids = config_options["obsids_pol"][:1]
+    obsids = config_options["obsids"][:1]
     config_file = config_options["config_file"]
     work_dir = os.path.join(DATA_PATH, "test_output")
 
@@ -974,7 +906,7 @@ def test_build_makeflow_from_config(config_options):
 @pytest.mark.filterwarnings("ignore: A value for the")
 def test_build_makeflow_from_config_lstbin_options(config_options):
     # test lstbin version with options
-    obsids = config_options["obsids_pol"][:1]
+    obsids = config_options["obsids"][:1]
     config_file = config_options["config_file_lstbin_options"]
     work_dir = os.path.join(DATA_PATH, "test_output")
     mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
@@ -1204,7 +1136,7 @@ def test_build_makeflow_from_config_errors():
 
 def test_sort_obsids(config_options):
     # get obsids
-    obsids = config_options["obsids_time"]
+    obsids = config_options["obsids"]
 
     # scramble them and make sure we get a sorted list back
     obsids_swap = list(obsids)
@@ -1222,15 +1154,15 @@ def test_sort_obsids(config_options):
     obsids_swap[1] = obsids_swap[0]
     obsids_swap[0] = temp
 
-    obsids_sort = mt.sort_obsids(obsids_swap, jd="2457698")
-    assert tuple(obsids_sort) == obsids_discontinuous[0:3]
+    obsids_sort = mt.sort_obsids(obsids_swap, jd="2458044")
+    assert tuple(obsids_sort) == tuple([obsids_discontinuous[1]])
 
     return
 
 
 def test_prep_args_obsid_list(config_options):
     # define args to parse
-    obsids_list = config_options["obsids_time"]
+    obsids_list = config_options["obsids"]
     args = "{obsid_list}"
     obsid = obsids_list[1]
 
@@ -1250,7 +1182,7 @@ def test_prep_args_obsid_list(config_options):
 
 def test_prep_args_obsid_list_centered(config_options):
     # define args to parse
-    obsids_list = config_options["obsids_time"]
+    obsids_list = config_options["obsids"]
     args = "{obsid_list}"
     obsid = obsids_list[1]
 
@@ -1270,7 +1202,7 @@ def test_prep_args_obsid_list_centered(config_options):
 
 def test_prep_args_obsid_list_not_centered(config_options):
     # define args to parse
-    obsids_list = config_options["obsids_time"]
+    obsids_list = config_options["obsids"]
     args = "{obsid_list}"
     obsid = obsids_list[1]
 
@@ -1290,7 +1222,7 @@ def test_prep_args_obsid_list_not_centered(config_options):
 
 def test_prep_args_obsid_list_with_stragglers(config_options):
     # define args to parse
-    obsids_list = config_options["obsids_time"]
+    obsids_list = config_options["obsids"]
     args = "{obsid_list}"
     obsid = obsids_list[0]
 
@@ -1311,7 +1243,7 @@ def test_prep_args_obsid_list_with_stragglers(config_options):
 
 def test_prep_args_obsid_list_error(config_options):
     # define args to parse
-    obsids_list = config_options["obsids_time"]
+    obsids_list = config_options["obsids"]
     args = "{obsid_list}"
     obsid = obsids_list[1]
 
@@ -1343,7 +1275,7 @@ def test_prep_args_obsid_list_error(config_options):
 
 def test_build_analysis_makeflow_error_obsid_list(config_options):
     config_file = config_options["bad_obsid_list_file"]
-    obsids = config_options["obsids_time"]
+    obsids = config_options["obsids"]
     work_dir = os.path.join(DATA_PATH, "test_output")
 
     with pytest.raises(ValueError) as cm:
