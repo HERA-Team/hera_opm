@@ -95,7 +95,7 @@ args = ["{basename}"]
 
 [ANT_METRICS]
 # prereqs = "FIX_DATAFILE"
-mem = 32000
+mem = 64000
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}", "${ANT_METRICS_OPTS:extension}",
         "${ANT_METRICS_OPTS:vis_format}"]
@@ -117,7 +117,7 @@ args = "{basename}"
 prereqs = "REDCAL"
 time_prereqs = "REDCAL"
 n_time_neighbors = "all"
-mem = 64000
+mem = 128000
 args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
 
 [ABSCAL]
@@ -128,7 +128,7 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 
 [XRFI]
 prereqs = "ABSCAL"
-mem = 48000
+mem = 64000
 args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
         "${XRFI_OPTS:sig_adj}"]
 
@@ -144,7 +144,7 @@ args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD
 prereqs = "XRFI_DAY_THRESHOLD"
 time_prereqs = "XRFI_DAY_THRESHOLD"
 n_time_neighbors = "all"
-mem = 48000
+mem = 64000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
         "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}",
@@ -173,5 +173,5 @@ args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scrip
 prereqs = "ANT_METRICS"
 time_prereqs = "ANT_METRICS"
 n_time_neighbors = "all"
-mem = 64000
+mem = 128000
 args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
