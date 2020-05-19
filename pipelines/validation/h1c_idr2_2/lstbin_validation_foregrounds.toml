@@ -21,18 +21,18 @@ fixed_lst_start = "True"
 vis_units = "Jy"
 parallelize = "True"
 file_ext = "grp1.of1.{type}.{time:7.5f}.HH.OCRSL.uvh5"
-outdir = "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/LSTBIN/sum"
-parent_dir = "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/LSTBIN/sum"
-data_files = ["/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458098_sum/zen.2458098.*.sum.corrupt.uvh5",
-              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458099_sum/zen.2458099.*.sum.corrupt.uvh5",
-              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458101_sum/zen.2458101.*.sum.corrupt.uvh5",
-              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458102_sum/zen.2458102.*.sum.corrupt.uvh5",
-              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458103_sum/zen.2458103.*.sum.corrupt.uvh5",
-              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458106_sum/zen.2458106.*.sum.corrupt.uvh5",
-              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458107_sum/zen.2458107.*.sum.corrupt.uvh5",
-              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458108_sum/zen.2458108.*.sum.corrupt.uvh5",
-              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458110_sum/zen.2458110.*.sum.corrupt.uvh5",
-              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458111_sum/zen.2458111.*.sum.corrupt.uvh5"]
+outdir = "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/LSTBIN/foregrounds"
+parent_dir = "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/LSTBIN/foregrounds"
+data_files = ["/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458098_foregrounds/zen.2458098.*.foregrounds.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458099_foregrounds/zen.2458099.*.foregrounds.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458101_foregrounds/zen.2458101.*.foregrounds.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458102_foregrounds/zen.2458102.*.foregrounds.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458103_foregrounds/zen.2458103.*.foregrounds.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458107_foregrounds/zen.2458107.*.foregrounds.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458106_foregrounds/zen.2458106.*.foregrounds.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458108_foregrounds/zen.2458108.*.foregrounds.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458110_foregrounds/zen.2458110.*.foregrounds.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458111_foregrounds/zen.2458111.*.foregrounds.corrupt.uvh5"]
 calibration = "smooth_abs.calfits"
 
 [WorkFlow]
