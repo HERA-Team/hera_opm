@@ -71,8 +71,9 @@ def _interpolate_config(config, entry):
         return entry
 
 
-def get_config_entry(config, header, item, required=True, interpolate=True,
-                     total_length=1):
+def get_config_entry(
+    config, header, item, required=True, interpolate=True, total_length=1
+):
     """Extract a specific entry from config file.
 
     Parameters
@@ -119,10 +120,11 @@ def get_config_entry(config, header, item, required=True, interpolate=True,
                     entries[i] = _interpolate_config(config, entry)
             else:
                 entries = _interpolate_config(config, entries)
-        if item in ['stride_length', 'n_time_neighbors']:
-            time_centered = get_config_entry(config, header, 'time_centered',
-                                             required=False)
-            if entries == 'all':
+        if item in ["stride_length", "n_time_neighbors"]:
+            time_centered = get_config_entry(
+                config, header, "time_centered", required=False
+            )
+            if entries == "all":
                 if time_centered or time_centered is None:
                     entries = str((total_length - 1) // 2)
                 else:
@@ -155,7 +157,7 @@ def make_outfile_name(obsid, action):
         corresponding to `obsid`.
 
     """
-    return [f'{obsid}.{action}.out']
+    return [f"{obsid}.{action}.out"]
 
 
 def sort_obsids(obsids, jd=None, return_basenames=True):
@@ -270,7 +272,7 @@ def make_time_neighbor_outfile_name(
         outfiles.append(obsids[i])
 
     # finalize the names of files
-    outfiles = [f'{of}.{action}.out' for of in outfiles]
+    outfiles = [f"{of}.{action}.out" for of in outfiles]
 
     return outfiles
 
@@ -869,12 +871,18 @@ def build_analysis_makeflow_from_config(
                 if action == "TEARDOWN":
                     continue
                 stride_length = get_config_entry(
-                    config, action, "stride_length", required=False,
-                    total_length=len(obsids)
+                    config,
+                    action,
+                    "stride_length",
+                    required=False,
+                    total_length=len(obsids),
                 )
                 n_time_neighbors = get_config_entry(
-                    config, action, "n_time_neighbors", required=False,
-                    total_length=len(obsids)
+                    config,
+                    action,
+                    "n_time_neighbors",
+                    required=False,
+                    total_length=len(obsids),
                 )
                 time_centered = get_config_entry(
                     config, action, "time_centered", required=False
@@ -910,9 +918,7 @@ def build_analysis_makeflow_from_config(
                         outfiles_prev = []
                         for oi_list in per_obsid_primary_obsids:
                             for oi in oi_list:
-                                outfiles_prev.extend(
-                                    make_outfile_name(oi, action)
-                                )
+                                outfiles_prev.extend(make_outfile_name(oi, action))
                         outfiles_prev = list(set(outfiles_prev))
 
                         continue
@@ -966,8 +972,11 @@ def build_analysis_makeflow_from_config(
                             prereqs = [prereqs]
                         # get how many neighbors we should be including
                         n_time_neighbors = get_config_entry(
-                            config, action, "n_time_neighbors", required=False,
-                            total_length=len(obsids)
+                            config,
+                            action,
+                            "n_time_neighbors",
+                            required=False,
+                            total_length=len(obsids),
                         )
                         time_centered = get_config_entry(
                             config, action, "time_centered", required=False
@@ -1262,9 +1271,7 @@ def build_lstbin_makeflow_from_config(
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
         # get data files
-        datafiles = get_config_entry(
-            config, "LSTBIN_OPTS", "data_files", required=True
-        )
+        datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
         # encapsulate in double quotes
         datafiles = [
             "'{}'".format(
@@ -1318,7 +1325,7 @@ def build_lstbin_makeflow_from_config(
                 config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
 
             # make outfile list
-            outfile = f'lstbin_outfile_{output_file_index}.LSTBIN.out'
+            outfile = f"lstbin_outfile_{output_file_index}.LSTBIN.out"
 
             # get args list for lst-binning step
             _args = [
@@ -1355,8 +1362,7 @@ def build_lstbin_makeflow_from_config(
                 print("cd {}".format(parent_dir), file=f2)
                 if timeout is not None:
                     print(
-                        "timeout {0} {1} {2}".format(timeout, command, args),
-                        file=f2,
+                        "timeout {0} {1} {2}".format(timeout, command, args), file=f2,
                     )
                 else:
                     print("{0} {1}".format(command, args), file=f2)
