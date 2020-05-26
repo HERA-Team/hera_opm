@@ -127,6 +127,7 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
         "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:edge_cut}"]
 
 [XRFI]
+mem = 96000
 prereqs = "ABSCAL"
 mem = 64000
 time_prereqs = "ABSCAL"
