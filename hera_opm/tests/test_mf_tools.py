@@ -6,7 +6,6 @@ import pytest
 import os
 import shutil
 import gzip
-import glob
 import toml
 
 from . import BAD_CONFIG_PATH
@@ -75,12 +74,12 @@ def config_options():
     config_dict["obsids"] = (
         "zen.2458043.40141.HH.uvh5",
         "zen.2458043.40887.HH.uvh5",
-        "zen.2458043.41632.HH.uvh5"
+        "zen.2458043.41632.HH.uvh5",
     )
     config_dict["obsids_time_discontinuous"] = (
         "zen.2458043.40141.HH.uvh5",
         "zen.2458044.40141.HH.uvh5",
-        "zen.2458045.40140.HH.uvh5"
+        "zen.2458045.40140.HH.uvh5",
     )
     config_dict["obsids_long_dummy_list"] = (
         "aaa",
@@ -149,12 +148,21 @@ def test_get_config_entry_total_length(config_options):
     config = toml.load(config_options["config_file_time_neighbors_all"])
 
     # Default is to time center
-    assert mt.get_config_entry(config, "XRFI", "n_time_neighbors",
-                               total_length=15) == '7'
-    assert mt.get_config_entry(config, "XRFI_CENTERED", 'n_time_neighbors',
-                               total_length=21) == '10'
-    assert mt.get_config_entry(config, "XRFI_NOT_CENTERED", 'n_time_neighbors',
-                               total_length=7) == '6'
+    assert (
+        mt.get_config_entry(config, "XRFI", "n_time_neighbors", total_length=15) == "7"
+    )
+    assert (
+        mt.get_config_entry(
+            config, "XRFI_CENTERED", "n_time_neighbors", total_length=21
+        )
+        == "10"
+    )
+    assert (
+        mt.get_config_entry(
+            config, "XRFI_NOT_CENTERED", "n_time_neighbors", total_length=7
+        )
+        == "6"
+    )
 
 
 def test_make_outfile_name(config_options):
@@ -162,11 +170,7 @@ def test_make_outfile_name(config_options):
     # define args
     obsid = config_options["obsids"][0]
     action = "OMNICAL"
-    outfiles = set(
-        [
-            "zen.2458043.40141.HH.uvh5.OMNICAL.out",
-        ]
-    )
+    outfiles = set(["zen.2458043.40141.HH.uvh5.OMNICAL.out"])
     assert set(mt.make_outfile_name(obsid, action)) == outfiles
 
 
@@ -177,8 +181,9 @@ def test_make_time_neighbor_outfile_name(config_options):
     obsids = config_options["obsids"]
     outfiles = [obs + ".OMNICAL.out" for obs in obsids[:3]]
     assert set(
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids=obsids,
-                                           n_time_neighbors=1)
+        mt.make_time_neighbor_outfile_name(
+            obsid, action, obsids=obsids, n_time_neighbors=1
+        )
     ) == set(outfiles)
 
     # test asking for "all" neighbors
@@ -248,10 +253,10 @@ def test_prep_args_errors(config_options):
     obsids = config_options["obsids_long_dummy_list"]
     args = "{basename} {prev_basename}"
     # Error if requesting time-adjacent obsids without obsids list
-    with pytest.raises(ValueError, match='when requesting time-adjacent'):
+    with pytest.raises(ValueError, match="when requesting time-adjacent"):
         mt.prep_args(args, obsid)
     # Error if obsid is not in obsids
-    with pytest.raises(ValueError, match=f'{obsid} not found in list of obsids'):
+    with pytest.raises(ValueError, match=f"{obsid} not found in list of obsids"):
         mt.prep_args(args, obsid, obsids=obsids)
 
     args = "{basename} {next_basename}"
@@ -520,17 +525,17 @@ def test_build_analysis_makeflow_from_config(config_options):
     ]
     for obsid in obsids:
         for action in actions:
-                wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
-                wrapper_fn = os.path.join(work_dir, wrapper_fn)
-                assert os.path.exists(wrapper_fn)
+            wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
+            wrapper_fn = os.path.join(work_dir, wrapper_fn)
+            assert os.path.exists(wrapper_fn)
 
-                # check that the wrapper scripts have the right lines in them
-                with open(wrapper_fn) as infile:
-                    lines = infile.readlines()
-                assert lines[0].strip() == "#!/bin/bash"
-                assert lines[1].strip() == "source ~/.bashrc"
-                assert lines[2].strip() == "conda activate hera"
-                assert lines[3].strip() == "date"
+            # check that the wrapper scripts have the right lines in them
+            with open(wrapper_fn) as infile:
+                lines = infile.readlines()
+            assert lines[0].strip() == "#!/bin/bash"
+            assert lines[1].strip() == "source ~/.bashrc"
+            assert lines[2].strip() == "conda activate hera"
+            assert lines[3].strip() == "date"
 
     # clean up after ourselves
     os.remove(outfile)
