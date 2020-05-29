@@ -56,7 +56,7 @@ then
     done
     input_cals="--input_cals ${input_cals[@]}"
     # if there's a calibration string, then the data files start at the 15th position
-    data_files=(${data_files[*]:14}) 
+    data_files=(${data_files[*]:14})
 else
    input_cals=""
    # if there's no calibration string, then they start at the 14th position
