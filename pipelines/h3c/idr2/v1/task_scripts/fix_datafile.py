@@ -33,7 +33,7 @@ for ind, jd in enumerate(unique_times):
     uv.uvw_array[inds] = ant_uvw[ant_sort][ant2_index, :] - ant_uvw[ant_sort][ant1_index, :]
 
 # Update history
-uv.history += f'\nData fixed to unflag all integrations, set nsamples to 1, and the correct uvw_array using the command:\n{' '.join(*sys.argv)}\n'
+uv.history += f'\n\nData fixed to unflag all integrations, set nsamples to 1, and the correct uvw_array using the command:\n{" ".join(*sys.argv)}\n\n'
 
 # Write results to disk
 uv.write_uvh5(args.outfile, clobber=True)
