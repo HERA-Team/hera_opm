@@ -9,7 +9,9 @@ import argparse
 import sys
 
 # Parse arguments
-a = argparse.ArgumentParser(description='Script for "fixing" H3C files to ensure that data is unflagged, nsamples = 1, and the uvws are correct given the antenna antenna_positions.')
+a = argparse.ArgumentParser(
+    description='Script for "fixing" H3C files to ensure that data is unflagged, nsamples = 1, and the uvws are correct given the antenna antenna_positions.'
+)
 a.add_argument("infile", help="Path to input pyuvdata-readable data file.")
 a.add_argument("outfile", help="Path to output uvh5 data file.")
 args = a.parse_args()
@@ -26,11 +28,17 @@ uv.nsample_array = np.ones_like(uv.nsample_array)
 unique_times = np.unique(uv.time_array)
 for ind, jd in enumerate(unique_times):
     inds = np.where(uv.time_array == jd)[0]
-    ant_uvw = utils.phase_uvw(uv.telescope_location_lat_lon_alt[1], uv.telescope_location_lat_lon_alt[0], uv.antenna_positions)
+    ant_uvw = utils.phase_uvw(
+        uv.telescope_location_lat_lon_alt[1],
+        uv.telescope_location_lat_lon_alt[0],
+        uv.antenna_positions,
+    )
     ant_sort = np.argsort(uv.antenna_numbers)
     ant1_index = np.searchsorted(uv.antenna_numbers[ant_sort], uv.ant_1_array[inds])
     ant2_index = np.searchsorted(uv.antenna_numbers[ant_sort], uv.ant_2_array[inds])
-    uv.uvw_array[inds] = ant_uvw[ant_sort][ant2_index, :] - ant_uvw[ant_sort][ant1_index, :]
+    uv.uvw_array[inds] = (
+        ant_uvw[ant_sort][ant2_index, :] - ant_uvw[ant_sort][ant1_index, :]
+    )
 
 # Update history
 uv.history += f'\n\nData fixed to unflag all integrations, set nsamples to 1, and the correct uvw_array using the command:\n{" ".join(sys.argv)}\n\n'
