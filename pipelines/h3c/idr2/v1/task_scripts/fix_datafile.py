@@ -7,6 +7,8 @@ import numpy as np
 from pyuvdata import UVData, utils
 import argparse
 import sys
+import os
+import shutil
 
 # Parse arguments
 a = argparse.ArgumentParser(
@@ -43,5 +45,10 @@ for ind, jd in enumerate(unique_times):
 # Update history
 uv.history += f'\n\nData fixed to unflag all integrations, set nsamples to 1, and the correct uvw_array using the command:\n{" ".join(sys.argv)}\n\n'
 
-# Write results to disk
-uv.write_uvh5(args.outfile, clobber=True)
+# Write results to disk, deleting infile if the infile and outfiles are the same (used for when the infile is a softlink)
+if args.infile == args.outfile:
+    try:
+        os.remove(args.infile)
+    except IsADirectoryError:
+        shutil.rmtree(args.infile)
+uv.write_uvh5(args.outfile)
