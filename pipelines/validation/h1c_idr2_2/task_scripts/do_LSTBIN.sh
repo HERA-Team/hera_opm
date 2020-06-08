@@ -43,6 +43,8 @@ data_files=($@)
 # if calibration suffix is not empty, parse it and apply it
 if [ ! -z "${calibration}" ]
 then
+    # if there's a calibration string, then the data files start at the 15th position
+    data_files=(${data_files[*]:14})
     # parse calibration suffix for each nested list in data_files
     input_cals=()
     for df in "${data_files[@]}"; do
@@ -55,8 +57,6 @@ then
         input_cals+=("$ic")
     done
     input_cals="--input_cals ${input_cals[@]}"
-    # if there's a calibration string, then the data files start at the 15th position
-    data_files=(${data_files[*]:14})
 else
    input_cals=""
    # if there's no calibration string, then they start at the 14th position
