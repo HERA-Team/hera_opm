@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2020 The HERA Collaboration
+# Licensed under the 2-clause BSD License
 """Tests for mf_tools.py."""
 import pytest
 import os
@@ -329,7 +331,6 @@ def test_determine_stride_partitioning(config_options):
     input_obsids = list(config_options["obsids_long_dummy_list"][:9])
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
-        "test",
         stride_length=1,
         n_time_neighbors=2,
         time_centered=True,
@@ -367,7 +368,7 @@ def test_determine_stride_partitioning_defaults(config_options):
     # run without specifying anything -- defaults to stride of 1 and 0 time
     # neighbors
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
-        input_obsids, "test", time_centered=True, collect_stragglers=False
+        input_obsids, time_centered=True, collect_stragglers=False
     )
     assert primary_obsids == input_obsids
     target_list = [input_obsids[idx : idx + 1] for idx in range(len(input_obsids))]
@@ -376,7 +377,6 @@ def test_determine_stride_partitioning_defaults(config_options):
     # run again with n_time_neighbors = 2
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
-        "test",
         n_time_neighbors=2,
         time_centered=True,
         collect_stragglers=False,
@@ -404,7 +404,6 @@ def test_determine_stride_partitioning_collect_stragglers(config_options):
     input_obsids = list(config_options["obsids_long_dummy_list"])
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
-        "test",
         stride_length=4,
         n_time_neighbors=3,
         time_centered=False,
@@ -436,18 +435,17 @@ def test_determine_stride_partitioning_errors(config_options):
         ValueError, match="stride_length must be able to be interpreted as an int"
     ):
         mt._determine_stride_partitioning(
-            input_obsids, "test", stride_length="foo", n_time_neighbors=1
+            input_obsids, stride_length="foo", n_time_neighbors=1
         )
 
     with pytest.raises(
         ValueError, match="n_time_neighbors must be able to be interpreted as an int"
     ):
-        mt._determine_stride_partitioning(input_obsids, "test", n_time_neighbors="foo")
+        mt._determine_stride_partitioning(input_obsids, n_time_neighbors="foo")
 
     with pytest.raises(ValueError, match="time_centered must be a boolean variable"):
         mt._determine_stride_partitioning(
             input_obsids,
-            "test",
             stride_length=1,
             n_time_neighbors=1,
             time_centered="False",
@@ -458,7 +456,6 @@ def test_determine_stride_partitioning_errors(config_options):
     ):
         mt._determine_stride_partitioning(
             input_obsids,
-            "test",
             stride_length=1,
             n_time_neighbors=1,
             time_centered=False,
@@ -473,7 +470,6 @@ def test_determine_stride_partitioning_noncontiguous_stragglers(config_options):
     input_obsids = list(config_options["obsids_long_dummy_list"])
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
-        "test",
         stride_length=10,
         n_time_neighbors=1,
         time_centered=False,

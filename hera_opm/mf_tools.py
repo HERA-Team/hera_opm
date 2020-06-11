@@ -345,7 +345,6 @@ def process_batch_options(
 
 def _determine_stride_partitioning(
     obsids,
-    action,
     stride_length=None,
     n_time_neighbors=None,
     time_centered=None,
@@ -356,8 +355,6 @@ def _determine_stride_partitioning(
     ----------
     obsids : list of str
         The list of obsids.
-    action : str
-        The current action.
     stride_length : int, optional
         Length of the stride. Default is 1.
     n_time_neighbors : int, optional
@@ -398,6 +395,7 @@ def _determine_stride_partitioning(
         time_centered = True
     if collect_stragglers is None:
         collect_stragglers = False
+    obsids = sort_obsids(obsids)
 
     try:
         n_time_neighbors = int(n_time_neighbors)
@@ -507,6 +505,8 @@ def prep_args(
         `args` string with mini-language substitutions.
 
     """
+    if obsids is not None:
+        obsids = sort_obsids(obsids)
     basename = obsid
     args = re.sub(r"\{basename\}", basename, args)
 
@@ -558,34 +558,18 @@ def prep_args(
             args = re.sub(r"\{next_basename\}", oids[obs_idx + 1], args)
 
     if re.search(r"\{obsid_list\}", args):
-        if time_centered is None:
-            time_centered = True
-        try:
-            n_time_neighbors = int(n_time_neighbors)
-        except ValueError:
-            raise ValueError(
-                "n_time_neighbors must be able to be interpreted as an int."
-            )
-        try:
-            stride_length = int(stride_length)
-        except ValueError:
-            raise ValueError("stride_length must be able to be interpreted as an int.")
-        obsids = sort_obsids(obsids)
-        obs_idx = obsids.index(obsid)
-        # Compute the number of remaining obsids to process.
-        # We account for the location of the next stride to determine if we
-        # should grab straggling obsids.
-        n_following = len(obsids) - (obs_idx + stride_length)
-        if time_centered:
-            i1 = max(obs_idx - n_time_neighbors, 0)
-        else:
-            i1 = obs_idx
-        i2 = min(obs_idx + n_time_neighbors + 1, len(obsids))
-        if n_following < (n_time_neighbors + 1) and collect_stragglers:
-            i2 = len(obsids)
-        print("i1, i2: ", i1, i2)
-        print("n_following: ", n_following)
-        file_list = " ".join(obsids[i1:i2])
+        _, per_obsid_primary_obsids = _determine_stride_partitioning(
+            obsids,
+            stride_length=stride_length,
+            n_time_neighbors=n_time_neighbors,
+            time_centered=time_centered,
+            collect_stragglers=collect_stragglers,
+        )
+        obsid_list = []
+        for obs, primary_obsids in zip(obsids, per_obsid_primary_obsids):
+            if obsid in primary_obsids:
+                obsid_list.append(obs)
+        file_list = " ".join(obsid_list)
         args = re.sub(r"\{obsid_list\}", file_list, args)
 
     return args
@@ -908,7 +892,6 @@ def build_analysis_makeflow_from_config(
                             per_obsid_primary_obsids,
                         ) = _determine_stride_partitioning(
                             sorted_obsids,
-                            action,
                             stride_length=stride_length,
                             n_time_neighbors=n_time_neighbors,
                             time_centered=time_centered,
@@ -990,23 +973,23 @@ def build_analysis_makeflow_from_config(
                             config, action, "time_centered", required=False
                         )
 
-                        for tp in prereqs:
+                        for prereq in prereqs:
                             try:
-                                workflow.index(tp)
+                                workflow.index(prereq)
                             except ValueError:
                                 raise ValueError(
                                     "Prereq {0} for action {1} not found in main "
-                                    "workflow".format(tp, action)
+                                    "workflow".format(prereq, action)
                                 )
                             # add neighbors
-                            tp_outfiles = make_time_neighbor_outfile_name(
+                            pr_outfiles = make_time_neighbor_outfile_name(
                                 filename,
-                                tp,
+                                prereq,
                                 obsids,
                                 n_time_neighbors,
                                 time_centered=time_centered,
                             )
-                            for of in tp_outfiles:
+                            for of in pr_outfiles:
                                 infiles.append(of)
 
                     # replace '{basename}' with actual filename
