@@ -870,6 +870,9 @@ def build_analysis_makeflow_from_config(
                     continue
                 if action == "TEARDOWN":
                     continue
+                prereqs = get_config_entry(
+                    config, action, "prereqs", required=False
+                )
                 stride_length = get_config_entry(
                     config,
                     action,
@@ -964,23 +967,9 @@ def build_analysis_makeflow_from_config(
 
                 # make rules
                 for outfile in outfiles:
-                    prereqs = get_config_entry(
-                        config, action, "prereqs", required=False
-                    )
                     if prereqs is not None:
                         if not isinstance(prereqs, list):
                             prereqs = [prereqs]
-                        # get how many neighbors we should be including
-                        n_time_neighbors = get_config_entry(
-                            config,
-                            action,
-                            "n_time_neighbors",
-                            required=False,
-                            total_length=len(obsids),
-                        )
-                        time_centered = get_config_entry(
-                            config, action, "time_centered", required=False
-                        )
 
                         for prereq in prereqs:
                             try:
