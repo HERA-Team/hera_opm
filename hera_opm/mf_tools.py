@@ -160,7 +160,7 @@ def make_outfile_name(obsid, action):
     return [f"{obsid}.{action}.out"]
 
 
-def sort_obsids(obsids, jd=None, return_basenames=True):
+def sort_obsids(obsids, jd=None, return_basenames=False):
     """
     Sort obsids in a given day.
 
@@ -172,7 +172,7 @@ def sort_obsids(obsids, jd=None, return_basenames=True):
         The Julian date to include in sorted obsids. If not provided, includes
         all obsids regardless of day.
     return_basenames : bool, optional
-        Whether to return only basenames of paths of obsids. Default is True.
+        Whether to return only basenames of paths of obsids. Default is False.
         If False, return full path as given in input.
 
     Returns
@@ -245,7 +245,7 @@ def make_time_neighbor_outfile_name(
     jd = get_jd(obsid)
 
     # find the neighbors of current obsid in list of obsids
-    obsids = sort_obsids(obsids, jd=jd)
+    obsids = sort_obsids(obsids, jd=jd, return_basenames=True)
 
     try:
         obs_idx = obsids.index(obsid)
