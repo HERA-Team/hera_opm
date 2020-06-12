@@ -966,39 +966,40 @@ def build_analysis_makeflow_from_config(
                 print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
                 # make rules
-                for outfile in outfiles:
-                    if prereqs is not None:
-                        if not isinstance(prereqs, list):
-                            prereqs = [prereqs]
+                if prereqs is not None:
+                    if not isinstance(prereqs, list):
+                        prereqs = [prereqs]
 
-                        for prereq in prereqs:
-                            try:
-                                workflow.index(prereq)
-                            except ValueError:
-                                raise ValueError(
-                                    "Prereq {0} for action {1} not found in main "
-                                    "workflow".format(prereq, action)
-                                )
-                            # add neighbors
-                            pr_outfiles = make_time_neighbor_outfile_name(
-                                filename,
-                                prereq,
-                                obsids,
-                                n_time_neighbors,
-                                time_centered=time_centered,
+                    for prereq in prereqs:
+                        try:
+                            workflow.index(prereq)
+                        except ValueError:
+                            raise ValueError(
+                                "Prereq {0} for action {1} not found in main "
+                                "workflow".format(prereq, action)
                             )
-                            for of in pr_outfiles:
-                                infiles.append(of)
+                        # add neighbors
+                        pr_outfiles = make_time_neighbor_outfile_name(
+                            filename,
+                            prereq,
+                            obsids,
+                            n_time_neighbors,
+                            time_centered=time_centered,
+                        )
+                        for of in pr_outfiles:
+                            infiles.append(of)
 
-                    # replace '{basename}' with actual filename
-                    prepped_args = prep_args(
-                        args,
-                        filename,
-                        obsids=obsids,
-                        n_time_neighbors=n_time_neighbors,
-                        time_centered=time_centered,
-                        collect_stragglers=collect_stragglers,
-                    )
+                # replace '{basename}' with actual filename
+                prepped_args = prep_args(
+                    args,
+                    filename,
+                    obsids=obsids,
+                    n_time_neighbors=n_time_neighbors,
+                    time_centered=time_centered,
+                    collect_stragglers=collect_stragglers,
+                )
+
+                for outfile in outfiles:
 
                     # make logfile name
                     # logfile will capture stdout and stderr
