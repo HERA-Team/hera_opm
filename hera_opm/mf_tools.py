@@ -981,14 +981,23 @@ def build_analysis_makeflow_from_config(
                                 "workflow".format(prereq, action)
                             )
                         # add neighbors
-                        pr_outfiles = make_time_neighbor_list(
+                        neighbors = make_time_neighbor_list(
                             filename,
-                            prereq,
+                            action,
                             obsids,
-                            n_time_neighbors,
+                            n_time_neighbors=n_time_neighbors,
                             time_centered=time_centered,
-                            outfiles=True,
                         )
+                        pr_outfiles = []
+                        key = prereq + "_per_obsid_primary_obsids"
+                        per_obsid_primary_obsids = _cache_dict[key]
+                        for oi, obs in enumerate(obsids):
+                            if obs in neighbors:
+                                for primary_obsid in per_obsid_primary_obsids[oi]:
+                                    if primary_obsid not in pr_outfiles:
+                                        pr_outfiles.append(primary_obsid)
+                        pr_outfiles = [make_outfile_name(pr_o, prereq)[0] for pr_o in pr_outfiles]
+
                         for of in pr_outfiles:
                             infiles.append(of)
 
