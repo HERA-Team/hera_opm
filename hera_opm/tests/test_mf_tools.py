@@ -174,53 +174,55 @@ def test_make_outfile_name(config_options):
     assert set(mt.make_outfile_name(obsid, action)) == outfiles
 
 
-def test_make_time_neighbor_outfile_name(config_options):
+def test_make_time_neighbor_list(config_options):
     # define args
     obsid = config_options["obsids"][1]
     action = "OMNICAL"
     obsids = config_options["obsids"]
     outfiles = [obs + ".OMNICAL.out" for obs in obsids[:3]]
     assert set(
-        mt.make_time_neighbor_outfile_name(
-            obsid, action, obsids=obsids, n_time_neighbors=1
+        mt.make_time_neighbor_list(
+            obsid, action, obsids=obsids, n_time_neighbors=1, outfiles=True
         )
     ) == set(outfiles)
 
     # test asking for "all" neighbors
     assert set(
-        mt.make_time_neighbor_outfile_name(
-            obsid, action, obsids, n_time_neighbors="all"
+        mt.make_time_neighbor_list(
+            obsid, action, obsids, n_time_neighbors="all", outfiles=True
         )
     ) == set(outfiles)
 
     # test edge cases
     obsid = obsids[0]
     assert set(
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids, n_time_neighbors=1)
+        mt.make_time_neighbor_list(obsid, action, obsids, n_time_neighbors=1,
+                                   outfiles=True)
     ) == set(outfiles[:2])
     obsid = obsids[2]
     assert set(
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids, n_time_neighbors=1)
+        mt.make_time_neighbor_list(obsid, action, obsids, n_time_neighbors=1,
+                                   outfiles=True)
     ) == set(outfiles[1:])
 
 
-def test_make_time_neighbor_outfile_name_errors(config_options):
+def test_make_time_neighbor_list_errors(config_options):
     # test not having the obsid in the supplied list
     obsid = "zen.1234567.12345.xx.HH.uvcA"
     action = "OMNICAL"
     obsids = config_options["obsids"]
     with pytest.raises(ValueError):
-        mt.make_time_neighbor_outfile_name(obsid, action, obsids)
+        mt.make_time_neighbor_list(obsid, action, obsids)
 
     # test passing in nonsense for all_neighbors
     with pytest.raises(ValueError):
-        mt.make_time_neighbor_outfile_name(
+        mt.make_time_neighbor_list(
             obsids[0], action, obsids, n_time_neighbors="blah"
         )
 
     # test passing in a negative number of neighbors
     with pytest.raises(ValueError):
-        mt.make_time_neighbor_outfile_name(
+        mt.make_time_neighbor_list(
             obsids[0], action, obsids, n_time_neighbors="-1"
         )
 

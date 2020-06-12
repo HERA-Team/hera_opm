@@ -199,8 +199,8 @@ def sort_obsids(obsids, jd=None, return_basenames=False):
     return sorted_obsids
 
 
-def make_time_neighbor_outfile_name(
-    obsid, action, obsids, n_time_neighbors=None, time_centered=None
+def make_time_neighbor_list(
+    obsid, action, obsids, n_time_neighbors=None, time_centered=None, outfiles=False
 ):
     """
     Make a list of neighbors in time for prereqs.
@@ -221,11 +221,14 @@ def make_time_neighbor_outfile_name(
         Whether the provided obsid should be in the center of the neighbors.
         If True (default), returns n_time_neighbors on either side of obsid.
         If False, returns original obsid _and_ n_time_neighbors following.
+    outfiles : bool, optional
+        Whether to return outfile names instead of the obsids themselves.
 
     Returns
     -------
-    outfiles : list of str
-        A list of files for time-adjacent neighbors.
+    neighbors : list of str
+        A list of obsids or files (depending on outfile keyword) for
+        time-adjacent neighbors.
 
     Raises
     ------
@@ -239,7 +242,7 @@ def make_time_neighbor_outfile_name(
         time_centered = True
     if n_time_neighbors is None:
         n_time_neighbors = "0"
-    outfiles = []
+    neighbors = []
 
     # extract the integer JD of the current file
     jd = get_jd(obsid)
@@ -269,12 +272,12 @@ def make_time_neighbor_outfile_name(
 
     # build list of output files to wait for
     for i in range(i0, i1):
-        outfiles.append(obsids[i])
+        neighbors.append(obsids[i])
 
     # finalize the names of files
-    outfiles = [f"{of}.{action}.out" for of in outfiles]
+    neighbors = [make_outfile_name(of, action)[0] for of in neighbors]
 
-    return outfiles
+    return neighbors
 
 
 def process_batch_options(
@@ -894,37 +897,36 @@ def build_analysis_makeflow_from_config(
                     config, action, "collect_stragglers", required=False
                 )
 
-                if n_time_neighbors is not None:
-                    key1 = action + "_primary_obsids"
-                    key2 = action + "_per_obsid_primary_obsids"
-                    if key1 not in _cache_dict.keys():
-                        (
-                            primary_obsids,
-                            per_obsid_primary_obsids,
-                        ) = _determine_stride_partitioning(
-                            sorted_obsids,
-                            stride_length=stride_length,
-                            n_time_neighbors=n_time_neighbors,
-                            time_centered=time_centered,
-                            collect_stragglers=collect_stragglers,
-                        )
-                        _cache_dict[key1] = primary_obsids
-                        _cache_dict[key2] = per_obsid_primary_obsids
-                    else:
-                        # fetch items from cache dict
-                        primary_obsids = _cache_dict[key1]
-                        per_obsid_primary_obsids = _cache_dict[key2]
+                key1 = action + "_primary_obsids"
+                key2 = action + "_per_obsid_primary_obsids"
+                if key1 not in _cache_dict.keys():
+                    (
+                        primary_obsids,
+                        per_obsid_primary_obsids,
+                    ) = _determine_stride_partitioning(
+                        sorted_obsids,
+                        stride_length=stride_length,
+                        n_time_neighbors=n_time_neighbors,
+                        time_centered=time_centered,
+                        collect_stragglers=collect_stragglers,
+                    )
+                    _cache_dict[key1] = primary_obsids
+                    _cache_dict[key2] = per_obsid_primary_obsids
+                else:
+                    # fetch items from cache dict
+                    primary_obsids = _cache_dict[key1]
+                    per_obsid_primary_obsids = _cache_dict[key2]
 
-                    if obsid not in primary_obsids:
-                        # add obsid's primary obsids to list of previous
-                        # outfiles and continue
-                        outfiles_prev = []
-                        for oi_list in per_obsid_primary_obsids:
-                            for oi in oi_list:
-                                outfiles_prev.extend(make_outfile_name(oi, action))
-                        outfiles_prev = list(set(outfiles_prev))
+                if obsid not in primary_obsids:
+                    # add obsid's primary obsids to list of previous
+                    # outfiles and continue
+                    outfiles_prev = []
+                    for oi_list in per_obsid_primary_obsids:
+                        for oi in oi_list:
+                            outfiles_prev.extend(make_outfile_name(oi, action))
+                    outfiles_prev = list(set(outfiles_prev))
 
-                        continue
+                    continue
 
                 # start list of input files
                 infiles = []
@@ -979,12 +981,13 @@ def build_analysis_makeflow_from_config(
                                 "workflow".format(prereq, action)
                             )
                         # add neighbors
-                        pr_outfiles = make_time_neighbor_outfile_name(
+                        pr_outfiles = make_time_neighbor_list(
                             filename,
                             prereq,
                             obsids,
                             n_time_neighbors,
                             time_centered=time_centered,
+                            outfiles=True,
                         )
                         for of in pr_outfiles:
                             infiles.append(of)
