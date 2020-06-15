@@ -222,8 +222,8 @@ def make_time_neighbor_list(
         Whether the provided obsid should be in the center of the neighbors.
         If True (default), returns n_time_neighbors on either side of obsid.
         If False, returns original obsid _and_ n_time_neighbors following.
-    stride_length : int, optional
-        Length of the stride. Default is 1.
+    stride_length : str, optional
+        Length of the stride. Default is "1".
     collect_stragglers : bool, optional
         When the list of files to work on is not divided evenly by the
         combination of stride_length and n_time_neighbors, this option specifies
@@ -251,7 +251,7 @@ def make_time_neighbor_list(
     if n_time_neighbors is None:
         n_time_neighbors = "0"
     if stride_length is None:
-        stride_length = 1
+        stride_length = "1"
     if collect_stragglers is None:
         collect_stragglers = False
     neighbors = []
@@ -281,10 +281,10 @@ def make_time_neighbor_list(
         # get n_time_neighbors before and after; make sure we don't have an IndexError
         i0 = max(obs_idx - time_centered * n_time_neighbors, 0)
         i1 = min(obs_idx + n_time_neighbors + 1, len(obsids))
-        n_following = len(obsids) - (obs_idx + stride_length)
+        n_following = len(obsids) - (obs_idx + int(stride_length))
         if n_following < (n_time_neighbors + 1) and collect_stragglers:
             # see _determine_stride_partitioning() for more explanation
-            gap = (stride_length - 1) - n_time_neighbors * (1 + time_centered)
+            gap = (int(stride_length) - 1) - n_time_neighbors * (1 + time_centered)
             if gap > 0:
                 warnings.warn(
                     "Collecting stragglers is incompatible with gaps between "
