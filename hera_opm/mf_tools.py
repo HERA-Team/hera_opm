@@ -298,7 +298,8 @@ def make_time_neighbor_list(
         neighbors.append(obsids[i])
 
     # finalize the names of files
-    neighbors = [make_outfile_name(of, action)[0] for of in neighbors]
+    if outfiles:
+        neighbors = [make_outfile_name(of, action)[0] for of in neighbors]
 
     return neighbors
 
@@ -1018,7 +1019,7 @@ def build_analysis_makeflow_from_config(
                         key = prereq + "_per_obsid_primary_obsids"
                         per_obsid_primary_obsids = _cache_dict[key]
                         for oi, obs in enumerate(obsids):
-                            if obs in neighbors:
+                            if os.path.basename(obs) in neighbors:
                                 for primary_obsid in per_obsid_primary_obsids[oi]:
                                     if primary_obsid not in pr_outfiles:
                                         pr_outfiles.append(primary_obsid)
