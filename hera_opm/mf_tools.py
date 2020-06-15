@@ -595,6 +595,7 @@ def prep_args(
         )
         obsid_list = []
         for obs, primary_obsids in zip(obsids, per_obsid_primary_obsids):
+            primary_obsids = [os.path.basename(pobs) for pobs in primary_obsids]
             if obsid in primary_obsids:
                 obsid_list.append(obs)
         file_list = " ".join(obsid_list)
