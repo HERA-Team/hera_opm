@@ -200,7 +200,8 @@ def sort_obsids(obsids, jd=None, return_basenames=False):
 
 
 def make_time_neighbor_list(
-    obsid, action, obsids, n_time_neighbors=None, time_centered=None, outfiles=False
+    obsid, action, obsids, n_time_neighbors=None, time_centered=None,
+    stride_length=None, collect_stragglers=None, outfiles=False
 ):
     """
     Make a list of neighbors in time for prereqs.
@@ -221,6 +222,13 @@ def make_time_neighbor_list(
         Whether the provided obsid should be in the center of the neighbors.
         If True (default), returns n_time_neighbors on either side of obsid.
         If False, returns original obsid _and_ n_time_neighbors following.
+    stride_length : int, optional
+        Length of the stride. Default is 1.
+    collect_stragglers : bool, optional
+        When the list of files to work on is not divided evenly by the
+        combination of stride_length and n_time_neighbors, this option specifies
+        whether to include the straggler files into the last group (True) or
+        treat them as their own small group (False, default).
     outfiles : bool, optional
         Whether to return outfile names instead of the obsids themselves.
 
@@ -242,6 +250,10 @@ def make_time_neighbor_list(
         time_centered = True
     if n_time_neighbors is None:
         n_time_neighbors = "0"
+    if stride_length is None:
+        stride_length = 1
+    if collect_stragglers is None:
+        collect_stragglers = False
     neighbors = []
 
     # extract the integer JD of the current file
@@ -269,8 +281,19 @@ def make_time_neighbor_list(
         # get n_time_neighbors before and after; make sure we don't have an IndexError
         i0 = max(obs_idx - time_centered * n_time_neighbors, 0)
         i1 = min(obs_idx + n_time_neighbors + 1, len(obsids))
+        n_following = len(obsids) - (obs_idx + stride_length)
+        if n_following < (n_time_neighbors + 1) and collect_stragglers:
+            # see _determine_stride_partitioning() for more explanation
+            gap = (stride_length - 1) - n_time_neighbors * (1 + time_centered)
+            if gap > 0:
+                warnings.warn(
+                    "Collecting stragglers is incompatible with gaps between "
+                    "consecutive strides. Not collecting stragglers..."
+                )
+            else:
+                i1 = len(obsids)
 
-    # build list of output files to wait for
+    # build list of neighbors
     for i in range(i0, i1):
         neighbors.append(obsids[i])
 
@@ -987,6 +1010,8 @@ def build_analysis_makeflow_from_config(
                             obsids,
                             n_time_neighbors=n_time_neighbors,
                             time_centered=time_centered,
+                            stride_length=stride_length,
+                            collect_stragglers=collect_stragglers,
                         )
                         pr_outfiles = []
                         key = prereq + "_per_obsid_primary_obsids"
