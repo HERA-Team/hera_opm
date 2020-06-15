@@ -948,6 +948,7 @@ def build_analysis_makeflow_from_config(
                     outfiles_prev = []
                     for oi_list in per_obsid_primary_obsids:
                         for oi in oi_list:
+                            oi = os.path.basename(oi)
                             outfiles_prev.extend(make_outfile_name(oi, action))
                     outfiles_prev = list(set(outfiles_prev))
 
@@ -1026,7 +1027,7 @@ def build_analysis_makeflow_from_config(
                         pr_outfiles = [make_outfile_name(pr_o, prereq)[0] for pr_o in pr_outfiles]
 
                         for of in pr_outfiles:
-                            infiles.append(of)
+                            infiles.append(os.path.basename(of))
 
                 # replace '{basename}' with actual filename
                 prepped_args = prep_args(
