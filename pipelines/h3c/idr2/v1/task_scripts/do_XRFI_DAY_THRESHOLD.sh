@@ -16,5 +16,5 @@ source ${src_dir}/_common.sh
 
 data_files="${@:5}"
 
-echo xrfi_day_threshold_run.py ${data_files} --nsig_f=${2} --nsig_t=${3} --nsig_f_adj=${4} --nsig_t_adj=${5} --clobber --run_if_first ${fn}
-xrfi_day_threshold_run.py ${data_files} --nsig_f=${2} --nsig_t=${3} --nsig_f_adj=${4} --nsig_t_adj=${5} --clobber --run_if_first ${fn}
+echo xrfi_day_threshold_run.py --nsig_f=${1} --nsig_t=${2} --nsig_f_adj=${3} --nsig_t_adj=${4} --clobber ${data_files}
+xrfi_day_threshold_run.py --nsig_f=${1} --nsig_t=${2} --nsig_f_adj=${3} --nsig_t_adj=${4} --clobber ${data_files}

@@ -28,5 +28,5 @@ for data_file in ${data_files[@]}; do
   model_files=${model_files}${data_file%.*}.omni_vis.uvh5' '
 done
 
-echo xrfi_h3c_idr2_1_run.py --ocalfits_files=${ocalfits_files} --acalfits_files=${acalfits_files} --model_files=${model_files} --data_files=${data_files} --kt_size=${1} --kf_size=${2} --sig_init=${3} --sig_adj=${4} --clobber
-xrfi_h3c_idr2_1_run.py --ocalfits_files=${ocalfits_files} --acalfits_files=${acalfits_files} --model_files=${model_files} --data_files=${data_files} --kt_size=${1} --kf_size=${2} --sig_init=${3} --sig_adj=${4} --clobber
+echo xrfi_h3c_idr2_1_run.py --ocalfits_files ${ocalfits_files} --acalfits_files ${acalfits_files} --model_files ${model_files} --data_files ${data_files} --kt_size=${1} --kf_size=${2} --sig_init=${3} --sig_adj=${4} --clobber
+xrfi_h3c_idr2_1_run.py --ocalfits_files ${ocalfits_files} --acalfits_files ${acalfits_files} --model_files ${model_files} --data_files ${data_files} --kt_size=${1} --kf_size=${2} --sig_init=${3} --sig_adj=${4} --clobber
