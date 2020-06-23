@@ -115,7 +115,6 @@ args = "{basename}"
 
 [MAKE_REDCAL_NOTEBOOK]
 prereqs = "REDCAL"
-time_prereqs = "REDCAL"
 n_time_neighbors = "all"
 mem = 128000
 args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
@@ -129,8 +128,6 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 [XRFI]
 mem = 96000
 prereqs = "ABSCAL"
-mem = 64000
-time_prereqs = "ABSCAL"
 args = ["${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
         "${XRFI_OPTS:sig_adj}", "{obsid_list}"]
 # xrfi will drop data within kt_size of time edge. Total integrations read in
@@ -146,7 +143,6 @@ collect_stragglers = true
 
 [XRFI_DAY_THRESHOLD]
 prereqs = "XRFI"
-time_prereqs = "XRFI"
 args = ["${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
         "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}",
         "{obsid_list}"]
@@ -156,7 +152,6 @@ time_centered = false
 
 [CAL_SMOOTH]
 prereqs = "XRFI_DAY_THRESHOLD"
-time_prereqs = "XRFI_DAY_THRESHOLD"
 n_time_neighbors = "all"
 mem = 128000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
@@ -166,26 +161,22 @@ args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_s
 
 [UPDATE_OMNISOL]
 prereqs = "CAL_SMOOTH"
-time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
 args = ["{basename}"]
 
 [NOISE]
 prereqs = "CAL_SMOOTH"
-time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
 args = ["{basename}"]
 
 [IMAGING]
 prereqs = "CAL_SMOOTH"
-time_prereqs = "CAL_SMOOTH"
 n_time_neighbors = "all"
 mem = 96000
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
 
 [MAKE_NOTEBOOK]
 prereqs = "ANT_METRICS"
-time_prereqs = "ANT_METRICS"
 n_time_neighbors = "all"
 mem = 128000
 args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
