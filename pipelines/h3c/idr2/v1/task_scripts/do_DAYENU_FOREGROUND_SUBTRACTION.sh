@@ -15,7 +15,7 @@
 fn="${1}"
 calibration="${2}"
 nbls_partial="${3}"
-output_label="${4}"
+label="${4}"
 spw0="${5}"
 spw1="${6}"
 tol="${7}"
@@ -24,7 +24,7 @@ cache_dir="${9}"
 # get julian day from file name
 jd=$(get_jd ${fn})
 # generate output file name
-fn_out = ${jd}.${output_label}.dayenu_delay_resid.ch${spw0}_${spw1}.uvh5
+fn_out = zen.${jd}.${label}.foreground_filtered.sum.uvh5
 # if cache directory does not exist, make it
 if [ ! -d "${cache_dir}" ]; then
   mkdir ${cache_dir}

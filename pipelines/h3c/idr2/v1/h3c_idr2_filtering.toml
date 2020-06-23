@@ -74,13 +74,27 @@ calibration = "smooth_abs.calfits"
 
 [DELAY_OPTS]
 nbls_partial = 1
-output_label = "tol_1e-9.standoff_200"
+label = "default"
 spw0 = 0
 spw1 = 250
 tol = 1e-9
 standoff = 200
-cache_dir = "/lustre/aoc/projects/hera/aoc/aewallwi/filter_cache/"
+cache_dir = "/lustre/aoc/projects/hera/aewallwi/filter_cache/"
 calibration = "smooth_abs.calfits"
+
+# we may want to consider another flagging round after delay filtering.
+
+[XTALK_OPTS]
+label = "default"
+frmax0 = 0.024 # max_frate = frmax0 * bl_len + frmax1
+frmax1 = -0.229
+tol = 1e-9
+cache_dir = "/lustre/aoc/projects/hera/aewallwi/filter_cache/"
+
+# Reconstitute the xtalk waterfalls. 
+
+[XTALK_RECONSTITUTE_OPTS]
+label = "default"
 
 
 
@@ -190,5 +204,19 @@ args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
 prereqs = "CAL_SMOOTH"
 chunk_size = "all"
 mem = 64000
-args = ["{basename}", "${DELAY_OPTS:calibration}", "${DELAY_OPTS:nbls_partial}", "${DELAY_OPTS:output_label}",
+args = ["{basename}", "${DELAY_OPTS:calibration}", "${DELAY_OPTS:nbls_partial}", "${DELAY_OPTS:label}",
         "${DELAY_OPTS:spw0}", "${DELAY_OPTS:spw1}", "${DELAY_OPTS:tol}", "${DELAY_OPTS:standoff}", "${DELAY_OPTS:cache_dir}"]
+
+[XTALK]
+prereqs = "DELAY"
+time_prereqs = "DELAY"
+n_time_neighbors = "all"
+mem = 64000
+args = ["{basename}", "${XTALK_OPTS:label}", "${XTALK_OPTS:tol}",
+        "${XTALK_OPTS:frmax0}", "${XTALK_OPTS:frmax1}", "${XTALK_OPTS:cache_dir}"]
+
+[XTALK_RECONSTITUTE]
+prereqs = "XTALK"
+time_prereqs = "all"
+mem = 64000
+args = ["{basename}", "${XTALK_RECONSTITUTE_OPTS:label}"]
