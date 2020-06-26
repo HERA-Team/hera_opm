@@ -91,7 +91,7 @@ frmax1 = -0.229
 tol = 1e-9
 cache_dir = "/lustre/aoc/projects/hera/aewallwi/filter_cache/"
 
-# Reconstitute the xtalk waterfalls. 
+# Reconstitute the xtalk waterfalls.
 
 [XTALK_RECONSTITUTE_OPTS]
 label = "default"
