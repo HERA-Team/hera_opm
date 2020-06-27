@@ -117,7 +117,7 @@ actions = [#"FIX_DATAFILE",
            "IMAGING",
            "DELAY",
            "XTALK",
-           "XTALK_RECONSTITUTE", 
+           "XTALK_RECONSTITUTE",
            "MAKE_NOTEBOOK"]
 
 [FIX_DATAFILE]
@@ -220,5 +220,6 @@ args = ["{basename}", "${XTALK_OPTS:label}", "${XTALK_OPTS:tol}",
 [XTALK_RECONSTITUTE]
 prereqs = "XTALK"
 time_prereqs = "all"
+n_time_neighbors = "all"
 mem = 64000
 args = ["{basename}", "${XTALK_RECONSTITUTE_OPTS:label}"]
