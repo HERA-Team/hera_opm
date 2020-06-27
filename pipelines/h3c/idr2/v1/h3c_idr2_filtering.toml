@@ -115,7 +115,9 @@ actions = [#"FIX_DATAFILE",
            "UPDATE_OMNISOL",
            "NOISE",
            "IMAGING",
-           "DAYENU_FOREGROUND_SUBTRACTION"
+           "DELAY",
+           "XTALK",
+           "XTALK_RECONSTITUTE", 
            "MAKE_NOTEBOOK"]
 
 [FIX_DATAFILE]
