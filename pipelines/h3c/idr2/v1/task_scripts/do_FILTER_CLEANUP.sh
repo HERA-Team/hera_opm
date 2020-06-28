@@ -6,14 +6,14 @@ src_dir="$(dirname "$0")"
 source ${src_dir}/_common.sh
 
 #the args are
-# 1 - input file name 
-# 2 - clear the cache containing xtalk cache files
-# 3 - clear the cache containing delay cache files
-# 4 - xtalk cache path
-# 5 - delay cache path
+# 1 - input file name.
+# 2 - clear the cache containing xtalk cache files.
+# 3 - clear the cache containing delay cache files.
+# 4 - xtalk cache path.
+# 5 - delay cache path.
 # 6 - clear the delay filtered (but not xtalk filtered) files.
 # 7 - label of xtalk filtered intermediate files.
-# 8 - label of delay filtered intermediate files. 
+# 8 - label of delay filtered intermediate files.
 
 # define input arguments
 fn="${1}"
@@ -56,6 +56,3 @@ then
 	rm -rfv ${delay_cache}
     fi
 fi
-
-
-    

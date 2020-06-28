@@ -15,7 +15,7 @@ source ${src_dir}/_common.sh
 # 5 - spw0 lower channel to process.
 # 6 - spw1 upper channel to process.
 # 7 - tol level to subtract foregrounds too
-# 8 - standoff delay standoff in ns for filtering window
+# 8 - standoff delay standoff in ns for filtering window.
 # 9 - cache_dir, directory to store cache files in.
 fn="${1}"
 calibration="${2}"
