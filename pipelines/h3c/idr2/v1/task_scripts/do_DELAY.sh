@@ -1,4 +1,9 @@
 #! /bin/bash
+set -e
+
+#import common functions
+src_dir="$(dirname "$0")"
+source ${src_dir}/_common.sh
 
 # Parameters are set in the configuration file, here we define their positions,
 # which must be consistent with the config.
@@ -22,19 +27,19 @@ tol="${7}"
 standoff="${8}"
 cache_dir="${9}"
 # get julian day from file name
-jd=$(get_jd ${fn})
+jd=$(get_jd $fn)
 # generate output file name
-fn_out = zen.${jd}.${label}.foreground_filtered.sum.uvh5
+fn_out=zen.${jd}.${label}.foreground_filtered.sum.uvh5
 # if cache directory does not exist, make it
 if [ ! -d "${cache_dir}" ]; then
   mkdir ${cache_dir}
 fi
-cal_file="${filename%.uvh5}.${calibration}"
+calfile=${fn%.uvh5}.${calibration}
 
-echo dayenu_delay_filter_run.py --calfile ${calfile} --partial_load_Nbls ${nbls_partial} \
+echo dayenu_delay_filter_run.py ${fn} --calfile ${calfile} --partial_load_Nbls ${nbls_partial} \
   --res_outfilename ${fn_out} --clobber --spw_range ${spw0} ${spw1} \
   --tol ${tol} --cache_dir ${cache_dir} --standoff ${standoff}
 
-dayenu_delay_filter_run.py --calfile ${calfile} --partial_load_Nbls ${nbls_partial} \
+dayenu_delay_filter_run.py ${fn} --calfile ${calfile} --partial_load_Nbls ${nbls_partial} \
     --res_outfilename ${fn_out} --clobber --spw_range ${spw0} ${spw1} \
     --tol ${tol} --cache_dir ${cache_dir} --standoff ${standoff}
