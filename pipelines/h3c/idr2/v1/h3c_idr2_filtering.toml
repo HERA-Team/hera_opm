@@ -219,7 +219,14 @@ args = ["{basename}", "${XTALK_OPTS:label}", "${XTALK_OPTS:tol}",
 
 [XTALK_RECONSTITUTE]
 prereqs = "XTALK"
-time_prereqs = "all"
+time_prereqs = "XTALK"
 n_time_neighbors = "all"
 mem = 64000
 args = ["{basename}", "${XTALK_RECONSTITUTE_OPTS:label}"]
+
+[CLEANUP]
+prereqs = "XTALK_RECONSTITUTE"
+time_prereqs = "all"
+n_time_neighbors = "all"
+mem = 64000
+args = ["{basename}"]
