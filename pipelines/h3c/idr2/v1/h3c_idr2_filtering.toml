@@ -73,7 +73,7 @@ casa_imaging_scripts = "/users/heramgr/hera_software/casa_imaging/scripts"
 calibration = "smooth_abs.calfits"
 
 [DELAY_OPTS]
-nbls_partial = 1
+nbls_partial = 50
 label = "default"
 spw0 = 0
 spw1 = 250
@@ -96,6 +96,10 @@ cache_dir = "/lustre/aoc/projects/hera/aewallwi/filter_cache/"
 [XTALK_RECONSTITUTE_OPTS]
 label = "default"
 
+[FILTER_CLEANUP_OPTS]
+clear_xtalk_cache = False
+clear_delay_cache = False
+clear_delay = False
 
 
 
@@ -118,6 +122,7 @@ actions = [#"FIX_DATAFILE",
            "DELAY",
            "XTALK",
            "XTALK_RECONSTITUTE",
+	   "FILTER_CLEANUP",
            "MAKE_NOTEBOOK"]
 
 [FIX_DATAFILE]
@@ -224,9 +229,10 @@ n_time_neighbors = "all"
 mem = 64000
 args = ["{basename}", "${XTALK_RECONSTITUTE_OPTS:label}"]
 
-[CLEANUP]
+[FILTER_CLEANUP]
 prereqs = "XTALK_RECONSTITUTE"
 time_prereqs = "all"
 n_time_neighbors = "all"
 mem = 64000
-args = ["{basename}"]
+args = ["{basename}", "${FILTER_CLEANUP_OPTS:clear_xtalk_cache}", "${FILTER_CLEANUP_OPTS:clear_delay_cache}", "${XTALK_OPTS:cache_dir}", "${DELAY_OPTS:cache_dir}",
+       		      "${FILTER_CLEANUP_OPTS:clear_delay}", "${XTALK_OPTS:label}", "${DELAY_OPTS:label}"]

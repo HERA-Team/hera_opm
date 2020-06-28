@@ -38,8 +38,8 @@ calfile=${fn%.uvh5}.${calibration}
 
 echo dayenu_delay_filter_run.py ${fn} --calfile ${calfile} --partial_load_Nbls ${nbls_partial} \
   --res_outfilename ${fn_out} --clobber --spw_range ${spw0} ${spw1} \
-  --tol ${tol} --cache_dir ${cache_dir} --standoff ${standoff}
+  --tol ${tol} --cache_dir ${cache_dir} --standoff ${standoff} --write_cache --read_cache
 
 dayenu_delay_filter_run.py ${fn} --calfile ${calfile} --partial_load_Nbls ${nbls_partial} \
     --res_outfilename ${fn_out} --clobber --spw_range ${spw0} ${spw1} \
-    --tol ${tol} --cache_dir ${cache_dir} --standoff ${standoff}
+    --tol ${tol} --cache_dir ${cache_dir} --standoff ${standoff} --write_cache --read_cache
