@@ -4,7 +4,7 @@ path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/t
 source_script = "~/.bashrc"
 conda_env = "python3"
 ex_ants_path = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/bad_ants"
-base_mem = 16000
+base_mem = 32000
 base_cpu = 1
 timeout = "24h"
 
@@ -144,7 +144,7 @@ args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD
 prereqs = "XRFI_DAY_THRESHOLD"
 time_prereqs = "XRFI_DAY_THRESHOLD"
 n_time_neighbors = "all"
-mem = 64000
+mem = 128000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
         "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}",
