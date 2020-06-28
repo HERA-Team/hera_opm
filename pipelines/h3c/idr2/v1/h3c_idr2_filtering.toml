@@ -73,7 +73,6 @@ casa_imaging_scripts = "/users/heramgr/hera_software/casa_imaging/scripts"
 calibration = "smooth_abs.calfits"
 
 [DELAY_OPTS]
-nbls_partial = 50
 label = "default"
 spw0 = 0
 spw1 = 250
@@ -211,8 +210,9 @@ args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
 prereqs = "CAL_SMOOTH"
 chunk_size = "all"
 mem = 64000
-args = ["{basename}", "${DELAY_OPTS:calibration}", "${DELAY_OPTS:nbls_partial}", "${DELAY_OPTS:label}",
-        "${DELAY_OPTS:spw0}", "${DELAY_OPTS:spw1}", "${DELAY_OPTS:tol}", "${DELAY_OPTS:standoff}", "${DELAY_OPTS:cache_dir}"]
+args = ["{basename}", "${DELAY_OPTS:calibration}", "${DELAY_OPTS:label}",
+        "${DELAY_OPTS:spw0}", "${DELAY_OPTS:spw1}", "${DELAY_OPTS:tol}",
+        "${DELAY_OPTS:standoff}", "${DELAY_OPTS:cache_dir}"]
 
 [XTALK]
 prereqs = "DELAY"
