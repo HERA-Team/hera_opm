@@ -231,7 +231,7 @@ args = ["{basename}", "${XTALK_RECONSTITUTE_OPTS:label}"]
 
 [FILTER_CLEANUP]
 prereqs = "XTALK_RECONSTITUTE"
-time_prereqs = "all"
+time_prereqs = "XTALK_RECONSTITUTE"
 n_time_neighbors = "all"
 mem = 64000
 args = ["{basename}", "${FILTER_CLEANUP_OPTS:clear_xtalk_cache}", "${FILTER_CLEANUP_OPTS:clear_delay_cache}", "${XTALK_OPTS:cache_dir}", "${DELAY_OPTS:cache_dir}",
