@@ -35,10 +35,10 @@ data_files=`echo zen.${int_jd}.*.${label}.foreground_filtered.uvh5`
 
 
 echo xtalk_dayenu_filter_run_baseline_parallelized.py ${fn} --tol ${tol} \
- --max_frate_coeffs ${fc0} ${fc1} --cache_dir ${cache_dir} --res_outfilename ${fn_out} \
+ --max_frate_coeffs ${frc0} ${frc1} --cache_dir ${cache_dir} --res_outfilename ${fn_out} \
  --clobber --datafilelist ${data_files} #--write_cache --read_cache
 
 
  xtalk_dayenu_filter_run_baseline_parallelized.py ${fn} --tol ${tol} \
-  --max_frate_coeffs ${fc0} ${fc1} --cache_dir ${cache_dir} --res_outfilename ${fn_out} \
+  --max_frate_coeffs ${frc0} ${frc1} --cache_dir ${cache_dir} --res_outfilename ${fn_out} \
   --clobber --datafilelist ${data_files} #--write_cache --read_cache
