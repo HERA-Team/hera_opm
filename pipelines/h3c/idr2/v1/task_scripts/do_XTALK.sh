@@ -24,8 +24,8 @@ cache_dir="${6}"
 jd=$(get_jd $fn)
 int_jd=${jd:0:7}
 # generate output file name
-fn = zen.${jd}.${label}.foreground_filtered.uvh5
-fn_out = zen.${jd}.${label}.xtalk_filtered_waterfall.uvh5
+fn=zen.${jd}.${label}.foreground_filtered.uvh5
+fn_out=zen.${jd}.${label}.xtalk_filtered_waterfall.uvh5
 # if cache directory does not exist, make it
 if [ ! -d "${cache_dir}" ]; then
   mkdir ${cache_dir}
