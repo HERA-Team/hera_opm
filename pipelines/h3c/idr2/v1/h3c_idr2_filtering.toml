@@ -53,6 +53,9 @@ nsig_f = 7.0
 nsig_t = 7.0
 nsig_f_adj = 3.0
 nsig_t_adj = 3.0
+separable_flags = "true"
+freq_threshold = 0.02
+time_threshold = 0.15
 
 [CAL_SMOOTH_OPTS]
 freq_scale = 10
@@ -66,6 +69,12 @@ freq_threshold = 1.0
 time_threshold = 1.0
 ant_threshold = 0.5
 lst_blacklists = "2.5-4.3 6.5-9.5"
+
+
+
+#[LAZY_CAL_SMOOTH_OPTS]
+#freq_scale = 50
+#ref_lst = 5.0 #LST in hours to use for reference calibration.
 
 [IMAGING_OPTS]
 casa = "/home/casa/packages/RHEL7/release/casa-release-5.1.0-68/bin/casa"
@@ -168,12 +177,13 @@ mem = 64000
 args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
         "${XRFI_OPTS:sig_adj}"]
 
-
 [XRFI_DAY_THRESHOLD]
 prereqs = "XRFI"
 chunk_size = "all"
 args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
-        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}"]
+        "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}",
+        "${XRFI_DAY_THRESHOLD_OPTS:separable_flags}", "${XRFI_DAY_THRESHOLD_OPTS:freq_threshold}",
+        "${XRFI_DAY_THRESHOLD_OPTS:time_threshold}"]
 
 [CAL_SMOOTH]
 prereqs = "XRFI_DAY_THRESHOLD"
@@ -183,6 +193,13 @@ args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_s
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
         "${CAL_SMOOTH_OPTS:maxiter}", "${CAL_SMOOTH_OPTS:alpha}", "${CAL_SMOOTH_OPTS:freq_threshold}",
         "${CAL_SMOOTH_OPTS:time_threshold}", "${CAL_SMOOTH_OPTS:ant_threshold}", "${CAL_SMOOTH_OPTS:lst_blacklists}"]
+
+#[LAZY_CAL_SMOOTH]
+#prepreqs = "XRFI_DAY_THRESHOLD"
+#time_prereqs = "XRFI_DAY_THRESHOLD"
+#n_time_neighbors = "all"
+#mem = 64000
+#args = ["{basename}", "${LAZY_CAL_SMOOTH_OPTS:freq_scale}", "${LAZY_CAL_SMOOTH_OPTS:ref_lst}"]
 
 [UPDATE_OMNISOL]
 prereqs = "CAL_SMOOTH"
