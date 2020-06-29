@@ -11,7 +11,7 @@ source ${src_dir}/_common.sh
 # 1 - template file name (template for time chunk to reconstitute).
 # 2 - output label for identifying file.
 
-${templatefile}="${1}"
+templatefile="${1}"
 label="${2}"
 
 jd=$(get_jd $fn_in)
