@@ -26,7 +26,7 @@ cache_dir="${8}"
 # get julian day from file name
 jd=$(get_jd $fn)
 # generate output file name
-fn_out=zen.${jd}.${label}.foreground_filtered.sum.uvh5
+fn_out=zen.${jd}.${label}.foreground_filtered.uvh5
 # if cache directory does not exist, make it
 if [ ! -d "${cache_dir}" ]; then
   mkdir ${cache_dir}

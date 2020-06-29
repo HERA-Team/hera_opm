@@ -26,8 +26,8 @@ xtalk_label="${7}"
 delay_label="${8}"
 
 # clear the xtalk fragment file.
-xtalk_fn=zen.${jd}.${xtalk_label}.xtalk_filtered_waterfall.sum.uvh5
-delay_fn=zen.${jd}.${delay_label}.foreground_filtered.sum.uvh5
+xtalk_fn=zen.${jd}.${xtalk_label}.xtalk_filtered_waterfall.uvh5
+delay_fn=zen.${jd}.${delay_label}.foreground_filtered.uvh5
 
 # remove per-baseline xtalk waterfall files.
 echo rm -rfv ${xtalk_fn}
