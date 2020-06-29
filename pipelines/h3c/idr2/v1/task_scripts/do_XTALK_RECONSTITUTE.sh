@@ -14,7 +14,7 @@ source ${src_dir}/_common.sh
 templatefile="${1}"
 label="${2}"
 
-jd=$(get_jd $fn_in)
+jd=$(get_jd $templatefile)
 int_jd=${jd:0:7}
 # generate output file name
 outfilename=zen.${jd}.${label}.xtalk_filtered.uvh5
