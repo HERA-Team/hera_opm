@@ -200,8 +200,14 @@ def sort_obsids(obsids, jd=None, return_basenames=False):
 
 
 def make_time_neighbor_list(
-    obsid, action, obsids, n_time_neighbors=None, time_centered=None,
-    stride_length=None, collect_stragglers=None, return_outfiles=False
+    obsid,
+    action,
+    obsids,
+    n_time_neighbors=None,
+    time_centered=None,
+    stride_length=None,
+    collect_stragglers=None,
+    return_outfiles=False,
 ):
     """
     Make a list of neighbors in time for prereqs.
@@ -898,9 +904,7 @@ def build_analysis_makeflow_from_config(
                     continue
                 if action == "TEARDOWN":
                     continue
-                prereqs = get_config_entry(
-                    config, action, "prereqs", required=False
-                )
+                prereqs = get_config_entry(config, action, "prereqs", required=False)
                 stride_length = get_config_entry(
                     config,
                     action,
@@ -1024,7 +1028,9 @@ def build_analysis_makeflow_from_config(
                                 for primary_obsid in per_obsid_primary_obsids[oi]:
                                     if primary_obsid not in pr_outfiles:
                                         pr_outfiles.append(primary_obsid)
-                        pr_outfiles = [make_outfile_name(pr_o, prereq)[0] for pr_o in pr_outfiles]
+                        pr_outfiles = [
+                            make_outfile_name(pr_o, prereq)[0] for pr_o in pr_outfiles
+                        ]
 
                         for of in pr_outfiles:
                             infiles.append(os.path.basename(of))

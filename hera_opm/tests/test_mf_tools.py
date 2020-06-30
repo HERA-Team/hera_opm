@@ -196,13 +196,15 @@ def test_make_time_neighbor_list(config_options):
     # test edge cases
     obsid = obsids[0]
     assert set(
-        mt.make_time_neighbor_list(obsid, action, obsids, n_time_neighbors=1,
-                                   outfiles=True)
+        mt.make_time_neighbor_list(
+            obsid, action, obsids, n_time_neighbors=1, outfiles=True
+        )
     ) == set(outfiles[:2])
     obsid = obsids[2]
     assert set(
-        mt.make_time_neighbor_list(obsid, action, obsids, n_time_neighbors=1,
-                                   outfiles=True)
+        mt.make_time_neighbor_list(
+            obsid, action, obsids, n_time_neighbors=1, outfiles=True
+        )
     ) == set(outfiles[1:])
 
 
@@ -216,15 +218,11 @@ def test_make_time_neighbor_list_errors(config_options):
 
     # test passing in nonsense for all_neighbors
     with pytest.raises(ValueError):
-        mt.make_time_neighbor_list(
-            obsids[0], action, obsids, n_time_neighbors="blah"
-        )
+        mt.make_time_neighbor_list(obsids[0], action, obsids, n_time_neighbors="blah")
 
     # test passing in a negative number of neighbors
     with pytest.raises(ValueError):
-        mt.make_time_neighbor_list(
-            obsids[0], action, obsids, n_time_neighbors="-1"
-        )
+        mt.make_time_neighbor_list(obsids[0], action, obsids, n_time_neighbors="-1")
 
     return
 
@@ -383,10 +381,7 @@ def test_determine_stride_partitioning_defaults(config_options):
 
     # run again with n_time_neighbors = 2
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
-        input_obsids,
-        n_time_neighbors=2,
-        time_centered=True,
-        collect_stragglers=False,
+        input_obsids, n_time_neighbors=2, time_centered=True, collect_stragglers=False,
     )
     # the results should be the same as in test_determine_stride_partitioning
     assert primary_obsids == list(input_obsids[2:-2])
@@ -452,10 +447,7 @@ def test_determine_stride_partitioning_errors(config_options):
 
     with pytest.raises(ValueError, match="time_centered must be a boolean variable"):
         mt._determine_stride_partitioning(
-            input_obsids,
-            stride_length=1,
-            n_time_neighbors=1,
-            time_centered="False",
+            input_obsids, stride_length=1, n_time_neighbors=1, time_centered="False",
         )
 
     with pytest.raises(
