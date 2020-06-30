@@ -201,7 +201,7 @@ def sort_obsids(obsids, jd=None, return_basenames=False):
 
 def make_time_neighbor_list(
     obsid, action, obsids, n_time_neighbors=None, time_centered=None,
-    stride_length=None, collect_stragglers=None, outfiles=False
+    stride_length=None, collect_stragglers=None, return_outfiles=False
 ):
     """
     Make a list of neighbors in time for prereqs.
@@ -229,7 +229,7 @@ def make_time_neighbor_list(
         combination of stride_length and n_time_neighbors, this option specifies
         whether to include the straggler files into the last group (True) or
         treat them as their own small group (False, default).
-    outfiles : bool, optional
+    return_outfiles : bool, optional
         Whether to return outfile names instead of the obsids themselves.
 
     Returns
@@ -298,7 +298,7 @@ def make_time_neighbor_list(
         neighbors.append(obsids[i])
 
     # finalize the names of files
-    if outfiles:
+    if return_outfiles:
         neighbors = [make_outfile_name(of, action)[0] for of in neighbors]
 
     return neighbors
