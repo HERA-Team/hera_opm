@@ -27,8 +27,8 @@ oc_maxiter = 5000
 min_bl_cut = 15
 max_bl_cut = 100
 iter0_prefix = ".iter0"
-good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
-# good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok,known_bad,not_connected"
+# good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
+good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok,known_bad,not_connected"
 
 [ABSCAL_OPTS]
 model_files_glob = "'/lustre/aoc/projects/hera/zmartino/hera_calib_model/H3C/abscal_files_unique_baselines/zen.2458894.?????.uvh5'"
