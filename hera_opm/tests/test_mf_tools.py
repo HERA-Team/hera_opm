@@ -182,14 +182,14 @@ def test_make_time_neighbor_list(config_options):
     outfiles = [obs + ".OMNICAL.out" for obs in obsids[:3]]
     assert set(
         mt.make_time_neighbor_list(
-            obsid, action, obsids=obsids, n_time_neighbors=1, outfiles=True
+            obsid, action, obsids=obsids, n_time_neighbors=1, return_outfiles=True
         )
     ) == set(outfiles)
 
     # test asking for "all" neighbors
     assert set(
         mt.make_time_neighbor_list(
-            obsid, action, obsids, n_time_neighbors="all", outfiles=True
+            obsid, action, obsids, n_time_neighbors="all", return_outfiles=True
         )
     ) == set(outfiles)
 
@@ -197,13 +197,13 @@ def test_make_time_neighbor_list(config_options):
     obsid = obsids[0]
     assert set(
         mt.make_time_neighbor_list(
-            obsid, action, obsids, n_time_neighbors=1, outfiles=True
+            obsid, action, obsids, n_time_neighbors=1, return_outfiles=True
         )
     ) == set(outfiles[:2])
     obsid = obsids[2]
     assert set(
         mt.make_time_neighbor_list(
-            obsid, action, obsids, n_time_neighbors=1, outfiles=True
+            obsid, action, obsids, n_time_neighbors=1, return_outfiles=True
         )
     ) == set(outfiles[1:])
 
