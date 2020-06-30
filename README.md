@@ -46,7 +46,7 @@ and generate a single log file for all jobs in the makeflow.
 
 To install the `hera_opm` package, simply:
 ```
-python setup.py install
+pip install .
 ```
 
 As mentioned above, `hera_opm` uses `makeflow` as the backing pipeline management
@@ -90,10 +90,6 @@ file docs page](docs/config_files.md).
 # Testing
 
 `hera_opm` uses `pytest` as its testing framework. To run the test suite, do:
-```
-python setup.py test
-```
-or
 ```
 pytest
 ```

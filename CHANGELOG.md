@@ -6,8 +6,17 @@ analysis/lstbin pipelines and workflows.
 
 ## Unreleased
 
+## [1.1.0] - 2020-06-30
+
+### Added
+- Support for striding through files in time, rather than processing all files.
+
 ### Changed
+- `time_prereqs` renamed to `prereqs`. Other changes to config files are noted in the `docs` folder.
 - Use `flake8` instead of `pycodestyle` for style checks.
+
+### Removed
+- Support for polarization broken out into separate files.
 
 
 ## [1.0.0] - 2019-11-21
