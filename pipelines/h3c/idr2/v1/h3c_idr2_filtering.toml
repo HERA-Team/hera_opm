@@ -82,7 +82,7 @@ casa_imaging_scripts = "/users/heramgr/hera_software/casa_imaging/scripts"
 calibration = "smooth_abs.calfits"
 
 [DELAY_OPTS]
-label = "default"
+label = "sum"
 spw0 = 0
 spw1 = 250
 tol = 1e-9
@@ -93,7 +93,7 @@ calibration = "smooth_abs.calfits"
 # we may want to consider another flagging round after delay filtering.
 
 [XTALK_OPTS]
-label = "default"
+label = "sum"
 frmax0 = 0.024 # max_frate = frmax0 * bl_len + frmax1
 frmax1 = -0.229
 tol = 1e-9
@@ -102,7 +102,7 @@ cache_dir = "/lustre/aoc/projects/hera/aewallwi/filter_cache/"
 # Reconstitute the xtalk waterfalls.
 
 [XTALK_RECONSTITUTE_OPTS]
-label = "default"
+label = "sum"
 
 [FILTER_CLEANUP_OPTS]
 clear_xtalk_cache = False
