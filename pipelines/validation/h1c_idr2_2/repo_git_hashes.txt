@@ -1,0 +1,6 @@
+hera_cal: 4de89cf07db96dc684ebdd67cb1f6fba363ebb2b
+hera_qm: 92674044d39a7649d7cb598a922ca4d494c7f768
+pyuvdata: 7543347ea10852f249e63d17297712781a1cdcdb
+uvtools: 071f04521b7a0270a7059ac99a91df9a6f3800aa
+
+conda environment: h1c_idr2_2_validation

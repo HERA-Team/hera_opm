@@ -1,0 +1,43 @@
+[Options]
+makeflow_type = "lstbin"
+path_to_do_scripts = "/users/heramgr/hera_software/hera_opm/pipelines/h1c/idr2/v2/task_scripts"
+source_script = "~/.bashrc"
+conda_env = "hera3"
+base_mem = 64000
+base_cpu = 4
+timeout = "48h"
+pbs_mail_user = "jsdillon+nrao@berkeley.edu"
+
+[LSTBIN_OPTS]
+sig_clip = "True"
+Nbls_to_load = 140
+sigma = 5
+min_N = 5
+rephase = "True"
+ntimes_per_file = 60
+dlst = 0.001565970008
+lst_start = 0.0
+fixed_lst_start = "True"
+vis_units = "Jy"
+parallelize = "True"
+file_ext = "grp2.of2.{type}.{time:7.5f}.HH.OCRSL.uvh5"
+outdir = "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/LSTBIN/two_group/grp2"
+parent_dir = "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/LSTBIN/two_group/grp2"
+data_files = ["/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/2458099/zen.2458099.*.HH.uvh5",
+             "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/2458102/zen.2458102.*.HH.uvh5",
+             "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/2458104/zen.2458104.*.HH.uvh5",
+             "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/2458106/zen.2458106.*.HH.uvh5",
+             "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/2458108/zen.2458108.*.HH.uvh5",
+             "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/2458110/zen.2458110.*.HH.uvh5",
+             "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/2458112/zen.2458112.*.HH.uvh5",
+             "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/2458114/zen.2458114.*.HH.uvh5",
+             "/lustre/aoc/projects/hera/H1C_IDR2/IDR2_2/2458116/zen.2458116.*.HH.uvh5"]
+calibration = "smooth_abs.calfits"
+
+[WorkFlow]
+actions = ["LSTBIN"]
+
+[LSTBIN]
+args = ["sig_clip", "sigma", "min_N", "rephase", "ntimes_per_file", "lst_start",
+        "fixed_lst_start", "dlst", "vis_units", "output_file_select", "file_ext",
+        "outdir", "Nbls_to_load", "calibration"]

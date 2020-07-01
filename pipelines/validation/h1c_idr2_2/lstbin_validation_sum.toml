@@ -1,0 +1,44 @@
+[Options]
+makeflow_type = "lstbin"
+path_to_do_scripts = "/lustre/aoc/projects/hera/Validation/test-4.0.0/hera_software/hera_opm/pipelines/validation/h1c_idr2_2/task_scripts"
+source_script = "~/.bashrc"
+conda_env = "h1c_idr2_2_validation"
+base_mem = 32000
+base_cpu = 2
+timeout = "48h"
+pbs_mail_user = "jsdillon+nrao@berkeley.edu"
+
+[LSTBIN_OPTS]
+sig_clip = "True"
+Nbls_to_load = 100
+sigma = 5
+min_N = 5
+rephase = "True"
+ntimes_per_file = 60
+dlst = 0.001565970008
+lst_start = 0.0
+fixed_lst_start = "True"
+vis_units = "Jy"
+parallelize = "True"
+file_ext = "grp1.of1.{type}.{time:7.5f}.HH.OCRSL.uvh5"
+outdir = "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/LSTBIN/sum"
+parent_dir = "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/LSTBIN/sum"
+data_files = ["/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458098_sum/zen.2458098.*.sum.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458099_sum/zen.2458099.*.sum.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458101_sum/zen.2458101.*.sum.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458102_sum/zen.2458102.*.sum.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458103_sum/zen.2458103.*.sum.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458106_sum/zen.2458106.*.sum.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458107_sum/zen.2458107.*.sum.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458108_sum/zen.2458108.*.sum.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458110_sum/zen.2458110.*.sum.corrupt.uvh5",
+              "/lustre/aoc/projects/hera/Validation/test-4.0.0/pipeline/2458111_sum/zen.2458111.*.sum.corrupt.uvh5"]
+calibration = "smooth_abs.calfits"
+
+[WorkFlow]
+actions = ["LSTBIN"]
+
+[LSTBIN]
+args = ["sig_clip", "sigma", "min_N", "rephase", "ntimes_per_file", "lst_start",
+        "fixed_lst_start", "dlst", "vis_units", "output_file_select", "file_ext",
+        "outdir", "Nbls_to_load", "calibration"]

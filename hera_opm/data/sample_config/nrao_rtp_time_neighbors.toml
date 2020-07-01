@@ -4,7 +4,6 @@
 
 [Options]
 makeflow_type = "analysis"
-pols = ["xx", "xy", "yx", "yy"]
 path_to_do_scripts = "~/hera/hera_op/hera_op/data/sample_task_scripts"
 conda_env = "hera"
 ex_ants = "~/hera/hera_cal/hera_cal/calibrations/herahex_ex_ants.txt"
@@ -30,12 +29,13 @@ args = ["{basename}", "${Options:ex_ants}"]
 
 [OMNICAL_METRICS]
 prereqs = "OMNICAL"
-time_prereqs = "OMNICAL"
 n_time_neighbors = 1
 args = ["{basename}", "{prev_basename}", "{next_basename}"]
 
 [OMNI_APPLY]
 prereqs = "OMNICAL_METRICS"
+n_time_neighbors = 1
+stride_length = 2
 args = "{basename}"
 
 [XRFI]

@@ -21,8 +21,7 @@ def get_jd(filename):
     ----------
     filename : str
         File name. Assumed to follow standard convention where name is
-        `zen.xxxxxxx.xxxxx.uv` (potentially with polarization and subarray
-        information mixed in).
+        `zen.xxxxxxx.xxxxx.uv`.
 
     Returns
     -------
@@ -72,7 +71,9 @@ def _interpolate_config(config, entry):
         return entry
 
 
-def get_config_entry(config, header, item, required=True, interpolate=True):
+def get_config_entry(
+    config, header, item, required=True, interpolate=True, total_length=1
+):
     """Extract a specific entry from config file.
 
     Parameters
@@ -82,7 +83,7 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
     header : str
         The entry in a config file to get the item of, e.g., 'OMNICAL'.
     item : str
-        The attribute to retreive, e.g., 'prereqs'.
+        The attribute to retreive, e.g., 'mem'.
     required : bool
         Whether the attribute is required or not. If required and not present,
         an error is raised. Default is True.
@@ -91,12 +92,18 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
         config file. Interpolation is triggered by a string with the template
         "${header:item}". If the corresponding key is not defined in that part
         of the config file, an error is raised. Default is True.
+    total_length : int, optional
+        If this parameter belongs to the special group of
+        [stride_length, n_time_neighbors],
+        the entry will be further parsed to interpret 'all', and be replaced
+        with (total_length - 1) // 2 if time_centered is True (default) or
+        with (total_length - 1) if time_centered is False.
 
     Returns
     -------
     entries : list of str
         List of entries contained in the config file. If item is not present, and
-        required is False, an empty list is returned.
+        required is False, None is returned.
 
     Raises
     ------
@@ -113,6 +120,15 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
                     entries[i] = _interpolate_config(config, entry)
             else:
                 entries = _interpolate_config(config, entries)
+        if item in ["stride_length", "n_time_neighbors"]:
+            time_centered = get_config_entry(
+                config, header, "time_centered", required=False
+            )
+            if entries == "all":
+                if time_centered or time_centered is None:
+                    entries = str((total_length - 1) // 2)
+                else:
+                    entries = str(total_length - 1)
         return entries
     except KeyError:
         if not required:
@@ -124,7 +140,7 @@ def get_config_entry(config, header, item, required=True, interpolate=True):
             )
 
 
-def make_outfile_name(obsid, action, pol_list=[]):
+def make_outfile_name(obsid, action):
     """Make a list of unique output files names for each stage and polarization.
 
     Parameters
@@ -133,31 +149,66 @@ def make_outfile_name(obsid, action, pol_list=[]):
         The obsid of the file.
     action : str
         The action corresponding to the output name.
-    pol_list : list of str
-        List denoting polarizations in files; if an empty list,
-        then all polarizations in a single file is assumed. (Default empty list)
 
     Returns
     -------
     outfiles : list of str
         A list of files that represent output produced for `action`
-        corresponding to `obsid`. For multiple polarizations, contains one
-        string per polarization. For one or no polarizations, just a list with
-        a single entry is returned.
+        corresponding to `obsid`.
 
     """
-    outfiles = []
-    if len(pol_list) > 1 and pol_list[0] is not None:
-        for pol in pol_list:
-            of = "{0}.{1}.{2}.out".format(obsid, action, pol)
-            outfiles.append(of)
-    else:
-        of = "{0}.{1}.out".format(obsid, action)
-        outfiles.append(of)
-    return outfiles
+    return [f"{obsid}.{action}.out"]
 
 
-def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors="1"):
+def sort_obsids(obsids, jd=None, return_basenames=False):
+    """
+    Sort obsids in a given day.
+
+    Parameters
+    ----------
+    obsids : list or tuple of str
+        A list of all obsids to be sorted.
+    jd : str, optional
+        The Julian date to include in sorted obsids. If not provided, includes
+        all obsids regardless of day.
+    return_basenames : bool, optional
+        Whether to return only basenames of paths of obsids. Default is False.
+        If False, return full path as given in input.
+
+    Returns
+    -------
+    sortd_obsids : list of str
+        Obsids (basename or absolute path), sorted by filename for given Julian day.
+    """
+    if jd is None:
+        jd = ""
+    # need to get just the filename, and just ones on the same day
+    keys = [
+        os.path.basename(os.path.abspath(o))
+        for o in obsids
+        if jd in os.path.basename(os.path.abspath(o))
+    ]
+    to_sort = list(zip(keys, range(len(obsids))))
+    temp = sorted(to_sort, key=lambda obs: obs[0])
+    argsort = [obs[1] for obs in temp]
+
+    sorted_obsids = [obsids[i] for i in argsort]
+    if return_basenames:
+        sorted_obsids = [os.path.basename(obsid) for obsid in sorted_obsids]
+
+    return sorted_obsids
+
+
+def make_time_neighbor_list(
+    obsid,
+    action,
+    obsids,
+    n_time_neighbors=None,
+    time_centered=None,
+    stride_length=None,
+    collect_stragglers=None,
+    return_outfiles=False,
+):
     """
     Make a list of neighbors in time for prereqs.
 
@@ -166,78 +217,97 @@ def make_time_neighbor_outfile_name(obsid, action, obsids, pol=None, n_neighbors
     obsid : str
         The obsid of the current file.
     action : str
-        The action corresponding to the time prereqs.
+        The action corresponding to the prereqs.
     obsids : list of str
         A list of all obsids for the given day; uses this list (sorted) to
         define neighbors
-    pol : str, optional
-        If present, polarization string to specify for output file.
-    n_neighbors : str
+    n_time_neighbors : str
         Number of neighboring time files to append to list. If set to the
-        string "all", then all neighbors from that JD are added.
+        string "all", then all neighbors from that JD are added. Default is "0"
+    time_centered : bool, optional
+        Whether the provided obsid should be in the center of the neighbors.
+        If True (default), returns n_time_neighbors on either side of obsid.
+        If False, returns original obsid _and_ n_time_neighbors following.
+    stride_length : str, optional
+        Length of the stride. Default is "1".
+    collect_stragglers : bool, optional
+        When the list of files to work on is not divided evenly by the
+        combination of stride_length and n_time_neighbors, this option specifies
+        whether to include the straggler files into the last group (True) or
+        treat them as their own small group (False, default).
+    return_outfiles : bool, optional
+        Whether to return outfile names instead of the obsids themselves.
 
     Returns
     -------
-    outfiles : list of str
-        A list of files for time-adjacent neighbors.
+    neighbors : list of str
+        A list of obsids or files (depending on outfile keyword) for
+        time-adjacent neighbors.
 
     Raises
     ------
     ValueError
         Raised if the specified obsid is not present in the full list, if
-        `n_neighbors` cannot be parsed as an int, or if `n_neighbors` is
-        not positive.
+        `n_time_neighbors` cannot be parsed as an int, or if `n_time_neighbors`
+        is negative.
 
     """
-    outfiles = []
+    if time_centered is None:
+        time_centered = True
+    if n_time_neighbors is None:
+        n_time_neighbors = "0"
+    if stride_length is None:
+        stride_length = "1"
+    if collect_stragglers is None:
+        collect_stragglers = False
+    neighbors = []
 
     # extract the integer JD of the current file
     jd = get_jd(obsid)
 
     # find the neighbors of current obsid in list of obsids
-    # need to get just the filename, and just ones on the same day
-    obsids = sorted(
-        [
-            os.path.basename(os.path.abspath(o))
-            for o in obsids
-            if jd in os.path.basename(os.path.abspath(o))
-        ]
-    )
+    obsids = sort_obsids(obsids, jd=jd, return_basenames=True)
+
     try:
         obs_idx = obsids.index(obsid)
     except ValueError:
         raise ValueError("obsid {} not found in list of obsids".format(obsid))
 
-    if n_neighbors == "all":
+    if n_time_neighbors == "all":
         i0 = 0
         i1 = len(obsids)
     else:
         # assume we got an integer as a string; try to make sense of it
         try:
-            n_neighbors = int(n_neighbors)
+            n_time_neighbors = int(n_time_neighbors)
         except ValueError:
-            raise ValueError("n_neighbors must be parsable as an int")
-        if n_neighbors <= 0:
-            raise ValueError("n_neighbors must be a postitive integer")
-        # get n_neighbors before and after; make sure we don't have an IndexError
-        i0 = max(obs_idx - n_neighbors, 0)
-        i1 = min(obs_idx + n_neighbors + 1, len(obsids))
+            raise ValueError("n_time_neighbors must be parsable as an int")
+        if n_time_neighbors < 0:
+            raise ValueError("n_time_neighbors must be an integer >= 0.")
+        # get n_time_neighbors before and after; make sure we don't have an IndexError
+        i0 = max(obs_idx - time_centered * n_time_neighbors, 0)
+        i1 = min(obs_idx + n_time_neighbors + 1, len(obsids))
+        n_following = len(obsids) - (obs_idx + int(stride_length))
+        if n_following < (n_time_neighbors + 1) and collect_stragglers:
+            # see _determine_stride_partitioning() for more explanation
+            gap = (int(stride_length) - 1) - n_time_neighbors * (1 + time_centered)
+            if gap > 0:
+                warnings.warn(
+                    "Collecting stragglers is incompatible with gaps between "
+                    "consecutive strides. Not collecting stragglers..."
+                )
+            else:
+                i1 = len(obsids)
 
-    # build list of output files to wait for
+    # build list of neighbors
     for i in range(i0, i1):
-        outfiles.append(obsids[i])
+        neighbors.append(obsids[i])
 
     # finalize the names of files
-    if pol is None:
-        for i, of in enumerate(outfiles):
-            of = "{0}.{1}.out".format(of, action)
-            outfiles[i] = of
-    else:
-        for i, of in enumerate(outfiles):
-            of = "{0}.{1}.{2}.out".format(of, action, pol)
-            outfiles[i] = of
+    if return_outfiles:
+        neighbors = [make_outfile_name(of, action)[0] for of in neighbors]
 
-    return outfiles
+    return neighbors
 
 
 def process_batch_options(
@@ -308,42 +378,172 @@ def process_batch_options(
     return batch_options
 
 
-def prep_args(args, obsid, pol=None, obsids=None):
+def _determine_stride_partitioning(
+    obsids,
+    stride_length=None,
+    n_time_neighbors=None,
+    time_centered=None,
+    collect_stragglers=None,
+):
     """
-    Substitute the polarization string in a filename/obsid with the specified one.
+    Parameters
+    ----------
+    obsids : list of str
+        The list of obsids.
+    stride_length : int, optional
+        Length of the stride. Default is 1.
+    n_time_neighbors : int, optional
+        Number of time neighbors. Optional, default is 0.
+    time_centered : bool, optional
+        Whether to center the obsid and select n_time_neighbors on either side,
+        returning a total of 2 * n_time_neighbors + 1 obsids (True, default), or
+        a group starting with the selected obsid and a total of length
+        n_time_neighbors + 1 (False).
+    collect_stragglers : bool, optional
+        When the list of files to work on is not divided evenly by the
+        combination of stride_length and n_time_neighbors, this option specifies
+        whether to include the straggler files into the last group (True) or
+        treat them as their own small group (False, default).
+
+    Returns
+    -------
+    primary_obsids : list of str
+        A list of obsids that consist of the "primary" obsids for the current
+        action, given the quantities specified. This list contains all obsids
+        that will "do work" this action, in the sense that they will run a "do"
+        script.
+    per_obsid_primary_obsids : list of list of str
+        A list of length `len(obsids)` that contains a list of "primary obsids"
+        for each entry. It is assumed that these primary obsids must be
+        completed for the current action before running the next action in the
+        workflow. An obsid may have itself as a primary obsid (e.g., if
+        stride_length == 1, then each obsid will have itself, as well as its
+        time neighbors, as primary obsids). If `stride_length` and
+        `n_time_neighbors` are such that there are obsids that do not belong to
+        any group, then the value is an empty list.
+    """
+    if stride_length is None:
+        stride_length = 1
+    if n_time_neighbors is None:
+        n_time_neighbors = 0
+    if time_centered is None:
+        time_centered = True
+    if collect_stragglers is None:
+        collect_stragglers = False
+    obsids = sort_obsids(obsids)
+
+    try:
+        n_time_neighbors = int(n_time_neighbors)
+    except ValueError:
+        raise ValueError("n_time_neighbors must be able to be interpreted as an int.")
+    try:
+        stride_length = int(stride_length)
+    except ValueError:
+        raise ValueError("stride_length must be able to be interpreted as an int.")
+    if type(time_centered) is not bool:
+        raise ValueError(
+            "time_centered must be a boolean variable. When written into the "
+            "config file, do *not* use quotation marks."
+        )
+    if type(collect_stragglers) is not bool:
+        raise ValueError(
+            "collect_stragglers must be a boolean variable. When written into "
+            "the config file, do *not* use quotation marks."
+        )
+
+    primary_obsids = []
+    per_obsid_primary_obsids = [[] for i in range(len(obsids))]
+
+    for idx in range(time_centered * n_time_neighbors, len(obsids), stride_length):
+        # Compute the number of remaining obsids to process.
+        # We account for the location of the next stride to determine if we
+        # should grab straggling obsids.
+        n_following = len(obsids) - (idx + stride_length)
+        if time_centered:
+            i1 = max(idx - n_time_neighbors, 0)
+        else:
+            i1 = idx
+        i2 = idx + n_time_neighbors + 1
+        # Check to see if i2 would be past the end of the array. If
+        # `collect_stragglers` is True, then we would have broken out of the
+        # loop on the iteration previous to the current one. Otherwise we drop
+        # the remaining obsids because there are insufficient time neighbors to
+        # make a full set.
+        if i2 > len(obsids):
+            break
+        if n_following < (n_time_neighbors + 1) and collect_stragglers:
+            # Figure out if any observations that would normally have been skipped
+            # will be lumped in by getting all remaining observations.
+            # "stride_length - 1" is the actual number of observations between
+            # current idx and next one given stride_length.
+            gap = (stride_length - 1) - n_time_neighbors * (1 + time_centered)
+            if gap > 0:
+                warnings.warn(
+                    "Collecting stragglers is incompatible with gaps between "
+                    "consecutive strides. Not collecting stragglers..."
+                )
+            else:
+                i2 = len(obsids)
+            primary_obsids.append(obsids[idx])
+            for i in range(i1, i2):
+                per_obsid_primary_obsids[i].append(obsids[idx])
+
+            # skip what would have been the last iteration, because we've
+            # collected the remaining obsids
+            break
+        # assign indices
+        primary_obsids.append(obsids[idx])
+        for i in range(i1, i2):
+            per_obsid_primary_obsids[i].append(obsids[idx])
+
+    return primary_obsids, per_obsid_primary_obsids
+
+
+def prep_args(
+    args,
+    obsid,
+    obsids=None,
+    n_time_neighbors="0",
+    stride_length="1",
+    time_centered=None,
+    collect_stragglers=None,
+):
+    """
+    Substitute mini-language in a filename/obsid.
 
     Parameters
     ----------
     args : str
-        String containing the arguments where polarization and mini-language is
+        String containing the arguments where mini-language is
         to be substituted.
     obsid : str
         Filename/obsid to be substituted.
-    pol : str, optional
-        Polarization to substitute for the one found in obsid.
     obsids : list of str, optional
         Full list of obsids. Required when time-adjacent neighbors are desired.
+    n_time_neighbors : str
+        Number of neighboring time files to append to list. If set to the
+        string "all", then all neighbors from that JD are added.
+    stride_length : str
+        Number of files to include in a stride. This interacts with
+        `n_time_neighbors` to define how arguments are generate.
+    time_centered : bool, optional
+        Whether the provided obsid should be in the center of the neighbors.
+        If True (default), returns n_time_neighbors on either side of obsid.
+        If False, returns original obsid _and_ n_time_neighbors following.
+    collect_stragglers : bool, optional
+        Whether to lump files close to the end of the list ("stragglers") into
+        the previous group, or belong to their own smaller group.
 
     Returns
     -------
     output : str
-        `args` string with mini-language and polarization substitutions.
+        `args` string with mini-language substitutions.
 
     """
-    if pol is not None:
-        # replace pol if present
-        match = re.search(r"zen\.\d{7}\.\d{5}\.(.*?)\.", obsid)
-        if match:
-            obs_pol = match.group(1)
-            basename = re.sub(obs_pol, pol, obsid)
-        else:
-            basename = obsid
-        # replace {basename} with actual basename
-        args = re.sub(r"\{basename\}", basename, args)
-
-    else:
-        basename = obsid
-        args = re.sub(r"\{basename\}", basename, args)
+    if obsids is not None:
+        obsids = sort_obsids(obsids)
+    basename = obsid
+    args = re.sub(r"\{basename\}", basename, args)
 
     # also replace time-adjacent basenames if requested
     if re.search(r"\{prev_basename\}", args):
@@ -391,6 +591,22 @@ def prep_args(args, obsid, pol=None, obsids=None):
             args = re.sub(r"\{next_basename\}", "None", args)
         else:
             args = re.sub(r"\{next_basename\}", oids[obs_idx + 1], args)
+
+    if re.search(r"\{obsid_list\}", args):
+        _, per_obsid_primary_obsids = _determine_stride_partitioning(
+            obsids,
+            stride_length=stride_length,
+            n_time_neighbors=n_time_neighbors,
+            time_centered=time_centered,
+            collect_stragglers=collect_stragglers,
+        )
+        obsid_list = []
+        for obs, primary_obsids in zip(obsids, per_obsid_primary_obsids):
+            primary_obsids = [os.path.basename(pobs) for pobs in primary_obsids]
+            if obsid in primary_obsids:
+                obsid_list.append(obs)
+        file_list = " ".join(obsid_list)
+        args = re.sub(r"\{obsid_list\}", file_list, args)
 
     return args
 
@@ -480,10 +696,6 @@ def build_analysis_makeflow_from_config(
 
     Raises
     ------
-    AssertionError
-        This is raised if a polarization list is specified, and no polarization
-        is detected for the input files, or if not all input obsids have the
-        same polarization.
     ValueError
         This is raised if the SETUP entry in the workflow is specified, but is
         not the first entry. Similarly, it is raised if the TEARDOWN is in the
@@ -505,39 +717,19 @@ def build_analysis_makeflow_from_config(
     "{basename}" = "zen.2458000.12345.uv"
 
     "{prev_basename}" and "{next_basename}" are previous and subsequent files
-    adjacent to "{basename}", useful for specifying prereqs in time
+    adjacent to "{basename}", useful for specifying prereqs
 
     """
+    # make a cache dictionary
+    _cache_dict = {}
+
+    # load config file
     config = toml.load(config_file)
     workflow = get_config_entry(config, "WorkFlow", "actions")
     # make workflow options uppercase
     workflow = [w.upper() for w in workflow]
 
     # get general options
-    pol_list = get_config_entry(config, "Options", "pols", required=False)
-    if pol_list is None:
-        # make a dummy list of length 1, to ensure we perform actions later
-        pol_list = [None]
-    else:
-        # make sure that we were only passed in a single polarization in our obsids
-        for i, obsid in enumerate(obsids):
-            match = re.search(r"zen\.\d{7}\.\d{5}\.(.*?)\.", obsid)
-            if match:
-                obs_pol = match.group(1)
-            else:
-                raise AssertionError(
-                    "Polarization not detected for input" " obsid {}".format(obsid)
-                )
-            for j in range(i + 1, len(obsids)):
-                obsid2 = obsids[j]
-                match2 = re.search(r"zen\.\d{7}\.\d{5}\.(.*?)\.", obsid2)
-                if match2:
-                    obs_pol2 = match2.group(1)
-                    if obs_pol != obs_pol2:
-                        raise AssertionError(
-                            "Polarizations do not match for"
-                            " obsids {} and {}".format(obsid, obsid2)
-                        )
     mandc_report = get_config_entry(config, "Options", "mandc_report", required=False)
 
     # make sure that SETUP and TEARDOWN are in the right spots, if they are in the workflow
@@ -555,6 +747,21 @@ def build_analysis_makeflow_from_config(
     else:
         if idx != len(workflow) - 1:
             raise ValueError("TEARDOWN must be last entry of workflow")
+
+    # Check for actions that use n_time_neighbors, make sure obsid_list is last arg
+    for action in workflow:
+        n_time_neighbors = get_config_entry(
+            config, action, "n_time_neighbors", required=False, total_length=len(obsids)
+        )
+        if n_time_neighbors is not None:
+            this_args = get_config_entry(config, action, "args", required=True)
+            if "{obsid_list}" in this_args:
+                bn_idx = this_args.index("{obsid_list}")
+                if bn_idx != len(this_args) - 1:
+                    raise ValueError(
+                        "{obsid_list} must be the last argument for action"
+                        f" {action} because n_time_neighbors is specified."
+                    )
 
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
@@ -585,7 +792,7 @@ def build_analysis_makeflow_from_config(
 
     # get the work directory
     if work_dir is None:
-        work_dir = os.getcwd()
+        work_dir = os.getcwd()  # pragma: no cover
     else:
         work_dir = os.path.abspath(work_dir)
     makeflowfile = os.path.join(work_dir, fn)
@@ -629,14 +836,12 @@ def build_analysis_makeflow_from_config(
             ncpu = get_config_entry(config, "SETUP", "ncpu", required=False)
             queue = get_config_entry(config, "SETUP", "queue", required=False)
             if queue is None:
-                queue = "hera"
+                queue = default_queue
             if mem is None:
                 mem = base_mem
             if ncpu is None:
                 if base_cpu is not None:
                     ncpu = base_cpu
-            if queue is None:
-                queue = default_queue
             batch_options = process_batch_options(
                 mem, ncpu, mail_user, queue, batch_system
             )
@@ -685,7 +890,8 @@ def build_analysis_makeflow_from_config(
             setup_outfiles = [outfile]
 
         # main loop over actual data files
-        for obsid in obsids:
+        sorted_obsids = sort_obsids(obsids, return_basenames=False)
+        for obsind, obsid in enumerate(sorted_obsids):
             # get parent directory
             abspath = os.path.abspath(obsid)
             parent_dir = os.path.dirname(abspath)
@@ -698,25 +904,62 @@ def build_analysis_makeflow_from_config(
                     continue
                 if action == "TEARDOWN":
                     continue
+                prereqs = get_config_entry(config, action, "prereqs", required=False)
+                stride_length = get_config_entry(
+                    config,
+                    action,
+                    "stride_length",
+                    required=False,
+                    total_length=len(obsids),
+                )
+                n_time_neighbors = get_config_entry(
+                    config,
+                    action,
+                    "n_time_neighbors",
+                    required=False,
+                    total_length=len(obsids),
+                )
+                time_centered = get_config_entry(
+                    config, action, "time_centered", required=False
+                )
+                collect_stragglers = get_config_entry(
+                    config, action, "collect_stragglers", required=False
+                )
+
+                key1 = action + "_primary_obsids"
+                key2 = action + "_per_obsid_primary_obsids"
+                if key1 not in _cache_dict.keys():
+                    (
+                        primary_obsids,
+                        per_obsid_primary_obsids,
+                    ) = _determine_stride_partitioning(
+                        sorted_obsids,
+                        stride_length=stride_length,
+                        n_time_neighbors=n_time_neighbors,
+                        time_centered=time_centered,
+                        collect_stragglers=collect_stragglers,
+                    )
+                    _cache_dict[key1] = primary_obsids
+                    _cache_dict[key2] = per_obsid_primary_obsids
+                else:
+                    # fetch items from cache dict
+                    primary_obsids = _cache_dict[key1]
+                    per_obsid_primary_obsids = _cache_dict[key2]
+
+                if obsid not in primary_obsids:
+                    # add obsid's primary obsids to list of previous
+                    # outfiles and continue
+                    outfiles_prev = []
+                    for oi_list in per_obsid_primary_obsids:
+                        for oi in oi_list:
+                            oi = os.path.basename(oi)
+                            outfiles_prev.extend(make_outfile_name(oi, action))
+                    outfiles_prev = list(set(outfiles_prev))
+
+                    continue
+
                 # start list of input files
                 infiles = []
-
-                # get dependencies
-                prereqs = get_config_entry(config, action, "prereqs", required=False)
-                if prereqs is not None:
-                    if not isinstance(prereqs, list):
-                        prereqs = [prereqs]
-                    for prereq in prereqs:
-                        try:
-                            workflow.index(prereq)
-                        except ValueError:
-                            raise ValueError(
-                                'Prereq "{0}" for action "{1}" not found in main '
-                                "workflow".format(prereq, action)
-                            )
-                        outfiles = make_outfile_name(filename, prereq, pol_list)
-                        for of in outfiles:
-                            infiles.append(of)
 
                 # add command to infile list
                 # this implicitly checks that do_{STAGENAME}.sh script exists
@@ -727,10 +970,7 @@ def build_analysis_makeflow_from_config(
                 # also add previous outfiles to input requirements
                 if ia > 0:
                     for of in outfiles_prev:
-                        # we might already have the output in the list if the
-                        # previous step is a prereq
-                        if of not in infiles:
-                            infiles.append(of)
+                        infiles.append(of)
 
                 # make argument list
                 args = get_config_entry(config, action, "args", required=False)
@@ -739,7 +979,7 @@ def build_analysis_makeflow_from_config(
                 args = " ".join(list(map(str, args)))
 
                 # make outfile name
-                outfiles = make_outfile_name(filename, action, pol_list)
+                outfiles = make_outfile_name(filename, action)
 
                 # get processing options
                 mem = get_config_entry(config, action, "mem", required=False)
@@ -758,46 +998,55 @@ def build_analysis_makeflow_from_config(
                 print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
                 # make rules
-                for pol, outfile in zip(pol_list, outfiles):
-                    time_prereqs = get_config_entry(
-                        config, action, "time_prereqs", required=False
-                    )
-                    if time_prereqs is not None:
-                        if not isinstance(time_prereqs, list):
-                            time_prereqs = [time_prereqs]
-                        # get how many neighbors we should be including
-                        n_neighbors = get_config_entry(
-                            config, action, "n_time_neighbors", required=True
+                if prereqs is not None:
+                    if not isinstance(prereqs, list):
+                        prereqs = [prereqs]
+
+                    for prereq in prereqs:
+                        try:
+                            workflow.index(prereq)
+                        except ValueError:
+                            raise ValueError(
+                                "Prereq {0} for action {1} not found in main "
+                                "workflow".format(prereq, action)
+                            )
+                        # add neighbors
+                        neighbors = make_time_neighbor_list(
+                            filename,
+                            action,
+                            obsids,
+                            n_time_neighbors=n_time_neighbors,
+                            time_centered=time_centered,
+                            stride_length=stride_length,
+                            collect_stragglers=collect_stragglers,
                         )
+                        pr_outfiles = []
+                        key = prereq + "_per_obsid_primary_obsids"
+                        per_obsid_primary_obsids = _cache_dict[key]
+                        for oi, obs in enumerate(obsids):
+                            if os.path.basename(obs) in neighbors:
+                                for primary_obsid in per_obsid_primary_obsids[oi]:
+                                    if primary_obsid not in pr_outfiles:
+                                        pr_outfiles.append(primary_obsid)
+                        pr_outfiles = [
+                            make_outfile_name(pr_o, prereq)[0] for pr_o in pr_outfiles
+                        ]
 
-                        # get a copy of the infile list; we're going to add to it, but don't want these
-                        # entries broadcast across pols
-                        infiles_pol = infiles
-                        for tp in time_prereqs:
-                            try:
-                                workflow.index(tp)
-                            except ValueError:
-                                raise ValueError(
-                                    'Time prereq "{0}" for action "{1}" not found in main '
-                                    "workflow".format(tp, action)
-                                )
-                            # add neighbors for all pols
-                            for pol2 in pol_list:
-                                tp_outfiles = make_time_neighbor_outfile_name(
-                                    filename, tp, obsids, pol2, n_neighbors
-                                )
-                                for of in tp_outfiles:
-                                    infiles_pol.append(of)
+                        for of in pr_outfiles:
+                            infiles.append(os.path.basename(of))
 
-                        # replace '{basename}' with actual filename
-                        # also replace polarization string, and time neighbors
-                        prepped_args = prep_args(args, filename, pol, obsids)
-                    else:
-                        # just get a copy of the infiles as-is
-                        infiles_pol = infiles
-                        # replace '{basename}' with actual filename
-                        # aslo replace polarization string
-                        prepped_args = prep_args(args, filename, pol)
+                # replace '{basename}' with actual filename
+                prepped_args = prep_args(
+                    args,
+                    filename,
+                    obsids=obsids,
+                    n_time_neighbors=n_time_neighbors,
+                    stride_length=stride_length,
+                    time_centered=time_centered,
+                    collect_stragglers=collect_stragglers,
+                )
+
+                for outfile in outfiles:
 
                     # make logfile name
                     # logfile will capture stdout and stderr
@@ -857,8 +1106,8 @@ def build_analysis_makeflow_from_config(
 
                     # first line lists target file to make (dummy output file), and requirements
                     # second line is "build rule", which runs the shell script and makes the output file
-                    infiles_pol = " ".join(infiles_pol)
-                    line1 = "{0}: {1}".format(outfile, infiles_pol)
+                    infiles = " ".join(infiles)
+                    line1 = "{0}: {1}".format(outfile, infiles)
                     line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
                     print(line1, file=f)
                     print(line2, file=f)
@@ -885,7 +1134,7 @@ def build_analysis_makeflow_from_config(
                 abspath = os.path.abspath(obsid)
                 parent_dir = os.path.dirname(abspath)
                 filename = os.path.basename(abspath)
-                outfiles = make_outfile_name(filename, prereq, pol_list)
+                outfiles = make_outfile_name(filename, prereq)
                 for of in outfiles:
                     infiles.append(of)
 
@@ -997,9 +1246,6 @@ def build_lstbin_makeflow_from_config(
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
 
     # get general options
-    pol_list = get_config_entry(config, "Options", "pols", required=False)
-    if not isinstance(pol_list, list):
-        pol_list = [pol_list]
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
     source_script = get_config_entry(config, "Options", "source_script", required=False)
@@ -1061,129 +1307,116 @@ def build_lstbin_makeflow_from_config(
         )
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
-        # loop over polarizations
-        for pol in pol_list:
-            # get data files and substitute w/ pol
-            datafiles = get_config_entry(
-                config, "LSTBIN_OPTS", "data_files", required=True
+        # get data files
+        datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
+        # encapsulate in double quotes
+        datafiles = [
+            "'{}'".format(
+                '"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'")))
             )
-            if pol is not None:
-                datafiles = [df.format(pol=pol) for df in datafiles]
-            # encapsulate in double quotes
-            datafiles = [
-                "'{}'".format(
-                    '"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'")))
+            for df in datafiles
+        ]
+
+        # get number of output files
+        if parallelize:
+            # get LST-specific config options
+            dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst", required=True)
+            if dlst == "None":
+                dlst = None
+            else:
+                dlst = float(dlst)
+            lst_start = float(
+                get_config_entry(config, "LSTBIN_OPTS", "lst_start", required=True)
+            )
+            fixed_lst_start = bool(
+                get_config_entry(
+                    config, "LSTBIN_OPTS", "fixed_lst_start", required=True
                 )
-                for df in datafiles
+            )
+            ntimes_per_file = int(
+                get_config_entry(
+                    config, "LSTBIN_OPTS", "ntimes_per_file", required=True
+                )
+            )
+
+            # pre-process files to determine the number of output files
+            _datafiles = [
+                sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
             ]
 
-            # get number of output files for this pol
+            output = lstbin.config_lst_bin_files(
+                _datafiles,
+                dlst=dlst,
+                lst_start=lst_start,
+                fixed_lst_start=fixed_lst_start,
+                ntimes_per_file=ntimes_per_file,
+            )
+            nfiles = len(output[2])
+        else:
+            nfiles = 1
+
+        # loop over output files
+        for output_file_index in range(nfiles):
+            # if parallize, update output_file_select
             if parallelize:
-                # get LST-specific config options
-                dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst", required=True)
-                if dlst == "None":
-                    dlst = None
-                else:
-                    dlst = float(dlst)
-                lst_start = float(
-                    get_config_entry(config, "LSTBIN_OPTS", "lst_start", required=True)
-                )
-                fixed_lst_start = bool(
-                    get_config_entry(
-                        config, "LSTBIN_OPTS", "fixed_lst_start", required=True
+                config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
+
+            # make outfile list
+            outfile = f"lstbin_outfile_{output_file_index}.LSTBIN.out"
+
+            # get args list for lst-binning step
+            _args = [
+                get_config_entry(config, "LSTBIN_OPTS", a, required=True)
+                for a in lstbin_args
+            ]
+            args = []
+            for a in _args:
+                args.append(str(a))
+
+            # extend datafiles
+            args.extend(datafiles)
+
+            # turn into string
+            args = " ".join(args)
+
+            # make logfile name
+            # logfile will capture stdout and stderr
+            logfile = re.sub(r"\.out", ".log", outfile)
+            logfile = os.path.join(work_dir, logfile)
+
+            # make a small wrapper script that will run the actual command
+            # can't embed if; then statements in makeflow script
+            wrapper_script = re.sub(r"\.out", ".sh", outfile)
+            wrapper_script = "wrapper_{}".format(wrapper_script)
+            wrapper_script = os.path.join(work_dir, wrapper_script)
+            with open(wrapper_script, "w") as f2:
+                print("#!/bin/bash", file=f2)
+                if source_script is not None:
+                    print("source {}".format(source_script), file=f2)
+                if conda_env is not None:
+                    print("conda activate {}".format(conda_env), file=f2)
+                print("date", file=f2)
+                print("cd {}".format(parent_dir), file=f2)
+                if timeout is not None:
+                    print(
+                        "timeout {0} {1} {2}".format(timeout, command, args), file=f2,
                     )
-                )
-                ntimes_per_file = int(
-                    get_config_entry(
-                        config, "LSTBIN_OPTS", "ntimes_per_file", required=True
-                    )
-                )
-
-                # pre-process files to determine the number of output files
-                _datafiles = [
-                    sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
-                ]
-
-                output = lstbin.config_lst_bin_files(
-                    _datafiles,
-                    dlst=dlst,
-                    lst_start=lst_start,
-                    fixed_lst_start=fixed_lst_start,
-                    ntimes_per_file=ntimes_per_file,
-                )
-                nfiles = len(output[2])
-            else:
-                nfiles = 1
-
-            # loop over output files
-            for output_file_index in range(nfiles):
-                # if parallize, update output_file_select
-                if parallelize:
-                    config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
-
-                # make outfile list
-                if pol is not None:
-                    polstr = ".{}".format(pol)
                 else:
-                    polstr = ""
-                outfile = "lstbin_outfile_{}.{}{}.out".format(
-                    output_file_index, "LSTBIN", polstr
-                )
+                    print("{0} {1}".format(command, args), file=f2)
+                print("if [ $? -eq 0 ]; then", file=f2)
+                print("  cd {}".format(work_dir), file=f2)
+                print("  touch {}".format(outfile), file=f2)
+                print("fi", file=f2)
+                print("date", file=f2)
+            # make file executable
+            os.chmod(wrapper_script, 0o755)
 
-                # get args list for lst-binning step
-                _args = [
-                    get_config_entry(config, "LSTBIN_OPTS", a, required=True)
-                    for a in lstbin_args
-                ]
-                args = []
-                for a in _args:
-                    args.append(str(a))
-
-                # extend datafiles
-                args.extend(datafiles)
-
-                # turn into string
-                args = " ".join(args)
-
-                # make logfile name
-                # logfile will capture stdout and stderr
-                logfile = re.sub(r"\.out", ".log", outfile)
-                logfile = os.path.join(work_dir, logfile)
-
-                # make a small wrapper script that will run the actual command
-                # can't embed if; then statements in makeflow script
-                wrapper_script = re.sub(r"\.out", ".sh", outfile)
-                wrapper_script = "wrapper_{}".format(wrapper_script)
-                wrapper_script = os.path.join(work_dir, wrapper_script)
-                with open(wrapper_script, "w") as f2:
-                    print("#!/bin/bash", file=f2)
-                    if source_script is not None:
-                        print("source {}".format(source_script), file=f2)
-                    if conda_env is not None:
-                        print("conda activate {}".format(conda_env), file=f2)
-                    print("date", file=f2)
-                    print("cd {}".format(parent_dir), file=f2)
-                    if timeout is not None:
-                        print(
-                            "timeout {0} {1} {2}".format(timeout, command, args),
-                            file=f2,
-                        )
-                    else:
-                        print("{0} {1}".format(command, args), file=f2)
-                    print("if [ $? -eq 0 ]; then", file=f2)
-                    print("  cd {}".format(work_dir), file=f2)
-                    print("  touch {}".format(outfile), file=f2)
-                    print("fi", file=f2)
-                    print("date", file=f2)
-                # make file executable
-                os.chmod(wrapper_script, 0o755)
-
-                # first line lists target file to make (dummy output file), and requirements
-                # second line is "build rule", which runs the shell script and makes the output file
-                line1 = "{0}: {1}".format(outfile, command)
-                line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
-                print(line1, file=f)
-                print(line2, file=f)
+            # first line lists target file to make (dummy output file), and requirements
+            # second line is "build rule", which runs the shell script and makes the output file
+            line1 = "{0}: {1}".format(outfile, command)
+            line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
+            print(line1, file=f)
+            print(line2, file=f)
 
     return
 

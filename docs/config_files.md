@@ -17,11 +17,6 @@ parts of the file.
 The `Options` section specifies general settings that apply to the entire
 workflow. We list several below, but the list is by no means exhaustive.
 
-### pols
-
-This lists the polarizations to be used, as a comma-separated list. This option
-is not required unless processing polarization-separated files.
-
 ### path_to_do_scripts
 
 This lists the absolute path to the task scripts (also called "do_scripts" due
@@ -70,20 +65,45 @@ Replacement section below for further explanation.
 
 ### prereqs
 
-Pre-requisite steps that must be completed (for all polarizations) before a task
-is executed. Due to the sequential nature of the pipeline, this option is not
-necessary for instances where there is only a single polarization to be
-analyzed. However, for instances where multiple polarizations are present, these
-actions act as a "barrier" to further progress. For instance, before the `yy`
-polarization can run the `firstcal` step, it requires information about excluded
-antennas, determined by the `ant_metrics` analysis. This analysis is only
-performed for the `xx` task thread (though it requires all 4
-polarizations). Therefore, the `yy` pipeline thread may arrive at the `firstcal`
-step before the associated `ant_metrics` thread has finished running. By adding
-`ANT_METRICS` to the `FIRSTCAL::prereqs` section, we ensure that the
-`ANT_METRICS` step has completed for *all* polarization threads before
-attempting to execute *any* `FIRSTCAL` steps. This ensures that all
-prerequisites have been met in terms of expected output files being produced.
+Pre-requisite steps where a previous step in
+the workflow must complete for a given file and all of its time neighbors. The
+chunking keywords listed below are used to determine which files are primary
+obsids for a given file, and hence which steps must be completed before
+launching a particular task script.
+
+### n_time_neighbors
+
+When running a workflow, it is sometimes desirable to operate on several files
+contiguous in time as a single chunk. There are several options that control how
+a full list of files is partitioned into a series of time-contiguous chunks that
+are all operated on together as a single job in the workflow, referred to as
+"time neighbors". When evaluating the workflow to determine which obsids to
+operate on, the code defines a notion of "primary obsids". For each primary
+obsid, a task script is run. Each obsid could be a primary obsid.  However, it
+is also possible to partition the list such that, e.g., every tenth file is a
+primary obsid, and the others do not have corresponding task scripts generated
+for them. The specific keywords that may be specified are:
+
+* `n_time_neighbors`: the number of files that are considered "time neighbors"
+  for a given primiary obsid. Must be a non-negative integer. Default is 0
+  (i.e., no time neighbors will be used unless specified).
+* `time_centered`: whether to treat a chunk of files such that the primary obsid
+  is in the center, with `n_time_neighbors` on either side for a total length of
+  2 * `n_time_neighbors` + 1 (True), or as the start of a chunk of files with
+  total length of `n_time_neighbors` + 1 (False). Default is True.
+* `stride_length`: the number of obsids to stride by when generating the list of
+  primary obsids. For example, if `stride_length = 11`, and `n_time_neighbors =
+  10`, and `time_centered` is `False`, the list will be partitioned into chunks
+  11 files long with no overlap. Default is 1 (i.e., every obsid will be treated
+  as a primary obsid with the exception of those files within `n_time_neighbors`
+  of the edge).
+* `collect_stragglers`: determine how to handle lists that are not evenly
+  divided by `stride_length`. If True, any files that would not evenly be added
+  to a full group are instead added to the second-to-last group to make an
+  "extra large" group, ensuring that all files are accounted for when
+  processing. If False, these obsids will not be included in the list. Default
+  is False.
+
 
 ### mem
 
@@ -107,7 +127,9 @@ One of the entries replaced in the `args` section is `{basename}` (that exact
 string, including the curly braces), which is the root name of the file. For
 instance, if the obsid specified when constructing the makeflow file is
 `zen.2458000.12345.xx.uv`, then this name will be replaced anytime `{basename}`
-is encountered in the `args`.
+is encountered in the `args`. If chunking multiple files using n_time_neighbors,
+this argument should instead be replaced with '{obsid_list}', and should be
+placed as the last argument in the list.
 
 In addition to the `{basename}` substitution, entries from other parts of the
 config file can be substituted. The syntax for this is to use:
