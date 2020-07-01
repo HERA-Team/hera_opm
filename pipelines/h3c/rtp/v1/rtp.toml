@@ -79,6 +79,7 @@ args = ["{basename}", "{prev_basename}"]
 time_prereqs = "UPLOAD"
 n_time_neighbors = "all"
 args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
+mem = 64000
 
 [ADD_RTP_PROCESS_RECORD]
 time_prereqs = "MAKE_SESSION"
