@@ -1013,7 +1013,7 @@ def build_analysis_makeflow_from_config(
                         # add neighbors
                         neighbors = make_time_neighbor_list(
                             filename,
-                            action,
+                            prereq,
                             obsids,
                             n_time_neighbors=n_time_neighbors,
                             time_centered=time_centered,
