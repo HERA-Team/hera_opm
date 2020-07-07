@@ -720,6 +720,9 @@ def build_analysis_makeflow_from_config(
     adjacent to "{basename}", useful for specifying prereqs
 
     """
+    # Make obsids abs paths
+    obsids = [os.path.abspath(obsid) for obsid in obsids]
+
     # make a cache dictionary
     _cache_dict = {}
 
