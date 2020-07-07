@@ -149,17 +149,17 @@ def test_get_config_entry_total_length(config_options):
 
     # Default is to time center
     assert (
-        mt.get_config_entry(config, "XRFI", "n_time_neighbors", total_length=15) == "7"
+        mt.get_config_entry(config, "XRFI", "n_curr_time_neighbors", total_length=15) == "7"
     )
     assert (
         mt.get_config_entry(
-            config, "XRFI_CENTERED", "n_time_neighbors", total_length=21
+            config, "XRFI_CENTERED", "n_curr_time_neighbors", total_length=21
         )
         == "10"
     )
     assert (
         mt.get_config_entry(
-            config, "XRFI_NOT_CENTERED", "n_time_neighbors", total_length=7
+            config, "XRFI_NOT_CENTERED", "n_curr_time_neighbors", total_length=7
         )
         == "6"
     )
@@ -337,7 +337,7 @@ def test_determine_stride_partitioning(config_options):
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
         stride_length=1,
-        n_time_neighbors=2,
+        n_curr_time_neighbors=2,
         time_centered=True,
         collect_stragglers=False,
     )
@@ -381,7 +381,7 @@ def test_determine_stride_partitioning_defaults(config_options):
 
     # run again with n_time_neighbors = 2
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
-        input_obsids, n_time_neighbors=2, time_centered=True, collect_stragglers=False,
+        input_obsids, n_curr_time_neighbors=2, time_centered=True, collect_stragglers=False,
     )
     # the results should be the same as in test_determine_stride_partitioning
     assert primary_obsids == list(input_obsids[2:-2])
@@ -407,7 +407,7 @@ def test_determine_stride_partitioning_collect_stragglers(config_options):
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
         stride_length=4,
-        n_time_neighbors=3,
+        n_curr_time_neighbors=3,
         time_centered=False,
         collect_stragglers=True,
     )
@@ -437,17 +437,17 @@ def test_determine_stride_partitioning_errors(config_options):
         ValueError, match="stride_length must be able to be interpreted as an int"
     ):
         mt._determine_stride_partitioning(
-            input_obsids, stride_length="foo", n_time_neighbors=1
+            input_obsids, stride_length="foo", n_curr_time_neighbors=1
         )
 
     with pytest.raises(
-        ValueError, match="n_time_neighbors must be able to be interpreted as an int"
+        ValueError, match="n_curr_time_neighbors must be able to be interpreted as an int"
     ):
-        mt._determine_stride_partitioning(input_obsids, n_time_neighbors="foo")
+        mt._determine_stride_partitioning(input_obsids, n_curr_time_neighbors="foo")
 
     with pytest.raises(ValueError, match="time_centered must be a boolean variable"):
         mt._determine_stride_partitioning(
-            input_obsids, stride_length=1, n_time_neighbors=1, time_centered="False",
+            input_obsids, stride_length=1, n_curr_time_neighbors=1, time_centered="False",
         )
 
     with pytest.raises(
@@ -456,7 +456,7 @@ def test_determine_stride_partitioning_errors(config_options):
         mt._determine_stride_partitioning(
             input_obsids,
             stride_length=1,
-            n_time_neighbors=1,
+            n_curr_time_neighbors=1,
             time_centered=False,
             collect_stragglers="True",
         )
@@ -470,7 +470,7 @@ def test_determine_stride_partitioning_noncontiguous_stragglers(config_options):
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
         stride_length=10,
-        n_time_neighbors=1,
+        n_curr_time_neighbors=1,
         time_centered=False,
         collect_stragglers=True,
     )
@@ -1165,7 +1165,7 @@ def test_prep_args_obsid_list(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_time_neighbors="1",
+        n_curr_time_neighbors="1",
         time_centered=None,
         collect_stragglers=False,
     )
@@ -1185,7 +1185,7 @@ def test_prep_args_obsid_list_centered(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_time_neighbors="1",
+        n_curr_time_neighbors="1",
         time_centered=True,
         collect_stragglers=False,
     )
@@ -1205,7 +1205,7 @@ def test_prep_args_obsid_list_not_centered(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_time_neighbors="1",
+        n_curr_time_neighbors="1",
         time_centered=False,
         collect_stragglers=False,
     )
@@ -1225,7 +1225,7 @@ def test_prep_args_obsid_list_with_stragglers(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_time_neighbors="1",
+        n_curr_time_neighbors="1",
         stride_length="2",
         time_centered=False,
         collect_stragglers=True,
@@ -1247,18 +1247,18 @@ def test_prep_args_obsid_list_error(config_options):
             args,
             obsid,
             obsids=obsids_list,
-            n_time_neighbors="foo",
+            n_curr_time_neighbors="foo",
             time_centered=True,
             collect_stragglers=False,
         )
-    assert str(cm.value).startswith("n_time_neighbors must be able to be interpreted")
+    assert str(cm.value).startswith("n_curr_time_neighbors must be able to be interpreted")
 
     with pytest.raises(ValueError) as cm:
         args = mt.prep_args(
             args,
             obsid,
             obsids=obsids_list,
-            n_time_neighbors="1",
+            n_curr_time_neighbors="1",
             stride_length="foo",
             time_centered=True,
             collect_stragglers=False,
