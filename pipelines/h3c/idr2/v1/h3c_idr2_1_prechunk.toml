@@ -136,7 +136,7 @@ args = ["{basename}", "${XRFI_PRECHUNK_OPTS:kt_size}", "${XRFI_PRECHUNK_OPTS:kf_
 
 
 [XRFI_DAY_THRESHOLD]
-prereqs = "XRFI"
+prereqs = "XRFI_PRECHUNK"
 args = ["${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
         "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}",
         "{obsid_list}"]
