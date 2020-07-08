@@ -128,11 +128,11 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
         "${ABSCAL_OPTS:min_bl_cut}", "${ABSCAL_OPTS:max_bl_cut}", "${ABSCAL_OPTS:phs_max_iter}",
         "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:edge_cut}"]
 
-[XRFI]
+[XRFI_PRECHUNK]
 mem = 96000
 prereqs = "ABSCAL"
-args = ["${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
-        "${XRFI_OPTS:sig_adj}", "{obsid_list}"]
+args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
+        "${XRFI_OPTS:sig_adj}"]
 
 
 [XRFI_DAY_THRESHOLD]
