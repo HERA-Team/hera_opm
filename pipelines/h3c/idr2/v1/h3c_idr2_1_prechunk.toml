@@ -39,7 +39,7 @@ phs_max_iter = 100
 phs_conv_crit = 1e-6
 edge_cut = 100
 
-[XRFI_OPTS]
+[XRFI_PRECHUNK_OPTS]
 kt_size = 8
 kf_size = 8
 sig_init = 5.0
@@ -78,7 +78,7 @@ actions = ["FIX_DATAFILE",
            "REDCAL",
            "FIRSTCAL_METRICS",
            "ABSCAL",
-           "XRFI",
+           "XRFI_PRECHUNK",
            "XRFI_DAY_THRESHOLD",
            "CAL_SMOOTH",
            "MAKE_REDCAL_NOTEBOOK",
@@ -131,8 +131,8 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
 [XRFI_PRECHUNK]
 mem = 96000
 prereqs = "ABSCAL"
-args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
-        "${XRFI_OPTS:sig_adj}"]
+args = ["{basename}", "${XRFI_PRECHUNK_OPTS:kt_size}", "${XRFI_PRECHUNK_OPTS:kf_size}",
+        "${XRFI_PRECHUNK_OPTS:sig_init}", "${XRFI_PRECHUNK_OPTS:sig_adj}"]
 
 
 [XRFI_DAY_THRESHOLD]
