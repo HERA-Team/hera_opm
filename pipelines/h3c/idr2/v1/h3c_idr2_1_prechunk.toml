@@ -4,7 +4,8 @@ path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/t
 source_script = "~/.bashrc"
 conda_env = "python3"
 ex_ants_path = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/bad_ants"
-base_mem = 32000
+# base_mem = 32000
+base_mem = 16000
 base_cpu = 1
 timeout = "24h"
 
@@ -27,8 +28,8 @@ oc_maxiter = 5000
 min_bl_cut = 15
 max_bl_cut = 100
 iter0_prefix = ".iter0"
-# good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
-good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok,known_bad,not_connected"
+good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok"
+# good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok,known_bad,not_connected"
 
 [ABSCAL_OPTS]
 model_files_glob = "'/lustre/aoc/projects/hera/H3C/abscal_models/RIMEz_v2_No_Outriggers/zen.2458894.?????.uvh5'"
@@ -129,7 +130,8 @@ args = ["{basename}", "${ABSCAL_OPTS:model_files_glob}", "${ABSCAL_OPTS:nInt_to_
         "${ABSCAL_OPTS:phs_conv_crit}", "${ABSCAL_OPTS:edge_cut}"]
 
 [XRFI_PRECHUNK]
-mem = 96000
+# mem = 96000
+mem = 64000
 prereqs = "ABSCAL"
 args = ["{basename}", "${XRFI_PRECHUNK_OPTS:kt_size}", "${XRFI_PRECHUNK_OPTS:kf_size}",
         "${XRFI_PRECHUNK_OPTS:sig_init}", "${XRFI_PRECHUNK_OPTS:sig_adj}"]
@@ -165,8 +167,11 @@ args = ["{basename}"]
 
 [IMAGING]
 prereqs = "CAL_SMOOTH"
-n_prev_time_neighbors = "all"
-mem = 96000
+n_time_neighbors = "all"
+stride_length = 1
+time_centered = false
+# mem = 96000
+mem = 64000
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
 
 [MAKE_NOTEBOOK]
