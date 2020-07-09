@@ -104,6 +104,7 @@ args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
 
 [REDCAL]
 prereqs = "ANT_METRICS"
+mem = 24000
 args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:solar_horizon}", "${REDCAL_OPTS:flag_nchan_low}",
         "${REDCAL_OPTS:flag_nchan_high}", "${REDCAL_OPTS:oc_maxiter}",
