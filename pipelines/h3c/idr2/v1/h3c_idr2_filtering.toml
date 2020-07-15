@@ -1,3 +1,6 @@
+NOTE TO E-DUBBS: This file is borked. Talk to Adam or Josh about updating
+for new chunking keywords. Or check other tomls.
+
 [Options]
 makeflow_type = "analysis"
 path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/task_scripts"

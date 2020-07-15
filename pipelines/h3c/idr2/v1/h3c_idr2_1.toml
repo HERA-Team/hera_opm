@@ -62,7 +62,7 @@ alpha = 0.3
 freq_threshold = 1.0
 time_threshold = 1.0
 ant_threshold = 0.5
-lst_blacklists = "0-1.3 1.84-1.9 2.1-2.19 2.27-2.47 2.5-4.3 5.25-5.56 5.59-5.7 5.89-5.96 6.11-6.32 6.5-9.1 9.37-9.44 9.51-9.58 10.9-11.5 11.9-14.3 16.3-1.3"
+lst_blacklists = "0-1.3 2.5-4.3 5.0-5.7 6.5-9.1 10.6-11.5 11.9-14.3 16.3-1.3"
 
 [IMAGING_OPTS]
 casa = "/home/casa/packages/RHEL7/release/casa-release-5.1.0-68/bin/casa"
@@ -76,7 +76,6 @@ actions = ["FIX_DATAFILE",
            "EXTRACT_AUTOS",
            "ANT_METRICS",
            "REDCAL",
-           "FIRSTCAL_METRICS",
            "ABSCAL",
            "XRFI",
            "XRFI_DAY_THRESHOLD",
@@ -91,11 +90,11 @@ actions = ["FIX_DATAFILE",
 args = "{basename}"
 
 [EXTRACT_AUTOS]
+prereqs = "FIX_DATAFILE"
 args = ["{basename}"]
 
 [ANT_METRICS]
-# prereqs = "FIX_DATAFILE"
-mem = 64000
+prereqs = "FIX_DATAFILE"
 args = ["{basename}", "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}", "${ANT_METRICS_OPTS:extension}",
         "${ANT_METRICS_OPTS:vis_format}"]
@@ -109,15 +108,13 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:max_bl_cut}", "${REDCAL_OPTS:iter0_prefix}",
         "${ANT_METRICS_OPTS:extension}", "${REDCAL_OPTS:good_statuses}"]
 
-[FIRSTCAL_METRICS]
-prereqs = "REDCAL"
-args = "{basename}"
-
 [MAKE_REDCAL_NOTEBOOK]
 prereqs = "REDCAL"
-chunk_size = "all"
+prereq_chunk_size = "all"
+stride_length = "all"
+time_centered = false
 mem = 128000
-args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
+args = ["{basename}", "${NB_OPTS:basenbdir}"]
 
 [ABSCAL]
 prereqs = "REDCAL"
@@ -152,7 +149,10 @@ time_centered = false
 
 [CAL_SMOOTH]
 prereqs = "XRFI_DAY_THRESHOLD"
-chunk_size = "all"
+prereq_chunk_size = "all"
+chunk_size = 1
+stride_length = "all"
+time_centered = false
 mem = 128000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
@@ -161,22 +161,24 @@ args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_s
 
 [UPDATE_OMNISOL]
 prereqs = "CAL_SMOOTH"
-chunk_size = "all"
+prereq_chunk_size = "all"
 args = ["{basename}"]
 
 [NOISE]
 prereqs = "CAL_SMOOTH"
-chunk_size = "all"
+prereq_chunk_size = "all"
 args = ["{basename}"]
 
 [IMAGING]
 prereqs = "CAL_SMOOTH"
-chunk_size = "all"
-mem = 96000
+prereq_chunk_size = "all"
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
 
 [MAKE_NOTEBOOK]
 prereqs = "ANT_METRICS"
-chunk_size = "all"
+prereq_chunk_size = "all"
+chunk_size = 1
+stride_length = "all"
+time_centered = false
 mem = 128000
-args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
+args = ["{basename}", "${NB_OPTS:basenbdir}"]

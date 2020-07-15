@@ -77,7 +77,6 @@ actions = ["FIX_DATAFILE",
            "EXTRACT_AUTOS",
            "ANT_METRICS",
            "REDCAL",
-           "FIRSTCAL_METRICS",
            "ABSCAL",
            "XRFI_PRECHUNK",
            "XRFI_DAY_THRESHOLD",
@@ -112,17 +111,13 @@ args = ["{basename}", "${Options:ex_ants_path}", "${REDCAL_OPTS:ant_z_thresh}",
         "${REDCAL_OPTS:max_bl_cut}", "${REDCAL_OPTS:iter0_prefix}",
         "${ANT_METRICS_OPTS:extension}", "${REDCAL_OPTS:good_statuses}"]
 
-[FIRSTCAL_METRICS]
-prereqs = "REDCAL"
-args = "{basename}"
-
 [MAKE_REDCAL_NOTEBOOK]
 prereqs = "REDCAL"
 prereq_chunk_size = "all"
-stride_length = 1
+stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
+args = ["{basename}", "${NB_OPTS:basenbdir}"]
 
 [ABSCAL]
 prereqs = "REDCAL"
@@ -150,6 +145,9 @@ time_centered = false
 [CAL_SMOOTH]
 prereqs = "XRFI_DAY_THRESHOLD"
 prereq_chunk_size = "all"
+chunk_size = 1
+stride_length = "all"
+time_centered = false
 mem = 128000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
@@ -168,9 +166,7 @@ args = ["{basename}"]
 
 [IMAGING]
 prereqs = "CAL_SMOOTH"
-chunk_size = "all"
-stride_length = 1
-time_centered = false
+prereq_chunk_size = "all"
 mem = 96000
 # mem = 64000
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
@@ -178,5 +174,8 @@ args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scrip
 [MAKE_NOTEBOOK]
 prereqs = "ANT_METRICS"
 prereq_chunk_size = "all"
+chunk_size = 1
+stride_length = "all"
+time_centered = false
 mem = 128000
-args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
+args = ["{basename}", "${NB_OPTS:basenbdir}"]
