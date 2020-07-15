@@ -118,7 +118,7 @@ args = "{basename}"
 
 [MAKE_REDCAL_NOTEBOOK]
 prereqs = "REDCAL"
-n_prev_time_neighbors = "all"
+prereq_chunk_size = "all"
 stride_length = 1
 time_centered = false
 mem = 128000
@@ -143,13 +143,13 @@ prereqs = "XRFI_PRECHUNK"
 args = ["${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
         "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}",
         "{obsid_list}"]
-n_curr_time_neighbors = "all"
+chunk_size = "all"
 stride_length = "all"
 time_centered = false
 
 [CAL_SMOOTH]
 prereqs = "XRFI_DAY_THRESHOLD"
-n_prev_time_neighbors = "all"
+prereq_chunk_size = "all"
 mem = 128000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
@@ -158,17 +158,17 @@ args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_s
 
 [UPDATE_OMNISOL]
 prereqs = "CAL_SMOOTH"
-n_prev_time_neighbors = "all"
+prereq_chunk_size = "all"
 args = ["{basename}"]
 
 [NOISE]
 prereqs = "CAL_SMOOTH"
-n_prev_time_neighbors = "all"
+prereq_chunk_size = "all"
 args = ["{basename}"]
 
 [IMAGING]
 prereqs = "CAL_SMOOTH"
-n_time_neighbors = "all"
+chunk_size = "all"
 stride_length = 1
 time_centered = false
 mem = 96000
@@ -177,6 +177,6 @@ args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scrip
 
 [MAKE_NOTEBOOK]
 prereqs = "ANT_METRICS"
-n_prev_time_neighbors = "all"
+prereq_chunk_size = "all"
 mem = 128000
 args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
