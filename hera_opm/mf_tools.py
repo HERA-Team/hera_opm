@@ -93,7 +93,7 @@ def get_config_entry(
         "${header:item}". If the corresponding key is not defined in that part
         of the config file, an error is raised. Default is True.
     total_length : int, optional
-        If this parameter is `stride_length`,
+        If this parameter is in ["stride_length", "chunk_size"],
         the entry will be further parsed to interpret 'all', and be replaced
         with `total_length`.
 
@@ -118,7 +118,7 @@ def get_config_entry(
                     entries[i] = _interpolate_config(config, entry)
             else:
                 entries = _interpolate_config(config, entries)
-        if (item in ["stride_length"]) and (entries == "all"):
+        if (item in ["stride_length", "chunk_size"]) and (entries == "all"):
             entries = str(total_length)
         return entries
     except KeyError:
