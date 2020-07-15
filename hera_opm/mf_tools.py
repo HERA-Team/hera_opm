@@ -93,11 +93,9 @@ def get_config_entry(
         "${header:item}". If the corresponding key is not defined in that part
         of the config file, an error is raised. Default is True.
     total_length : int, optional
-        If this parameter belongs to the special group of
-        [stride_length, n_curr_time_neighbors],
+        If this parameter is `stride_length`,
         the entry will be further parsed to interpret 'all', and be replaced
-        with (total_length - 1) // 2 if time_centered is True (default) or
-        with (total_length - 1) if time_centered is False.
+        with `total_length`.
 
     Returns
     -------
@@ -120,15 +118,8 @@ def get_config_entry(
                     entries[i] = _interpolate_config(config, entry)
             else:
                 entries = _interpolate_config(config, entries)
-        if item in ["stride_length", "n_curr_time_neighbors"]:
-            time_centered = get_config_entry(
-                config, header, "time_centered", required=False
-            )
-            if entries == "all":
-                if time_centered or time_centered is None:
-                    entries = str((total_length - 1) // 2)
-                else:
-                    entries = str(total_length - 1)
+        if (item in ["stride_length"]) and (entries == "all"):
+            entries = str(total_length)
         return entries
     except KeyError:
         if not required:
@@ -199,11 +190,11 @@ def sort_obsids(obsids, jd=None, return_basenames=False):
     return sorted_obsids
 
 
-def make_time_neighbor_list(
+def make_chunk_list(
     obsid,
     action,
     obsids,
-    n_time_neighbors=None,
+    chunk_size=None,
     time_centered=None,
     stride_length=None,
     collect_stragglers=None,
@@ -221,18 +212,20 @@ def make_time_neighbor_list(
     obsids : list of str
         A list of all obsids for the given day; uses this list (sorted) to
         define neighbors
-    n_time_neighbors : str
-        Number of neighboring time files to append to list. If set to the
-        string "all", then all neighbors from that JD are added. Default is "0"
+    chunk_size : str
+        Number of obsids to include in the list. If set to the
+        string "all", then all neighbors from that JD are added. Default is "1"
+        (just the obsid).
     time_centered : bool, optional
-        Whether the provided obsid should be in the center of the neighbors.
-        If True (default), returns n_time_neighbors on either side of obsid.
-        If False, returns original obsid _and_ n_time_neighbors following.
+        Whether the provided obsid should be in the center of the chunk.
+        If True (default), returns (n_chunk - 1) // 2 on either side of obsid.
+        If n_chunk is even, there will be one more obsid on the left.
+        If False, returns original obsid _and_ (chunk_size - 1) following.
     stride_length : str, optional
         Length of the stride. Default is "1".
     collect_stragglers : bool, optional
         When the list of files to work on is not divided evenly by the
-        combination of stride_length and n_time_neighbors, this option specifies
+        combination of stride_length and n_chunk, this option specifies
         whether to include the straggler files into the last group (True) or
         treat them as their own small group (False, default).
     return_outfiles : bool, optional
@@ -240,7 +233,7 @@ def make_time_neighbor_list(
 
     Returns
     -------
-    neighbors : list of str
+    chunk_list : list of str
         A list of obsids or files (depending on outfile keyword) for
         time-adjacent neighbors.
 
@@ -248,19 +241,19 @@ def make_time_neighbor_list(
     ------
     ValueError
         Raised if the specified obsid is not present in the full list, if
-        `n_time_neighbors` cannot be parsed as an int, or if `n_time_neighbors`
-        is negative.
+        `chunk_size` cannot be parsed as an int, or if `chunk_size`
+        is less than 1.
 
     """
     if time_centered is None:
         time_centered = True
-    if n_time_neighbors is None:
-        n_time_neighbors = "0"
+    if chunk_size is None:
+        chunk_size = "1"
     if stride_length is None:
         stride_length = "1"
     if collect_stragglers is None:
         collect_stragglers = False
-    neighbors = []
+    chunk_list = []
 
     # extract the integer JD of the current file
     jd = get_jd(obsid)
@@ -273,24 +266,28 @@ def make_time_neighbor_list(
     except ValueError:
         raise ValueError("obsid {} not found in list of obsids".format(obsid))
 
-    if n_time_neighbors == "all":
+    if chunk_size == "all":
         i0 = 0
         i1 = len(obsids)
     else:
         # assume we got an integer as a string; try to make sense of it
         try:
-            n_time_neighbors = int(n_time_neighbors)
+            chunk_size = int(chunk_size)
         except ValueError:
-            raise ValueError("n_time_neighbors must be parsable as an int")
-        if n_time_neighbors < 0:
-            raise ValueError("n_time_neighbors must be an integer >= 0.")
-        # get n_time_neighbors before and after; make sure we don't have an IndexError
-        i0 = max(obs_idx - time_centered * n_time_neighbors, 0)
-        i1 = min(obs_idx + n_time_neighbors + 1, len(obsids))
+            raise ValueError("chunk_size must be parsable as an int")
+        if chunk_size < 1:
+            raise ValueError("chunk_size must be an integer >= 1.")
+        # get obsids before and after; make sure we don't have an IndexError
+        if time_centered:
+            i0 = max(obs_idx - chunk_size // 2, 0)
+            i1 = min(obs_idx + (chunk_size + 1) // 2, len(obsids))
+        else:
+            i0 = obs_idx
+            i1 = min(obs_idx + chunk_size, len(obsids))
         n_following = len(obsids) - (obs_idx + int(stride_length))
-        if n_following < (n_time_neighbors + 1) and collect_stragglers:
-            # see _determine_stride_partitioning() for more explanation
-            gap = (int(stride_length) - 1) - n_time_neighbors * (1 + time_centered)
+        if (n_following < chunk_size) and collect_stragglers:
+            # Calculate number of obsids that are skipped between strides
+            gap = int(stride_length) - chunk_size
             if gap > 0:
                 warnings.warn(
                     "Collecting stragglers is incompatible with gaps between "
@@ -299,15 +296,15 @@ def make_time_neighbor_list(
             else:
                 i1 = len(obsids)
 
-    # build list of neighbors
+    # build list of obsids
     for i in range(i0, i1):
-        neighbors.append(obsids[i])
+        chunk_list.append(obsids[i])
 
     # finalize the names of files
     if return_outfiles:
-        neighbors = [make_outfile_name(of, action)[0] for of in neighbors]
+        chunk_list = [make_outfile_name(of, action)[0] for of in chunk_list]
 
-    return neighbors
+    return chunk_list
 
 
 def process_batch_options(
@@ -381,7 +378,7 @@ def process_batch_options(
 def _determine_stride_partitioning(
     obsids,
     stride_length=None,
-    n_curr_time_neighbors=None,
+    chunk_size=None,
     time_centered=None,
     collect_stragglers=None,
 ):
@@ -392,16 +389,16 @@ def _determine_stride_partitioning(
         The list of obsids.
     stride_length : int, optional
         Length of the stride. Default is 1.
-    n_curr_time_neighbors : int, optional
-        Number of time neighbors. Optional, default is 0.
+    chunk_size : int, optional
+        Number of obsids in a chunk. Optional, default is 1.
     time_centered : bool, optional
-        Whether to center the obsid and select n_curr_time_neighbors on either side,
-        returning a total of 2 * n_curr_time_neighbors + 1 obsids (True, default), or
-        a group starting with the selected obsid and a total of length
-        n_curr_time_neighbors + 1 (False).
+        Whether to center the obsid and select chunk_size // 2 on either side
+        (True, default), or a group starting with the selected obsid (False).
+        If `time_centered` is True and `chunk_size` is even, there will be
+        one more obsid to the left.
     collect_stragglers : bool, optional
         When the list of files to work on is not divided evenly by the
-        combination of stride_length and n_curr_time_neighbors, this option specifies
+        combination of stride_length and chunk_size, this option specifies
         whether to include the straggler files into the last group (True) or
         treat them as their own small group (False, default).
 
@@ -419,13 +416,13 @@ def _determine_stride_partitioning(
         workflow. An obsid may have itself as a primary obsid (e.g., if
         stride_length == 1, then each obsid will have itself, as well as its
         time neighbors, as primary obsids). If `stride_length` and
-        `n_curr_time_neighbors` are such that there are obsids that do not belong to
+        `chunk_size` are such that there are obsids that do not belong to
         any group, then the value is an empty list.
     """
     if stride_length is None:
         stride_length = 1
-    if n_curr_time_neighbors is None:
-        n_curr_time_neighbors = 0
+    if chunk_size is None:
+        chunk_size = 1
     if time_centered is None:
         time_centered = True
     if collect_stragglers is None:
@@ -433,9 +430,9 @@ def _determine_stride_partitioning(
     obsids = sort_obsids(obsids)
 
     try:
-        n_curr_time_neighbors = int(n_curr_time_neighbors)
+        chunk_size = int(chunk_size)
     except ValueError:
-        raise ValueError("n_curr_time_neighbors must be able to be interpreted as an int.")
+        raise ValueError("chunk_size must be able to be interpreted as an int.")
     try:
         stride_length = int(stride_length)
     except ValueError:
@@ -454,38 +451,37 @@ def _determine_stride_partitioning(
     primary_obsids = []
     per_obsid_primary_obsids = [[] for i in range(len(obsids))]
 
-    for idx in range(time_centered * n_curr_time_neighbors, len(obsids), stride_length):
+    for idx in range(time_centered * (chunk_size // 2), len(obsids), stride_length):
         # Compute the number of remaining obsids to process.
         # We account for the location of the next stride to determine if we
         # should grab straggling obsids.
         n_following = len(obsids) - (idx + stride_length)
         if time_centered:
-            i1 = max(idx - n_curr_time_neighbors, 0)
+            i0 = max(idx - chunk_size // 2, 0)
+            i1 = idx + (chunk_size + 1) // 2
         else:
-            i1 = idx
-        i2 = idx + n_curr_time_neighbors + 1
-        # Check to see if i2 would be past the end of the array. If
+            i0 = idx
+            i1 = idx + chunk_size
+        # Check to see if i1 would be past the end of the array. If
         # `collect_stragglers` is True, then we would have broken out of the
         # loop on the iteration previous to the current one. Otherwise we drop
         # the remaining obsids because there are insufficient time neighbors to
         # make a full set.
-        if i2 > len(obsids):
+        if i1 > len(obsids):
             break
-        if n_following < (n_curr_time_neighbors + 1) and collect_stragglers:
+        if (n_following < chunk_size) and collect_stragglers:
             # Figure out if any observations that would normally have been skipped
             # will be lumped in by getting all remaining observations.
-            # "stride_length - 1" is the actual number of observations between
-            # current idx and next one given stride_length.
-            gap = (stride_length - 1) - n_curr_time_neighbors * (1 + time_centered)
+            gap = stride_length - chunk_size
             if gap > 0:
                 warnings.warn(
                     "Collecting stragglers is incompatible with gaps between "
                     "consecutive strides. Not collecting stragglers..."
                 )
             else:
-                i2 = len(obsids)
+                i1 = len(obsids)
             primary_obsids.append(obsids[idx])
-            for i in range(i1, i2):
+            for i in range(i0, i1):
                 per_obsid_primary_obsids[i].append(obsids[idx])
 
             # skip what would have been the last iteration, because we've
@@ -493,7 +489,7 @@ def _determine_stride_partitioning(
             break
         # assign indices
         primary_obsids.append(obsids[idx])
-        for i in range(i1, i2):
+        for i in range(i0, i1):
             per_obsid_primary_obsids[i].append(obsids[idx])
 
     return primary_obsids, per_obsid_primary_obsids
@@ -503,7 +499,7 @@ def prep_args(
     args,
     obsid,
     obsids=None,
-    n_curr_time_neighbors="0",
+    chunk_size="1",
     stride_length="1",
     time_centered=None,
     collect_stragglers=None,
@@ -520,16 +516,17 @@ def prep_args(
         Filename/obsid to be substituted.
     obsids : list of str, optional
         Full list of obsids. Required when time-adjacent neighbors are desired.
-    n_curr_time_neighbors : str
-        Number of neighboring time files to append to list. If set to the
+    chunk_size : str
+        Number of obs files to append to list. If set to the
         string "all", then all neighbors from that JD are added.
     stride_length : str
         Number of files to include in a stride. This interacts with
-        `n_curr_time_neighbors` to define how arguments are generate.
+        `chunk_size` to define how arguments are generate.
     time_centered : bool, optional
-        Whether the provided obsid should be in the center of the neighbors.
-        If True (default), returns n_curr_time_neighbors on either side of obsid.
-        If False, returns original obsid _and_ n_curr_time_neighbors following.
+        Whether the provided obsid should be in the center of the chunk.
+        If True (default), returns (n_chunk - 1) // 2 on either side of obsid.
+        If n_chunk is even, there will be one more obsid on the left.
+        If False, returns original obsid _and_ (chunk_size - 1) following.
     collect_stragglers : bool, optional
         Whether to lump files close to the end of the list ("stragglers") into
         the previous group, or belong to their own smaller group.
@@ -596,7 +593,7 @@ def prep_args(
         _, per_obsid_primary_obsids = _determine_stride_partitioning(
             obsids,
             stride_length=stride_length,
-            n_curr_time_neighbors=n_curr_time_neighbors,
+            chunk_size=chunk_size,
             time_centered=time_centered,
             collect_stragglers=collect_stragglers,
         )
@@ -751,19 +748,19 @@ def build_analysis_makeflow_from_config(
         if idx != len(workflow) - 1:
             raise ValueError("TEARDOWN must be last entry of workflow")
 
-    # Check for actions that use n_curr_time_neighbors, make sure obsid_list is last arg
+    # Check for actions that use chunk_size, make sure obsid_list is last arg
     for action in workflow:
-        n_curr_time_neighbors = get_config_entry(
-            config, action, "n_curr_time_neighbors", required=False, total_length=len(obsids)
+        chunk_size = get_config_entry(
+            config, action, "chunk_size", required=False
         )
-        if n_curr_time_neighbors is not None:
+        if chunk_size is not None:
             this_args = get_config_entry(config, action, "args", required=True)
             if "{obsid_list}" in this_args:
                 bn_idx = this_args.index("{obsid_list}")
                 if bn_idx != len(this_args) - 1:
                     raise ValueError(
                         "{obsid_list} must be the last argument for action"
-                        f" {action} because n_curr_time_neighbors is specified."
+                        f" {action} because chunk_size is specified."
                     )
 
     path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
@@ -915,16 +912,16 @@ def build_analysis_makeflow_from_config(
                     required=False,
                     total_length=len(obsids),
                 )
-                n_prev_time_neighbors = get_config_entry(
+                prereq_chunk_size = get_config_entry(
                     config,
                     action,
-                    "n_prev_time_neighbors",
+                    "prereq_chunk_size",
                     required=False,
                 )
-                n_curr_time_neighbors = get_config_entry(
+                chunk_size = get_config_entry(
                     config,
                     action,
-                    "n_curr_time_neighbors",
+                    "chunk_size",
                     required=False,
                     total_length=len(obsids),
                 )
@@ -944,7 +941,7 @@ def build_analysis_makeflow_from_config(
                     ) = _determine_stride_partitioning(
                         sorted_obsids,
                         stride_length=stride_length,
-                        n_curr_time_neighbors=n_curr_time_neighbors,
+                        chunk_size=chunk_size,
                         time_centered=time_centered,
                         collect_stragglers=collect_stragglers,
                     )
@@ -1020,20 +1017,20 @@ def build_analysis_makeflow_from_config(
                                 "workflow".format(prereq, action)
                             )
                         # add neighbors
-                        prev_neighbors = make_time_neighbor_list(
+                        prev_neighbors = make_chunk_list(
                             filename,
                             prereq,
                             obsids,
-                            n_time_neighbors=n_prev_time_neighbors,
+                            chunk_size=prereq_chunk_size,
                             time_centered=time_centered,
                             stride_length=stride_length,
                             collect_stragglers=collect_stragglers,
                         )
-                        curr_neighbors = make_time_neighbor_list(
+                        curr_neighbors = make_chunk_list(
                             filename,
                             prereq,
                             obsids,
-                            n_time_neighbors=n_curr_time_neighbors,
+                            chunk_size=chunk_size,
                             time_centered=time_centered,
                             stride_length=stride_length,
                             collect_stragglers=collect_stragglers,
@@ -1059,7 +1056,7 @@ def build_analysis_makeflow_from_config(
                     args,
                     filename,
                     obsids=obsids,
-                    n_curr_time_neighbors=n_curr_time_neighbors,
+                    chunk_size=chunk_size,
                     stride_length=stride_length,
                     time_centered=time_centered,
                     collect_stragglers=collect_stragglers,

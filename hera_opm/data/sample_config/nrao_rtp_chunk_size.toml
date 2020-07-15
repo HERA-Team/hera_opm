@@ -29,12 +29,12 @@ args = ["{basename}", "${Options:ex_ants}"]
 
 [OMNICAL_METRICS]
 prereqs = "OMNICAL"
-n_curr_time_neighbors = 1
+chunk_size = 3
 args = ["{basename}", "{prev_basename}", "{next_basename}"]
 
 [OMNI_APPLY]
 prereqs = "OMNICAL_METRICS"
-n_curr_time_neighbors = 1
+chunk_size = 3
 stride_length = 2
 args = "{basename}"
 

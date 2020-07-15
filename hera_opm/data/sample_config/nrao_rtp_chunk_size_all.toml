@@ -15,14 +15,15 @@ actions = ["XRFI"]
 
 [XRFI]
 args = "{basename}"
-n_curr_time_neighbors = 'all'
+chunk_size = 'all'
+stride_length = 'all'
 
 [XRFI_CENTERED]
 args = "{basename}"
-n_curr_time_neighbors = 'all'
+chunk_size = 'all'
 time_centered = true
 
 [XRFI_NOT_CENTERED]
 args = "{basename}"
-n_curr_time_neighbors = 'all'
+chunk_size = 'all'
 time_centered = false

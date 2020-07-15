@@ -31,11 +31,11 @@ def config_options():
     config_dict["config_file"] = os.path.join(
         DATA_PATH, "sample_config", "nrao_rtp.toml"
     )
-    config_dict["config_file_time_neighbors"] = os.path.join(
-        DATA_PATH, "sample_config", "nrao_rtp_time_neighbors.toml"
+    config_dict["config_file_chunk_size"] = os.path.join(
+        DATA_PATH, "sample_config", "nrao_rtp_chunk_size.toml"
     )
-    config_dict["config_file_time_neighbors_all"] = os.path.join(
-        DATA_PATH, "sample_config", "nrao_rtp_time_neighbors_all.toml"
+    config_dict["config_file_chunk_size_all"] = os.path.join(
+        DATA_PATH, "sample_config", "nrao_rtp_chunk_size_all.toml"
     )
     config_dict["config_file_options"] = os.path.join(
         DATA_PATH, "sample_config", "nrao_rtp_options.toml"
@@ -145,23 +145,10 @@ def test_get_config_entry(config_options):
 def test_get_config_entry_total_length(config_options):
     """Test setting a total_length for an entry."""
     # retreive config
-    config = toml.load(config_options["config_file_time_neighbors_all"])
+    config = toml.load(config_options["config_file_chunk_size_all"])
 
-    # Default is to time center
     assert (
-        mt.get_config_entry(config, "XRFI", "n_curr_time_neighbors", total_length=15) == "7"
-    )
-    assert (
-        mt.get_config_entry(
-            config, "XRFI_CENTERED", "n_curr_time_neighbors", total_length=21
-        )
-        == "10"
-    )
-    assert (
-        mt.get_config_entry(
-            config, "XRFI_NOT_CENTERED", "n_curr_time_neighbors", total_length=7
-        )
-        == "6"
+        mt.get_config_entry(config, "XRFI", "stride_length", total_length=15) == "15"
     )
 
 
@@ -174,55 +161,55 @@ def test_make_outfile_name(config_options):
     assert set(mt.make_outfile_name(obsid, action)) == outfiles
 
 
-def test_make_time_neighbor_list(config_options):
+def test_make_chunk_list(config_options):
     # define args
     obsid = config_options["obsids"][1]
     action = "OMNICAL"
     obsids = config_options["obsids"]
     outfiles = [obs + ".OMNICAL.out" for obs in obsids[:3]]
     assert set(
-        mt.make_time_neighbor_list(
-            obsid, action, obsids=obsids, n_time_neighbors=1, return_outfiles=True
+        mt.make_chunk_list(
+            obsid, action, obsids=obsids, chunk_size=3, return_outfiles=True
         )
     ) == set(outfiles)
 
-    # test asking for "all" neighbors
+    # test asking for "all" obsids
     assert set(
-        mt.make_time_neighbor_list(
-            obsid, action, obsids, n_time_neighbors="all", return_outfiles=True
+        mt.make_chunk_list(
+            obsid, action, obsids, chunk_size="all", return_outfiles=True
         )
     ) == set(outfiles)
 
     # test edge cases
     obsid = obsids[0]
     assert set(
-        mt.make_time_neighbor_list(
-            obsid, action, obsids, n_time_neighbors=1, return_outfiles=True
+        mt.make_chunk_list(
+            obsid, action, obsids, chunk_size=3, return_outfiles=True
         )
     ) == set(outfiles[:2])
     obsid = obsids[2]
     assert set(
-        mt.make_time_neighbor_list(
-            obsid, action, obsids, n_time_neighbors=1, return_outfiles=True
+        mt.make_chunk_list(
+            obsid, action, obsids, chunk_size=3, return_outfiles=True
         )
     ) == set(outfiles[1:])
 
 
-def test_make_time_neighbor_list_errors(config_options):
+def test_make_chunk_list_errors(config_options):
     # test not having the obsid in the supplied list
     obsid = "zen.1234567.12345.xx.HH.uvcA"
     action = "OMNICAL"
     obsids = config_options["obsids"]
     with pytest.raises(ValueError):
-        mt.make_time_neighbor_list(obsid, action, obsids)
+        mt.make_chunk_list(obsid, action, obsids)
 
-    # test passing in nonsense for all_neighbors
+    # test passing in nonsense for chunk_size
     with pytest.raises(ValueError):
-        mt.make_time_neighbor_list(obsids[0], action, obsids, n_time_neighbors="blah")
+        mt.make_chunk_list(obsids[0], action, obsids, chunk_size="blah")
 
-    # test passing in a negative number of neighbors
+    # test passing in a negative number of chunk_size
     with pytest.raises(ValueError):
-        mt.make_time_neighbor_list(obsids[0], action, obsids, n_time_neighbors="-1")
+        mt.make_chunk_list(obsids[0], action, obsids, chunk_size="-1")
 
     return
 
@@ -337,7 +324,7 @@ def test_determine_stride_partitioning(config_options):
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
         stride_length=1,
-        n_curr_time_neighbors=2,
+        chunk_size=5,
         time_centered=True,
         collect_stragglers=False,
     )
@@ -370,8 +357,8 @@ def test_determine_stride_partitioning(config_options):
 
 def test_determine_stride_partitioning_defaults(config_options):
     input_obsids = list(config_options["obsids_long_dummy_list"][:9])
-    # run without specifying anything -- defaults to stride of 1 and 0 time
-    # neighbors
+    # run without specifying anything -- defaults to stride of 1 and 1 chunk
+    # size
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids, time_centered=True, collect_stragglers=False
     )
@@ -379,9 +366,9 @@ def test_determine_stride_partitioning_defaults(config_options):
     target_list = [input_obsids[idx : idx + 1] for idx in range(len(input_obsids))]
     assert per_obsid_primary_obsids == target_list
 
-    # run again with n_time_neighbors = 2
+    # run again with chunk_size = 5
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
-        input_obsids, n_curr_time_neighbors=2, time_centered=True, collect_stragglers=False,
+        input_obsids, chunk_size=5, time_centered=True, collect_stragglers=False,
     )
     # the results should be the same as in test_determine_stride_partitioning
     assert primary_obsids == list(input_obsids[2:-2])
@@ -407,7 +394,7 @@ def test_determine_stride_partitioning_collect_stragglers(config_options):
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
         stride_length=4,
-        n_curr_time_neighbors=3,
+        chunk_size=4,
         time_centered=False,
         collect_stragglers=True,
     )
@@ -437,17 +424,17 @@ def test_determine_stride_partitioning_errors(config_options):
         ValueError, match="stride_length must be able to be interpreted as an int"
     ):
         mt._determine_stride_partitioning(
-            input_obsids, stride_length="foo", n_curr_time_neighbors=1
+            input_obsids, stride_length="foo", chunk_size=3
         )
 
     with pytest.raises(
-        ValueError, match="n_curr_time_neighbors must be able to be interpreted as an int"
+        ValueError, match="chunk_size must be able to be interpreted as an int"
     ):
-        mt._determine_stride_partitioning(input_obsids, n_curr_time_neighbors="foo")
+        mt._determine_stride_partitioning(input_obsids, chunk_size="foo")
 
     with pytest.raises(ValueError, match="time_centered must be a boolean variable"):
         mt._determine_stride_partitioning(
-            input_obsids, stride_length=1, n_curr_time_neighbors=1, time_centered="False",
+            input_obsids, stride_length=1, chunk_size=2, time_centered="False",
         )
 
     with pytest.raises(
@@ -456,7 +443,7 @@ def test_determine_stride_partitioning_errors(config_options):
         mt._determine_stride_partitioning(
             input_obsids,
             stride_length=1,
-            n_curr_time_neighbors=1,
+            chunk_size=1,
             time_centered=False,
             collect_stragglers="True",
         )
@@ -470,7 +457,7 @@ def test_determine_stride_partitioning_noncontiguous_stragglers(config_options):
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
         input_obsids,
         stride_length=10,
-        n_curr_time_neighbors=1,
+        chunk_size=2,
         time_centered=False,
         collect_stragglers=True,
     )
@@ -573,10 +560,10 @@ def test_build_analysis_makeflow_from_config_missing_prereq(config_options):
     return
 
 
-def test_build_analysis_makeflow_from_config_time_neighbors(config_options):
+def test_build_analysis_makeflow_from_config_chunk_size(config_options):
     # define args
     obsids = config_options["obsids"]
-    config_file = config_options["config_file_time_neighbors"]
+    config_file = config_options["config_file_chunk_size"]
     work_dir = os.path.join(DATA_PATH, "test_output")
 
     mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
@@ -602,7 +589,7 @@ def test_build_analysis_makeflow_from_config_time_neighbors(config_options):
             wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
             wrapper_fn = os.path.join(work_dir, wrapper_fn)
             assert os.path.exists(wrapper_fn)
-    # some actions will not run for edge observations because they need time neighbors.
+    # some actions will not run for edge observations because they need neighbors.
     for obsid in obsids[1:-1]:
         for action in ntime_actions:
             wrapper_fn = "wrapper_" + obsid + "." + action + ".sh"
@@ -1165,7 +1152,7 @@ def test_prep_args_obsid_list(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_curr_time_neighbors="1",
+        chunk_size="3",
         time_centered=None,
         collect_stragglers=False,
     )
@@ -1185,7 +1172,7 @@ def test_prep_args_obsid_list_centered(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_curr_time_neighbors="1",
+        chunk_size="3",
         time_centered=True,
         collect_stragglers=False,
     )
@@ -1205,7 +1192,7 @@ def test_prep_args_obsid_list_not_centered(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_curr_time_neighbors="1",
+        chunk_size="2",
         time_centered=False,
         collect_stragglers=False,
     )
@@ -1225,7 +1212,7 @@ def test_prep_args_obsid_list_with_stragglers(config_options):
         args,
         obsid,
         obsids=obsids_list,
-        n_curr_time_neighbors="1",
+        chunk_size="2",
         stride_length="2",
         time_centered=False,
         collect_stragglers=True,
@@ -1247,18 +1234,18 @@ def test_prep_args_obsid_list_error(config_options):
             args,
             obsid,
             obsids=obsids_list,
-            n_curr_time_neighbors="foo",
+            chunk_size="foo",
             time_centered=True,
             collect_stragglers=False,
         )
-    assert str(cm.value).startswith("n_curr_time_neighbors must be able to be interpreted")
+    assert str(cm.value).startswith("chunk_size must be able to be interpreted")
 
     with pytest.raises(ValueError) as cm:
         args = mt.prep_args(
             args,
             obsid,
             obsids=obsids_list,
-            n_curr_time_neighbors="1",
+            chunk_size="3",
             stride_length="foo",
             time_centered=True,
             collect_stragglers=False,
