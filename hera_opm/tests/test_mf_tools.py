@@ -187,6 +187,48 @@ def test_make_chunk_list(config_options):
     assert set(
         mt.make_chunk_list(obsid, action, obsids, chunk_size=3, return_outfiles=True)
     ) == set(outfiles[1:])
+    assert set(
+        mt.make_chunk_list(
+            obsid,
+            action,
+            obsids,
+            chunk_size=3,
+            time_centered=False,
+            return_outfiles=True,
+        )
+    ) == set(outfiles[2:])
+
+    return
+
+
+def test_make_chunk_list_gap(config_options):
+    # test having a gap in the chunk list
+    obsid = config_options["obsids"][1]
+    action = "OMNICAL"
+    obsids = config_options["obsids"]
+    with pytest.warns(UserWarning, match="Collecting stragglers is incompatible"):
+        chunk_list = mt.make_chunk_list(
+            obsid,
+            action,
+            obsids=obsids,
+            chunk_size=2,
+            stride_length=3,
+            collect_stragglers=True,
+        )
+    assert set(chunk_list) == set(obsids[:2])
+
+    # do it again with no gap
+    chunk_list = mt.make_chunk_list(
+        obsid,
+        action,
+        obsids=obsids,
+        chunk_size=3,
+        stride_length=3,
+        collect_stragglers=True,
+    )
+    assert set(chunk_list) == set(obsids)
+
+    return
 
 
 def test_make_chunk_list_errors(config_options):
