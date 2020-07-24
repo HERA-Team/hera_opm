@@ -4,7 +4,7 @@ path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/t
 source_script = "~/.bashrc"
 conda_env = "python3"
 ex_ants_path = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/bad_ants"
-base_mem = 32000
+base_mem = 16000
 base_cpu = 1
 timeout = "24h"
 
