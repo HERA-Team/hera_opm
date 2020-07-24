@@ -71,38 +71,44 @@ chunking keywords listed below are used to determine which files are primary
 obsids for a given file, and hence which steps must be completed before
 launching a particular task script.
 
-### n_time_neighbors
+### Time Chunking
 
 When running a workflow, it is sometimes desirable to operate on several files
 contiguous in time as a single chunk. There are several options that control how
 a full list of files is partitioned into a series of time-contiguous chunks that
-are all operated on together as a single job in the workflow, referred to as
-"time neighbors". When evaluating the workflow to determine which obsids to
-operate on, the code defines a notion of "primary obsids". For each primary
-obsid, a task script is run. Each obsid could be a primary obsid.  However, it
-is also possible to partition the list such that, e.g., every tenth file is a
-primary obsid, and the others do not have corresponding task scripts generated
-for them. The specific keywords that may be specified are:
+are all operated on together as a single job in the workflow, referred to as a
+"time chunk". When evaluating the workflow to determine which obsids to operate
+on, the code defines a notion of "primary obsids". For each primary obsid, a
+task script is run. Each obsid could be a primary obsid.  However, it is also
+possible to partition the list such that, e.g., every tenth file is a primary
+obsid, and the others do not have corresponding task scripts generated for
+them. The specific keywords that may be specified are:
 
-* `n_time_neighbors`: the number of files that are considered "time neighbors"
-  for a given primiary obsid. Must be a non-negative integer. Default is 0
-  (i.e., no time neighbors will be used unless specified).
+* `chunk_size`: the total size of a given time chunk, in terms of the number of
+  files. In addition to an integer, can also be the string `"all"` to indicate
+  the chunk includes all time values.
 * `time_centered`: whether to treat a chunk of files such that the primary obsid
-  is in the center, with `n_time_neighbors` on either side for a total length of
-  2 * `n_time_neighbors` + 1 (True), or as the start of a chunk of files with
-  total length of `n_time_neighbors` + 1 (False). Default is True.
+  is in the center the chunk (True), or the start of the chunk. If
+  `time_centered` is `True` and `chunk_size` is even, an extra entry is included
+  on the left to make the chunk symmetric about the chunk center. Default is
+  `True`.
 * `stride_length`: the number of obsids to stride by when generating the list of
-  primary obsids. For example, if `stride_length = 11`, and `n_time_neighbors =
-  10`, and `time_centered` is `False`, the list will be partitioned into chunks
-  11 files long with no overlap. Default is 1 (i.e., every obsid will be treated
-  as a primary obsid with the exception of those files within `n_time_neighbors`
-  of the edge).
+  primary obsids. For example, if `stride_length = 10`, `chunk_size=10`, and
+  `time_centered` is `False`, the list will be partitioned into chunks 10 files
+  long with no overlap. Default is 1 (i.e., every obsid will be treated as a
+  primary obsid with the exception of those files within `chunk_size` of
+  the edge).
 * `collect_stragglers`: determine how to handle lists that are not evenly
   divided by `stride_length`. If True, any files that would not evenly be added
   to a full group are instead added to the second-to-last group to make an
   "extra large" group, ensuring that all files are accounted for when
   processing. If False, these obsids will not be included in the list. Default
   is False.
+* `prereq_chunk_size`: this option is specified if the user wants to wait for
+  specific entries in the previous step to finish before starting the current
+  one, without necessarily using them. Usually this will not be set, or it will
+  be `"all"` to indicate all entries for the previous step must be completed
+  before proceeding.
 
 
 ### mem

@@ -20,7 +20,7 @@ actions = ["SETUP", "ANT_METRICS", "FIRSTCAL", "FIRSTCAL_METRICS",
 [ANT_METRICS]
 args = "{obsid_list} {basename}"
 stride_length = 4
-n_time_neighbors = 2
+chunk_size = 2
 
 [FIRSTCAL]
 args = ["{basename}", "${Options:ex_ants}"]

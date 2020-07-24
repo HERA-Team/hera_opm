@@ -1,3 +1,6 @@
+NOTE TO E-DUBBS: This file is borked. Talk to Adam or Josh about updating
+for new chunking keywords. Or check other tomls.
+
 [Options]
 makeflow_type = "analysis"
 path_to_do_scripts = "/users/jsdillon/Libraries/hera_opm/pipelines/h3c/idr2/v1/task_scripts"
@@ -129,8 +132,7 @@ args = "{basename}"
 
 [MAKE_REDCAL_NOTEBOOK]
 prereqs = "REDCAL"
-time_prereqs = "REDCAL"
-n_time_neighbors = "all"
+chunk_size = "all"
 mem = 128000
 args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
 
@@ -149,15 +151,13 @@ args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OP
 
 [XRFI_DAY_THRESHOLD]
 prereqs = "XRFI"
-time_prereqs = "XRFI"
-n_time_neighbors = "all"
+chunk_size = "all"
 args = ["{basename}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_f}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t}",
         "${XRFI_DAY_THRESHOLD_OPTS:nsig_f_adj}", "${XRFI_DAY_THRESHOLD_OPTS:nsig_t_adj}"]
 
 [CAL_SMOOTH]
 prereqs = "XRFI_DAY_THRESHOLD"
-time_prereqs = "XRFI_DAY_THRESHOLD"
-n_time_neighbors = "all"
+chunk_size = "all"
 mem = 64000
 args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_scale}",
         "${CAL_SMOOTH_OPTS:tol}", "${CAL_SMOOTH_OPTS:filter_mode}", "${CAL_SMOOTH_OPTS:window}",
@@ -166,34 +166,29 @@ args = ["{basename}", "${CAL_SMOOTH_OPTS:freq_scale}", "${CAL_SMOOTH_OPTS:time_s
 
 [UPDATE_OMNISOL]
 prereqs = "CAL_SMOOTH"
-time_prereqs = "CAL_SMOOTH"
-n_time_neighbors = "all"
+chunk_size = "all"
 args = ["{basename}"]
 
 [NOISE]
 prereqs = "CAL_SMOOTH"
-time_prereqs = "CAL_SMOOTH"
-n_time_neighbors = "all"
+chunk_size = "all"
 args = ["{basename}"]
 
 [IMAGING]
 prereqs = "CAL_SMOOTH"
-time_prereqs = "CAL_SMOOTH"
-n_time_neighbors = "all"
+chunk_size = "all"
 mem = 96000
 args = ["{basename}", "${IMAGING_OPTS:casa}", "${IMAGING_OPTS:casa_imaging_scripts}", "${IMAGING_OPTS:calibration}"]
 
 [MAKE_NOTEBOOK]
 prereqs = "ANT_METRICS"
-time_prereqs = "ANT_METRICS"
-n_time_neighbors = "all"
+chunk_size = "all"
 mem = 128000
 args = ["{basename}", "{prev_basename}", "${NB_OPTS:basenbdir}"]
 
 [DELAY]
 prereqs = "CAL_SMOOTH"
-time_prereqs = "CAL_SMOOTH"
-n_time_neighbors = "all"
+chunk_size = "all"
 mem = 64000
 args = ["{basename}", "${DELAY_OPTS:calibration}", "${DELAY_OPTS:nbls_partial}", "${DELAY_OPTS:output_label}",
         "${DELAY_OPTS:spw0}", "${DELAY_OPTS:spw1}", "${DELAY_OPTS:tol}", "${DELAY_OPTS:standoff}", "${DELAY_OPTS:cache_dir}"]
