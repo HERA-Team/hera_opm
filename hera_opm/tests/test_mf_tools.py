@@ -147,9 +147,7 @@ def test_get_config_entry_total_length(config_options):
     # retreive config
     config = toml.load(config_options["config_file_chunk_size_all"])
 
-    assert (
-        mt.get_config_entry(config, "XRFI", "stride_length", total_length=15) == "15"
-    )
+    assert mt.get_config_entry(config, "XRFI", "stride_length", total_length=15) == "15"
 
 
 def test_make_outfile_name(config_options):
@@ -183,15 +181,11 @@ def test_make_chunk_list(config_options):
     # test edge cases
     obsid = obsids[0]
     assert set(
-        mt.make_chunk_list(
-            obsid, action, obsids, chunk_size=3, return_outfiles=True
-        )
+        mt.make_chunk_list(obsid, action, obsids, chunk_size=3, return_outfiles=True)
     ) == set(outfiles[:2])
     obsid = obsids[2]
     assert set(
-        mt.make_chunk_list(
-            obsid, action, obsids, chunk_size=3, return_outfiles=True
-        )
+        mt.make_chunk_list(obsid, action, obsids, chunk_size=3, return_outfiles=True)
     ) == set(outfiles[1:])
 
 

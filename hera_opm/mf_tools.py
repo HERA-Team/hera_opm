@@ -750,9 +750,7 @@ def build_analysis_makeflow_from_config(
 
     # Check for actions that use chunk_size, make sure obsid_list is last arg
     for action in workflow:
-        chunk_size = get_config_entry(
-            config, action, "chunk_size", required=False
-        )
+        chunk_size = get_config_entry(config, action, "chunk_size", required=False)
         if chunk_size is not None:
             this_args = get_config_entry(config, action, "args", required=True)
             if "{obsid_list}" in this_args:
@@ -913,10 +911,7 @@ def build_analysis_makeflow_from_config(
                     total_length=len(obsids),
                 )
                 prereq_chunk_size = get_config_entry(
-                    config,
-                    action,
-                    "prereq_chunk_size",
-                    required=False,
+                    config, action, "prereq_chunk_size", required=False,
                 )
                 chunk_size = get_config_entry(
                     config,
