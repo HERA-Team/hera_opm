@@ -67,7 +67,7 @@ actions = ["FIX_DATAFILE", # TODO: REMOVE THIS FOR SITE
            "REDCAL_INSPECT_NOTEBOOK_MAYBE_GOOD",
            "XRFI",
            "XRFI_DAY_THRESHOLD",
-           "RFI_INSPECT_NB",
+           "RFI_INSPECT_NOTEBOOK",
            "DATA_DOWNSELECT", # TODO: THIS DOES NOTHING CURRENTLY
           ]
 
@@ -212,6 +212,19 @@ args = ["${XRFI_DAY_THRESHOLD_OPTS:nsig_f}",
 chunk_size = "all"
 stride_length = "all"
 time_centered = false
+
+[RFI_INSPECT_NOTEBOOK]
+prereqs = "XRFI_DAY_THRESHOLD"
+prereq_chunk_size = "all"
+chunk_size = 1
+stride_length = "all"
+time_centered = false
+mem = 128000
+args = ["{basename}", 
+        "${NOTEBOOK_OPTS:nb_template_dir}",
+        "${NOTEBOOK_OPTS:nb_output_repo}",
+        "${NOTEBOOK_OPTS:git_push}",
+        ]
 
 [DATA_DOWNSELECT]
 prereqs = "XRFI_DAY_THRESHOLD"
