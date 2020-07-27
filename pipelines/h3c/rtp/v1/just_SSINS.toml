@@ -1,6 +1,6 @@
 [Options]
 makeflow_type = "analysis"
-path_to_do_scripts = "/lustre/aoc/projects/hera/mwilensk/hera_opm/hera_opm"
+path_to_do_scripts = "/Users/mike_e_dubs/Repositories/hera_opm/pipelines/h3c/rtp/v1/task_scripts"
 source_script = "~/.bashrc"
 conda_env = "mw_nrao_py36"
 base_mem = 64000

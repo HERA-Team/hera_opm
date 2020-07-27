@@ -88,7 +88,7 @@ args = ["{basename}", "${WorkFlow:actions}"]
 
 [SSINS]
 args = ["${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
-        "${SSINS_OPTS:tb_aggro}", "${obsid_list}"]
+        "${SSINS_OPTS:tb_aggro}", "{obsid_list}"]
 stride_length = 10
 chunk_size = 10
 time_centered = False
