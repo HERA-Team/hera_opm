@@ -1,0 +1,21 @@
+[Options]
+makeflow_type = "analysis"
+path_to_do_scripts = "/lustre/aoc/projects/hera/mwilensk/hera_opm/hera_opm"
+source_script = "~/.bashrc"
+conda_env = "mw_nrao_py36"
+base_mem = 64000
+base_cpu = 1
+atch_system = "slurm"
+default_queue = "hera,master"
+
+[SSINS_OPTS]
+streak_sig = 20.0
+other_sig = 5.0
+tb_aggro = 0.5
+
+[WorkFlow]
+actions = ["SSINS"]
+
+[SSINS]
+args = ["${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
+        "${SSINS_OPTS:tb_aggro}", "{obsid_list}"]
