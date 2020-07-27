@@ -90,7 +90,9 @@ args = ["{basename}", "${WorkFlow:actions}"]
 args = ["${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
         "${SSINS_OPTS:tb_aggro}", "${obsid_list}"]
 stride_length = 10
-n_time_neighbors = 9
+chunk_size = 10
+time_centered = False
+collect_stragglers = True
 
 [XRFI]
 args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
