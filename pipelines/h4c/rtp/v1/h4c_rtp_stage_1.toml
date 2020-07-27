@@ -80,7 +80,7 @@ args = ["{basename}"]
 
 [ANT_METRICS_KNOWN_GOOD]
 prereqs = "FIX_DATAFILE"
-args = ["{basename}", 
+args = ["{basename}",
         "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}",
         "${ANT_METRICS_OPTS:Nbls_per_load}",
@@ -90,7 +90,7 @@ args = ["{basename}",
 
 [ANT_METRICS_MAYBE_GOOD]
 prereqs = "FIX_DATAFILE"
-args = ["{basename}", 
+args = ["{basename}",
         "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}",
         "${ANT_METRICS_OPTS:Nbls_per_load}",
@@ -105,7 +105,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
@@ -119,7 +119,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
@@ -161,7 +161,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
@@ -175,7 +175,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
@@ -220,7 +220,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
