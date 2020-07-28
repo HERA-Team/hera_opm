@@ -20,6 +20,11 @@ nb_output_repo = '/users/jsdillon/Libraries/H4C_Notebooks'
 # nb_out_dir = '/home/obs/src/H4C_Notebooks'
 git_push = false
 
+[SSINS_OPTS]
+streak_sig = 20.0
+other_sig = 5.0
+tb_aggro = 0.5
+
 [ANT_METRICS_OPTS]
 crossCut = 5.0
 deadCut = 5.0
@@ -57,6 +62,7 @@ nsig_t_adj = 3.0
 [WorkFlow]
 actions = ["FIX_DATAFILE", # TODO: REMOVE THIS FOR SITE
            "EXTRACT_AUTOS",
+           "SSINS",
            "ANT_METRICS_KNOWN_GOOD",
            "ANT_METRICS_MAYBE_GOOD",
            "DATA_INSPECT_NOTEBOOK_KNOWN_GOOD",
@@ -78,9 +84,17 @@ args = ["{basename}"]
 prereqs = "FIX_DATAFILE"
 args = ["{basename}"]
 
+[SSINS]
+args = ["${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
+        "${SSINS_OPTS:tb_aggro}", "{obsid_list}"]
+stride_length = 10
+chunk_size = 10
+time_centered = false
+collect_stragglers = true
+
 [ANT_METRICS_KNOWN_GOOD]
 prereqs = "FIX_DATAFILE"
-args = ["{basename}", 
+args = ["{basename}",
         "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}",
         "${ANT_METRICS_OPTS:Nbls_per_load}",
@@ -90,7 +104,7 @@ args = ["{basename}",
 
 [ANT_METRICS_MAYBE_GOOD]
 prereqs = "FIX_DATAFILE"
-args = ["{basename}", 
+args = ["{basename}",
         "${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}",
         "${ANT_METRICS_OPTS:Nbls_per_load}",
@@ -105,7 +119,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
@@ -119,7 +133,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
@@ -161,7 +175,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
@@ -175,7 +189,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
@@ -220,7 +234,7 @@ chunk_size = 1
 stride_length = "all"
 time_centered = false
 mem = 128000
-args = ["{basename}", 
+args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_template_dir}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
