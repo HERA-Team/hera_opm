@@ -17,5 +17,5 @@ source ${src_dir}/_common.sh
 # 5+ - filenames
 data_files="${@:5}"
 
-echo xrfi_run_data_only.py --data_files ${data_files} --kt_size=${1} --kf_size=${2} --sig_init=${3} --sig_adj=${4} --clobber
-xrfi_run_data_only.py --data_files ${data_files} --kt_size=${1} --kf_size=${2} --sig_init=${3} --sig_adj=${4} --clobber
+echo xrfi_run_data_only.py --data_file ${data_files} --kt_size=${1} --kf_size=${2} --sig_init=${3} --sig_adj=${4} --clobber
+xrfi_run_data_only.py --data_file ${data_files} --kt_size=${1} --kf_size=${2} --sig_init=${3} --sig_adj=${4} --clobber
