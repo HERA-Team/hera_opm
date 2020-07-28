@@ -27,8 +27,8 @@ Nbls_per_load = 100
 good_extension = ".known_good.ant_metrics.hdf5"
 maybe_extension = ".maybe_good.ant_metrics.hdf5"
 # TODO: these will need to be updated as commissioning gets underway
-good_statuses = "digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok,not_connected"
-maybe_statuses = "digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok,not_connected"
+good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok"
+maybe_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok"
 
 [REDCAL_OPTS]
 ant_z_thresh = 4
