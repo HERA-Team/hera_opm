@@ -23,6 +23,7 @@ extension=${5}
 known_good_statuses=${6}
 
 # get exants from HERA CM database
+jd=$(get_jd ${fn})
 apriori_xants=`query_ex_ants.py ${jd} ${known_good_statuses}`
 
 # We only want to run ant metrics on sum files
