@@ -13,7 +13,7 @@ timeout = "24h"
 
 [NOTEBOOK_OPTS]
 # FOR NRAO:
-nb_template_dir = '/users/jsdillon/Libraries/hera_notebook_templates'
+nb_template_dir = '/users/jsdillon/Libraries/hera_notebook_templates/notebooks'
 nb_output_repo = '/users/jsdillon/Libraries/H4C_Notebooks'
 # FOR SITE:
 # nb_template_dir = '/home/obs/src/hera_notebook_templates'
