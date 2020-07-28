@@ -91,8 +91,8 @@ args = ["${SSINS_OPTS:streak_sig}", "${SSINS_OPTS:other_sig}",
         "${SSINS_OPTS:tb_aggro}", "{obsid_list}"]
 stride_length = 10
 chunk_size = 10
-time_centered = False
-collect_stragglers = True
+time_centered = false
+collect_stragglers = true
 
 [XRFI]
 args = ["{basename}", "${XRFI_OPTS:kt_size}", "${XRFI_OPTS:kf_size}", "${XRFI_OPTS:sig_init}",
