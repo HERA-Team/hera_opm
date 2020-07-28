@@ -13,15 +13,20 @@ source ${src_dir}/_common.sh
 # 3 - The threshold for flagging a highly contaminated frequency channel
 # 4 - The filename(s) to read in
 
+all_args=("$@")
+
 streak_sig=${1}
 other_sig=${2}
 tb_aggro=${3}
-fn=${4}
+fns=("${all_args[@]:3}")
+
+
+echo filenames are "${fns[@]}"
 
 # Get the first filename in the list (should work if only one file)
-first_file="${fn%" "*}"
+first_file="${fns%" "*}"
 # Set the prefix based on the first filename
 prefix="${first_file%.*}"
 
-echo Run_HERA_SSINS.py -f $fn -s $streak_sig -o $other_sig -p $prefix -t $tb_aggro -c
-Run_HERA_SSINS.py -f $fn -s $streak_sig -o $other_sig -p $prefix -t $tb_aggro -c
+echo Run_HERA_SSINS.py -f "${fns[@]}" -s $streak_sig -o $other_sig -p $prefix -t $tb_aggro -c
+Run_HERA_SSINS.py -f "${fns[@]}" -s $streak_sig -o $other_sig -p $prefix -t $tb_aggro -c
