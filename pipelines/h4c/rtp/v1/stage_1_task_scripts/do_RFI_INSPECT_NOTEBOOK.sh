@@ -36,7 +36,7 @@ echo "THIS IS A PLACEHOLDER FOR A SCRIPT THAT RUNS THE rfi_inspect NOTEBOOK. NOT
 # --execute ${nb_template_dir}/rfi_inspect.ipynb
 
 # # If desired, push results to github
-# if ${git_push}
+# if [ "${git_push}" == "True" ]
 # then
 #     cd ${nb_output_repo}
 #     git pull origin master
