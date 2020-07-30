@@ -17,8 +17,8 @@ source ${src_dir}/_common.sh
 # 5+ - filenames
 data_files="${@:5}"
 
-echo xrfi_day_threshold_run.py --skip_making_flagged_abs_calfits --nsig_f=${1} --nsig_t=${2} --nsig_f_adj=${3} --nsig_t_adj=${4} --clobber ${data_files}
-xrfi_day_threshold_run.py --skip_making_flagged_abs_calfits --nsig_f=${1} --nsig_t=${2} --nsig_f_adj=${3} --nsig_t_adj=${4} --clobber ${data_files}
+echo xrfi_day_threshold_run.py ${data_files} --skip_making_flagged_abs_calfits --nsig_f=${1} --nsig_t=${2} --nsig_f_adj=${3} --nsig_t_adj=${4} --clobber
+xrfi_day_threshold_run.py ${data_files} --skip_making_flagged_abs_calfits --nsig_f=${1} --nsig_t=${2} --nsig_f_adj=${3} --nsig_t_adj=${4} --clobber
 
 # Rename results so that there will be no conflict with stage 2
 for df in data_files
