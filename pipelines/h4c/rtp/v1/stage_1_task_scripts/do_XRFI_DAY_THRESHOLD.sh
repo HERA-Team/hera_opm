@@ -26,7 +26,7 @@ if [ $? == 0 ]; then
         echo mv ${df%.sum.uvh5}.xrfi  ${df%.sum.uvh5}.stage_1_xrfi
         mv ${df%.sum.uvh5}.xrfi ${df%.sum.uvh5}.stage_1_xrfi
     done
-    for ff in *_threshold_flags.h5.h5; do
+    for ff in *_threshold_flags.h5; do
         echo mv ${ff} ${ff%_threshold_flags.h5}_stage_1_threshold_flag.h5
         mv ${ff} ${ff%_threshold_flags.h5}_stage_1_threshold_flag.h5
     done
