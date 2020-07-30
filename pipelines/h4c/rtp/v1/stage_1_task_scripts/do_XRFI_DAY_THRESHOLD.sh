@@ -24,7 +24,7 @@ xrfi_day_threshold_run.py ${data_files} --skip_making_flagged_abs_calfits --nsig
 for df in ${data_files}
 do
     echo mv ${df%.sum.uvh5}.xrfi  ${df%.sum.uvh5}.stage_1_xrfi
-    mv ${df%.sum.uvh5}.xrfi  ${df%.sum.uvh5}.stage_1_xrfi
+    mv ${df%.sum.uvh5}.xrfi ${df%.sum.uvh5}.stage_1_xrfi
 done
 for ff in *_threshold_flags.h5.h5
 do
