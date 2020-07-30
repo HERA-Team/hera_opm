@@ -21,7 +21,7 @@ echo xrfi_day_threshold_run.py ${data_files} --skip_making_flagged_abs_calfits -
 xrfi_day_threshold_run.py ${data_files} --skip_making_flagged_abs_calfits --nsig_f=${1} --nsig_t=${2} --nsig_f_adj=${3} --nsig_t_adj=${4} --clobber
 
 # Rename results so that there will be no conflict with stage 2
-for df in data_files
+for df in ${data_files}
 do
     mv ${df%.sum.uvh5}.xrfi  ${df%.sum.uvh5}.stage_1_xrfi
 done
