@@ -284,8 +284,7 @@ def make_chunk_list(
         else:
             i0 = obs_idx
             i1 = min(obs_idx + chunk_size, len(obsids))
-        n_following = len(obsids) - (obs_idx + int(stride_length))
-        if (n_following < chunk_size) and collect_stragglers:
+        if (i1 + int(stride_length) > len(obsids)) and collect_stragglers:
             # Calculate number of obsids that are skipped between strides
             gap = int(stride_length) - chunk_size
             if gap > 0:
@@ -455,7 +454,6 @@ def _determine_stride_partitioning(
         # Compute the number of remaining obsids to process.
         # We account for the location of the next stride to determine if we
         # should grab straggling obsids.
-        n_following = len(obsids) - (idx + stride_length)
         if time_centered:
             i0 = max(idx - chunk_size // 2, 0)
             i1 = idx + (chunk_size + 1) // 2
@@ -469,7 +467,7 @@ def _determine_stride_partitioning(
         # make a full set.
         if i1 > len(obsids):
             break
-        if (n_following < chunk_size) and collect_stragglers:
+        if (i1 + int(stride_length) > len(obsids)) and collect_stragglers:
             # Figure out if any observations that would normally have been skipped
             # will be lumped in by getting all remaining observations.
             gap = stride_length - chunk_size
