@@ -32,7 +32,7 @@ jupyter nbconvert --output=${nb_outfile} \
 --execute ${nb_template_dir}/rfi_inspect.ipynb
 
 # If desired, push results to github
-if ${git_push}
+if [ "${git_push}" == "True" ]
 then
     cd ${nb_output_repo}
     git pull origin master
