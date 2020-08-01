@@ -80,22 +80,30 @@ args = ["{basename}"]
 
 [ANT_METRICS_KNOWN_GOOD]
 prereqs = "FIX_DATAFILE"
-args = ["{basename}",
-        "${ANT_METRICS_OPTS:crossCut}",
+chunk_size = 10
+stride_length = 10
+time_centered = false
+collect_stragglers = true
+args = ["${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}",
         "${ANT_METRICS_OPTS:Nbls_per_load}",
         "${ANT_METRICS_OPTS:good_extension}",
         "${ANT_METRICS_OPTS:good_statuses}",
+        "{obsid_list}",
        ]
 
 [ANT_METRICS_MAYBE_GOOD]
 prereqs = "FIX_DATAFILE"
-args = ["{basename}",
-        "${ANT_METRICS_OPTS:crossCut}",
+chunk_size = 10
+stride_length = 10
+time_centered = false
+collect_stragglers = true
+args = ["${ANT_METRICS_OPTS:crossCut}",
         "${ANT_METRICS_OPTS:deadCut}",
         "${ANT_METRICS_OPTS:Nbls_per_load}",
         "${ANT_METRICS_OPTS:maybe_extension}",
         "${ANT_METRICS_OPTS:maybe_statuses}",
+        "{obsid_list}",
        ]
 
 [DATA_INSPECT_NOTEBOOK_KNOWN_GOOD]
