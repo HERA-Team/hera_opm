@@ -20,7 +20,7 @@ deadCut=${2}
 Nbls_per_load=${3}
 extension=${4}
 maybe_good_statuses=${5}
-fn1="${6}"
+fn1=`basename ${6}`
 data_files="${@:6}"
 
 # get exants from HERA CM database
