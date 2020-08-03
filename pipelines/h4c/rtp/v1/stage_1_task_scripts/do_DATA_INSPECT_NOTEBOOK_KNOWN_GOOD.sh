@@ -40,6 +40,6 @@ then
     cd ${nb_output_repo}
     git pull origin master
     git add ${nb_outfile}
-    git commit -m "RTP data inspection of known good antennas notebook commit for JD ${jd}"
+    git commit -m "RTP data inspection of known good antennas for JD ${jd}"
     git push origin master
 fi
