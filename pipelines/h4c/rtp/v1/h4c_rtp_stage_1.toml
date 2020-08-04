@@ -6,6 +6,7 @@ conda_env = "python3"
 # FOR SITE:
 # path_to_do_scripts = "/home/obs/src/hera_opm/pipelines/h4c/rtp/v1/stage_1_task_scripts"
 # conda_env = "RTP"
+# mandc_report = true
 source_script = "~/.bashrc"
 base_mem = 16000 # TODO: Check if this is the right number for site
 base_cpu = 1
