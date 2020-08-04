@@ -24,11 +24,16 @@ git_push = false
 crossCut = 5.0
 deadCut = 5.0
 Nbls_per_load = 100
-good_extension = ".known_good.ant_metrics.hdf5"
-maybe_extension = ".maybe_good.ant_metrics.hdf5"
 # TODO: these will need to be updated as commissioning gets underway
+# Antennas considered "good" and thus likely candidates for LST-binning
 good_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok"
+good_extension = ".known_good.ant_metrics.hdf5"
+# Good antennas as well as ntennas that might be ready to promote to "good" status, pending a commissioning meeting.
 maybe_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok"
+maybe_extension = ".maybe_good.ant_metrics.hdf5"
+# All antennas that are on and worth running ant_metrics and the data_inspect notebook on.
+all_statuses = "passed_checks,needs_checking,digital_ok,digital_maintenance,calibration_maintenance,calibration_triage,calibration_ok,dish_maintenance,dish_ok,RF_maintenance,RF_ok"
+all_extension = ".all_ants.ant_metrics.hdf5"
 
 [REDCAL_OPTS]
 ant_z_thresh = 4
@@ -59,8 +64,10 @@ actions = ["FIX_DATAFILE", # TODO: REMOVE THIS FOR SITE
            "EXTRACT_AUTOS",
            "ANT_METRICS_KNOWN_GOOD",
            "ANT_METRICS_MAYBE_GOOD",
+           "ANT_METRICS_ALL_ANTS",
            "DATA_INSPECT_NOTEBOOK_KNOWN_GOOD",
            "DATA_INSPECT_NOTEBOOK_MAYBE_GOOD",
+           "DATA_INSPECT_NOTEBOOK_ALL_ANTS",
            "REDCAL_KNOWN_GOOD",
            "REDCAL_MAYBE_GOOD",
            "REDCAL_INSPECT_NOTEBOOK_KNOWN_GOOD",
@@ -106,6 +113,20 @@ args = ["${ANT_METRICS_OPTS:crossCut}",
         "{obsid_list}",
        ]
 
+[ANT_METRICS_ALL_ANTS]
+prereqs = "FIX_DATAFILE"
+chunk_size = 10
+stride_length = 10
+time_centered = false
+collect_stragglers = true
+args = ["${ANT_METRICS_OPTS:crossCut}",
+        "${ANT_METRICS_OPTS:deadCut}",
+        "${ANT_METRICS_OPTS:Nbls_per_load}",
+        "${ANT_METRICS_OPTS:all_extension}",
+        "${ANT_METRICS_OPTS:all_statuses}",
+        "{obsid_list}",
+       ]
+
 [DATA_INSPECT_NOTEBOOK_KNOWN_GOOD]
 prereqs = "ANT_METRICS_KNOWN_GOOD"
 prereq_chunk_size = "all"
@@ -132,6 +153,20 @@ args = ["{basename}",
         "${NOTEBOOK_OPTS:nb_output_repo}",
         "${NOTEBOOK_OPTS:git_push}",
         "${ANT_METRICS_OPTS:maybe_extension}"
+        ]
+
+[DATA_INSPECT_NOTEBOOK_ALL_ANTS]
+prereqs = "ANT_METRICS_ALL_ANTS"
+prereq_chunk_size = "all"
+chunk_size = 1
+stride_length = "all"
+time_centered = false
+mem = 128000
+args = ["{basename}",
+        "${NOTEBOOK_OPTS:nb_template_dir}",
+        "${NOTEBOOK_OPTS:nb_output_repo}",
+        "${NOTEBOOK_OPTS:git_push}",
+        "${ANT_METRICS_OPTS:all_extension}"
         ]
 
 [REDCAL_KNOWN_GOOD]
