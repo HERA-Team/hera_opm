@@ -895,10 +895,7 @@ def build_analysis_makeflow_from_config(
 
             # loop over actions for this obsid
             for ia, action in enumerate(workflow):
-                if action == "SETUP":
-                    outfiles_prev = setup_outfiles
-                    continue
-                if action == "TEARDOWN":
+                if action == "SETUP" or action == "TEARDOWN":
                     continue
                 prereqs = get_config_entry(config, action, "prereqs", required=False)
                 stride_length = get_config_entry(
@@ -945,18 +942,6 @@ def build_analysis_makeflow_from_config(
                     primary_obsids = _cache_dict[key1]
                     per_obsid_primary_obsids = _cache_dict[key2]
 
-                if obsid not in primary_obsids:
-                    # add obsid's primary obsids to list of previous
-                    # outfiles and continue
-                    outfiles_prev = []
-                    for oi_list in per_obsid_primary_obsids:
-                        for oi in oi_list:
-                            oi = os.path.basename(oi)
-                            outfiles_prev.extend(make_outfile_name(oi, action))
-                    outfiles_prev = list(set(outfiles_prev))
-
-                    continue
-
                 # start list of input files
                 infiles = []
 
@@ -967,8 +952,9 @@ def build_analysis_makeflow_from_config(
                 infiles.append(command)
 
                 # also add previous outfiles to input requirements
-                if ia > 0:
-                    for of in outfiles_prev:
+                if "SETUP" in workflow and ia == 1:
+                    # add setup to list of prereqs
+                    for of in setup_outfiles:
                         infiles.append(of)
 
                 # make argument list
@@ -1121,9 +1107,6 @@ def build_analysis_makeflow_from_config(
                     print(line1, file=f)
                     print(line2, file=f)
 
-                # save previous outfiles for next time
-                outfiles_prev = outfiles
-
         # if we have a teardown step, add it here
         if "TEARDOWN" in workflow:
             # set parent_dir to correspond to the directory of the last obsid
@@ -1138,14 +1121,60 @@ def build_analysis_makeflow_from_config(
             infiles.append(command)
 
             # add the final outfiles for the last per-file step for all obsids
-            prereq = workflow[-2]
+            action = workflow[-2]
             for obsid in obsids:
                 abspath = os.path.abspath(obsid)
                 parent_dir = os.path.dirname(abspath)
                 filename = os.path.basename(abspath)
-                outfiles = make_outfile_name(filename, prereq)
-                for of in outfiles:
-                    infiles.append(of)
+
+                # get primary obsids for 2nd-to-last step
+                stride_length = get_config_entry(
+                    config,
+                    action,
+                    "stride_length",
+                    required=False,
+                    total_length=len(obsids),
+                )
+                prereq_chunk_size = get_config_entry(
+                    config, action, "prereq_chunk_size", required=False,
+                )
+                chunk_size = get_config_entry(
+                    config,
+                    action,
+                    "chunk_size",
+                    required=False,
+                    total_length=len(obsids),
+                )
+                time_centered = get_config_entry(
+                    config, action, "time_centered", required=False
+                )
+                collect_stragglers = get_config_entry(
+                    config, action, "collect_stragglers", required=False
+                )
+
+                key1 = action + "_primary_obsids"
+                key2 = action + "_per_obsid_primary_obsids"
+                if key1 not in _cache_dict.keys():
+                    (
+                        primary_obsids,
+                        per_obsid_primary_obsids,
+                    ) = _determine_stride_partitioning(
+                        sorted_obsids,
+                        stride_length=stride_length,
+                        chunk_size=chunk_size,
+                        time_centered=time_centered,
+                        collect_stragglers=collect_stragglers,
+                    )
+                else:
+                    # fetch items from cache dict
+                    primary_obsids = _cache_dict[key1]
+                    per_obsid_primary_obsids = _cache_dict[key2]
+
+                for oi_list in per_obsid_primary_obsids:
+                    for oi in oi_list:
+                        oi = os.path.basename(oi)
+                        infiles.extend(make_outfile_name(oi, action))
+                infiles = list(set(infiles))
 
             args = get_config_entry(config, "TEARDOWN", "args", required=False)
             if args is not None:
