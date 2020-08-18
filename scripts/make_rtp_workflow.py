@@ -23,7 +23,9 @@ MONITORING_INTERVAL = 60
 REDIS_HOST = "redishost"
 REDIS_PORT = 6379
 STORAGE_LOCATION = "/mnt/sn1"
-WORKFLOW_CONFIG = "/home/obs/src/hera_opm/pipelines/h3c/rtp/v1/rtp.toml"
+WORKFLOW_CONFIG = (
+    "/home/obs/src/hera_pipelines/pipelines/h4c/rtp/v1/h4c_rtp_stage_1.toml"
+)
 CONDA_ENV = "RTP"
 
 # get around potential problem of HDF5 not being able to lock files
