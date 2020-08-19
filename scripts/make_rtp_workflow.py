@@ -14,6 +14,7 @@ import numpy as np
 from psycopg2.errors import UniqueViolation
 from sqlalchemy.exc import IntegrityError
 
+from pyuvdata import UVData
 import hera_mc.mc as mc
 from hera_opm import mf_tools as mt
 
@@ -54,6 +55,15 @@ while True:
         file_paths = [
             os.path.join(STORAGE_LOCATION, new_file) for new_file in new_files
         ]
+
+        # make sure we can read the metadata properly
+        for filename in file_paths:
+            try:
+                uvd = UVData()
+                uvd.read(filename, read_data=False)
+            except (KeyError, OSError, ValueError):
+                # ignore the file
+                file_paths.remove(filename)
 
         # make M&C RTP process events for each file
         parser = mc.get_mc_argument_parser()
