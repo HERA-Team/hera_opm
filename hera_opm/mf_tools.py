@@ -942,6 +942,9 @@ def build_analysis_makeflow_from_config(
                     primary_obsids = _cache_dict[key1]
                     per_obsid_primary_obsids = _cache_dict[key2]
 
+                if obsid not in primary_obsids:
+                    continue
+
                 # start list of input files
                 infiles = []
 
@@ -951,8 +954,8 @@ def build_analysis_makeflow_from_config(
                 command = os.path.join(path_to_do_scripts, command)
                 infiles.append(command)
 
-                # also add previous outfiles to input requirements
-                if "SETUP" in workflow and ia == 1:
+                # add setup outfile to input requirements
+                if "SETUP" in workflow and ia > 0:
                     # add setup to list of prereqs
                     for of in setup_outfiles:
                         infiles.append(of)
