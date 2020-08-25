@@ -110,7 +110,9 @@ while True:
         mt.build_makeflow_from_config(file_paths, WORKFLOW_CONFIG, mf_path, MF_LOCATION)
 
         # launch workflow inside of screen
-        cmd = "conda activate {}; makeflow -T slurm {}\n".format(CONDA_ENV, mf_path)
+        cmd = "conda deactivate; conda activate {}; makeflow -T slurm {}\n".format(
+            CONDA_ENV, mf_path
+        )
         screen_name = "rtp_{}".format(str(int(jd0)))
         screen_cmd1 = ["screen", "-d", "-m", "-S", screen_name]
         screen_cmd2 = ["screen", "-S", screen_name, "-p", "0", "-X", "stuff", cmd]
