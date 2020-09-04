@@ -187,16 +187,19 @@ def test_make_chunk_list(config_options):
     assert set(
         mt.make_chunk_list(obsid, action, obsids, chunk_size=3, return_outfiles=True)
     ) == set(outfiles[1:])
-    assert set(
-        mt.make_chunk_list(
-            obsid,
-            action,
-            obsids,
-            chunk_size=3,
-            time_centered=False,
-            return_outfiles=True,
+    assert (
+        set(
+            mt.make_chunk_list(
+                obsid,
+                action,
+                obsids,
+                chunk_size=3,
+                time_centered=False,
+                return_outfiles=True,
+            )
         )
-    ) == set(outfiles[2:])
+        == set(outfiles[2:])
+    )
 
     return
 
@@ -404,7 +407,10 @@ def test_determine_stride_partitioning_defaults(config_options):
 
     # run again with chunk_size = 5
     primary_obsids, per_obsid_primary_obsids = mt._determine_stride_partitioning(
-        input_obsids, chunk_size=5, time_centered=True, collect_stragglers=False,
+        input_obsids,
+        chunk_size=5,
+        time_centered=True,
+        collect_stragglers=False,
     )
     # the results should be the same as in test_determine_stride_partitioning
     assert primary_obsids == list(input_obsids[2:-2])
@@ -470,7 +476,10 @@ def test_determine_stride_partitioning_errors(config_options):
 
     with pytest.raises(ValueError, match="time_centered must be a boolean variable"):
         mt._determine_stride_partitioning(
-            input_obsids, stride_length=1, chunk_size=2, time_centered="False",
+            input_obsids,
+            stride_length=1,
+            chunk_size=2,
+            time_centered="False",
         )
 
     with pytest.raises(

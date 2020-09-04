@@ -357,8 +357,8 @@ def process_batch_options(
         if queue is not None:
             batch_options += " -p {}".format(queue)
     elif batch_system.lower() == "htcondor":
-        batch_options = "request_memory = {0:d} M \n request_virtualmemory = {0:d} M".format(
-            mem
+        batch_options = (
+            "request_memory = {0:d} M \n request_virtualmemory = {0:d} M".format(mem)
         )
         if ncpu is not None:
             batch_options += " \n request_cpus = {:d}".format(ncpu)
@@ -906,7 +906,10 @@ def build_analysis_makeflow_from_config(
                     total_length=len(obsids),
                 )
                 prereq_chunk_size = get_config_entry(
-                    config, action, "prereq_chunk_size", required=False,
+                    config,
+                    action,
+                    "prereq_chunk_size",
+                    required=False,
                 )
                 chunk_size = get_config_entry(
                     config,
@@ -1139,7 +1142,10 @@ def build_analysis_makeflow_from_config(
                     total_length=len(obsids),
                 )
                 prereq_chunk_size = get_config_entry(
-                    config, action, "prereq_chunk_size", required=False,
+                    config,
+                    action,
+                    "prereq_chunk_size",
+                    required=False,
                 )
                 chunk_size = get_config_entry(
                     config,
@@ -1440,7 +1446,8 @@ def build_lstbin_makeflow_from_config(
                 print("cd {}".format(parent_dir), file=f2)
                 if timeout is not None:
                     print(
-                        "timeout {0} {1} {2}".format(timeout, command, args), file=f2,
+                        "timeout {0} {1} {2}".format(timeout, command, args),
+                        file=f2,
                     )
                 else:
                     print("{0} {1}".format(command, args), file=f2)
