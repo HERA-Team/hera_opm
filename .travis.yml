@@ -35,6 +35,7 @@ install:
   - conda list
 script:
   - coverage run --source=hera_opm setup.py test
+  - pre-commit autoupdate
   - pre-commit run -a
 after_success:
   - coveralls
