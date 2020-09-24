@@ -28,6 +28,7 @@ WORKFLOW_CONFIG = (
     "/home/obs/src/hera_pipelines/pipelines/h4c/rtp/v1/h4c_rtp_stage_1.toml"
 )
 CONDA_ENV = "RTP"
+ALLOWED_TAGS = ["engineering", "science"]
 
 # get around potential problem of HDF5 not being able to lock files
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
@@ -62,8 +63,20 @@ while True:
                 uvd = UVData()
                 uvd.read(filename, read_data=False)
             except (KeyError, OSError, ValueError):
-                # ignore the file
+                # ignore the file and rename it
                 file_paths.remove(filename)
+                new_filename = filename + ".METADATA_ERROR"
+                os.rename(filename, new_filename)
+                continue
+            # make sure the tag is valid
+            if uvd.extra_keywords["tag"] not in ALLOWED_TAGS:
+                file_paths.remove(filename)
+
+        # make sure we still have files to process
+        if len(file_paths) == 0:
+            # update redis
+            rsession.hset("rtp:has_new_data", "state", "False")
+            continue
 
         # make M&C RTP process events for each file
         parser = mc.get_mc_argument_parser()
