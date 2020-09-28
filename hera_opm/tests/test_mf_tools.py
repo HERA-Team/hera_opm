@@ -319,11 +319,15 @@ def test_process_batch_options_slurm():
     mail_user = "youremail@example.org"
     queue = "hera"
     batch_system = "slurm"
-    batch_options = mt.process_batch_options(mem, ncpu, mail_user, queue, batch_system)
+    extra_options = "--gres=gpu"
+    batch_options = mt.process_batch_options(
+        mem, ncpu, mail_user, queue, batch_system, extra_options
+    )
     assert "--mem 8000M" in batch_options
     assert "-n 1" in batch_options
     assert "--mail-user youremail@example.org" in batch_options
     assert "-p hera" in batch_options
+    assert "--gres=gpu" in batch_options
 
     return
 

@@ -307,7 +307,12 @@ def make_chunk_list(
 
 
 def process_batch_options(
-    mem, ncpu=None, mail_user="youremail@example.org", queue="hera", batch_system="pbs"
+    mem,
+    ncpu=None,
+    mail_user="youremail@example.org",
+    queue="hera",
+    batch_system="pbs",
+    extra_options=None,
 ):
     """Form a series of batch options to be passed to makeflow.
 
@@ -324,6 +329,11 @@ def process_batch_options(
     batch_system : str, optional
         The batch system that will be running the makeflow. Must be one of:
         "pbs", "slurm", "htcondor".
+    extra_options : str, optional
+        Additional batch processing options. These will be passed in as-is, and
+        so will be unique for a given batch_system. For example, when using
+        slurm, one could use this option to specify "gres=gpu" or something
+        similar.
 
     Returns
     -------
@@ -371,6 +381,10 @@ def process_batch_options(
             "Unrecognized batch system {}; must be one of: "
             "pbs, slurm".format(batch_system)
         )
+
+    # tack on extra_options
+    if extra_options is not None:
+        batch_options += " " + extra_options
     return batch_options
 
 
@@ -831,6 +845,9 @@ def build_analysis_makeflow_from_config(
             mem = get_config_entry(config, "SETUP", "mem", required=False)
             ncpu = get_config_entry(config, "SETUP", "ncpu", required=False)
             queue = get_config_entry(config, "SETUP", "queue", required=False)
+            extra_options = get_config_entry(
+                config, "SETUP", "extra_batch_options", required=False
+            )
             if queue is None:
                 queue = default_queue
             if mem is None:
@@ -839,7 +856,7 @@ def build_analysis_makeflow_from_config(
                 if base_cpu is not None:
                     ncpu = base_cpu
             batch_options = process_batch_options(
-                mem, ncpu, mail_user, queue, batch_system
+                mem, ncpu, mail_user, queue, batch_system, extra_options
             )
             print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
@@ -976,6 +993,9 @@ def build_analysis_makeflow_from_config(
                 mem = get_config_entry(config, action, "mem", required=False)
                 ncpu = get_config_entry(config, action, "ncpu", required=False)
                 queue = get_config_entry(config, action, "queue", required=False)
+                extra_options = get_config_entry(
+                    config, action, "extra_batch_options", required=False
+                )
                 if mem is None:
                     mem = base_mem
                 if ncpu is None:
@@ -984,7 +1004,7 @@ def build_analysis_makeflow_from_config(
                 if queue is None:
                     queue = default_queue
                 batch_options = process_batch_options(
-                    mem, ncpu, mail_user, queue, batch_system
+                    mem, ncpu, mail_user, queue, batch_system, extra_options
                 )
                 print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
@@ -1196,6 +1216,9 @@ def build_analysis_makeflow_from_config(
             mem = get_config_entry(config, "TEARDOWN", "mem", required=False)
             ncpu = get_config_entry(config, "TEARDOWN", "ncpu", required=False)
             queue = get_config_entry(config, "TEARDOWN", "queue", required=False)
+            extra_options = get_config_entry(
+                config, "TEARDOWN", "extra_batch_options", required=False
+            )
             if mem is None:
                 mem = base_mem
             if ncpu is None:
@@ -1204,7 +1227,7 @@ def build_analysis_makeflow_from_config(
             if queue is None:
                 queue = default_queue
             batch_options = process_batch_options(
-                mem, ncpu, mail_user, queue, batch_system
+                mem, ncpu, mail_user, queue, batch_system, extra_options
             )
             print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
