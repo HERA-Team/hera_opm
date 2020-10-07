@@ -4,7 +4,7 @@
 
 import os
 import time
-import datetime
+import shutil
 import subprocess
 
 from astropy.time import Time
@@ -105,19 +105,28 @@ while True:
                 continue
 
         # make target directory if it doesn't exist
-        date = datetime.date.today().strftime("%y%m%d")
-        MF_LOCATION = os.path.join("/home/obs/rtp_makeflow", date)
-        if not os.path.isdir(MF_LOCATION):
-            os.makedirs(MF_LOCATION)
+        jd0 = float(new_files[0][4:17])
+        int_jd = int(jd0)
+        isuffix = 0
+        while True:
+            workdir_name = int_jd + f".run{isuffix}"
+            MF_LOCATION = os.path.join("/home/obs/rtp_makeflow", workdir_name)
+            if os.path.isdir(MF_LOCATION):
+                isuffix += 1
+            else:
+                os.makedirs(MF_LOCATION)
+                break
 
         # make a date stamp from the first file in the makeflow filename
-        jd0 = float(new_files[0][4:17])
         t0 = Time(jd0, format="jd", out_subfmt="date_hms")
         mf_name = "rtp_{}.mf".format(t0.isot)
         mf_path = os.path.join(MF_LOCATION, mf_name)
 
         # change working location
         os.chdir(MF_LOCATION)
+
+        # make a copy of the TOML file used
+        shutil.copy2(WORKFLOW_CONFIG, MF_LOCATION)
 
         # make a workflow
         mt.build_makeflow_from_config(file_paths, WORKFLOW_CONFIG, mf_path, MF_LOCATION)
