@@ -15,20 +15,20 @@ config = args.config
 output = args.output
 scan_files = args.scan_files
 
-obsid_list = " ".join(obsids)
 if scan_files:
     try:
         from pyuvdata import UVData
     except ImportError:
         sys.exit("pyuvdata must be installed to use --scan-files option")
-    for obsid in obsid_list:
+    for obsid in obsids:
         try:
             uvd = UVData()
             uvd.read(obsid, read_data=False)
         except (KeyError, OSError, ValueError):
             print(f"Bad metadata in {obsid}")
-            obsid_list.remove(obsid)
+            obsids.remove(obsid)
 
+obsid_list = " ".join(obsids)
 print(
     "Generating makeflow file from config file {0} for obsids {1}".format(
         config, obsid_list
