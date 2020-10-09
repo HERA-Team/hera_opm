@@ -46,6 +46,12 @@ def get_makeflow_ArgumentParser():
         default=[],
         help="Files to apply the pipeline to. Typically raw miriad files.",
     )
+    ap.add_argument(
+        "--scan-files",
+        action="store_true",
+        default=False,
+        help="Scan metadata of HERA data files before including in workflow. Requires pyuvdata",
+    )
 
     return ap
 
