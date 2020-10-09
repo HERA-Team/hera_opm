@@ -66,7 +66,11 @@ while True:
                 # ignore the file and rename it
                 file_paths.remove(filename)
                 new_filename = filename + ".METADATA_ERROR"
-                os.rename(filename, new_filename)
+                try:
+                    os.rename(filename, new_filename)
+                except FileNotFoundError:
+                    # ignore it
+                    pass
                 continue
             # make sure the tag is valid
             if uvd.extra_keywords["tag"] not in ALLOWED_TAGS:
