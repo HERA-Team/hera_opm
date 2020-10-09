@@ -4,6 +4,7 @@
 # Licensed under the 2-clause BSD License
 """Script for generating a makeflow from a config and list of files."""
 
+import sys
 from hera_opm import mf_tools as mt
 from hera_opm import utils
 
@@ -12,8 +13,22 @@ args = a.parse_args()
 obsids = args.files
 config = args.config
 output = args.output
+scan_files = args.scan_files
 
 obsid_list = " ".join(obsids)
+if scan_files:
+    try:
+        from pyuvdata import UVData
+    except ImportError:
+        sys.exit("pyuvdata must be installed to use --scan-files option")
+    for obsid in obsid_list:
+        try:
+            uvd = UVData()
+            uvd.read(obsid, read_data=False)
+        except (KeyError, OSError, ValueError):
+            print(f"Bad metadata in {obsid}")
+            obsid_list.remove(obsid)
+
 print(
     "Generating makeflow file from config file {0} for obsids {1}".format(
         config, obsid_list

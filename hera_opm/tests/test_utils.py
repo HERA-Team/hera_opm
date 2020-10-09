@@ -17,6 +17,7 @@ def test_get_makeflow_ArgumentParser():
     assert parsed_args.output == output_file
     for obsid in obsids:
         assert obsid in parsed_args.files
+    assert parsed_args.scan_files is False
 
     return
 
