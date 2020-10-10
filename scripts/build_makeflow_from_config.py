@@ -15,6 +15,7 @@ config = args.config
 output = args.output
 scan_files = args.scan_files
 
+bad_metadata_obsids = []
 if scan_files:
     try:
         from pyuvdata import UVData
@@ -25,7 +26,7 @@ if scan_files:
             uvd = UVData()
             uvd.read(obsid, read_data=False)
         except (KeyError, OSError, ValueError):
-            print(f"Bad metadata in {obsid}")
+            bad_metadata_obsids.append(obsid)
             obsids.remove(obsid)
 
 obsid_list = " ".join(obsids)
@@ -35,3 +36,7 @@ print(
     )
 )
 mt.build_makeflow_from_config(obsids, config, output)
+
+for obsid in bad_metadata_obsids:
+    print(f"Bad metadata in {obsid}")
+
