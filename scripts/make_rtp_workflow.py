@@ -113,7 +113,7 @@ while True:
         int_jd = int(jd0)
         isuffix = 0
         while True:
-            workdir_name = int_jd + f".run{isuffix}"
+            workdir_name = str(int_jd) + f".run{isuffix}"
             MF_LOCATION = os.path.join("/home/obs/rtp_makeflow", workdir_name)
             if os.path.isdir(MF_LOCATION):
                 isuffix += 1
