@@ -146,7 +146,13 @@ while True:
             subprocess.check_call(screen_cmd1)
             subprocess.check_call(screen_cmd2)
         except subprocess.CalledProcessError as e:
-            raise ValueError(
+            # raise ValueError(
+            #     "Error spawning screen session; command was {}; returncode was {:d}; "
+            #     "output was {}; stderr was {}".format(
+            #         e.cmd, e.returncode, e.output, e.stderr
+            #     )
+            # )
+            print(
                 "Error spawning screen session; command was {}; returncode was {:d}; "
                 "output was {}; stderr was {}".format(
                     e.cmd, e.returncode, e.output, e.stderr
