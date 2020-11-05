@@ -120,7 +120,7 @@ requires more memory than the amount specified, it is not killed). That said, it
 is better to overestimate the memory required, to avoid instances of tasks
 having insufficient memory, and terminating early.
 
-### cpu
+### ncpu
 
 The number of CPU cores that should be reserved for a given task. Unless you
 have explicitly made your task parallel (using OpenMP, MPI, or other
