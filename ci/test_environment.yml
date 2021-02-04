@@ -21,8 +21,6 @@ dependencies:
   - toml
   - scikit-learn
   - pip:
-      - git+https://github.com/HERA-Team/linsolve.git
-      - git+https://github.com/HERA-Team/hera_qm.git
-      - git+https://github.com/HERA-Team/uvtools.git
-      - git+https://github.com/HERA-Team/hera_cal.git
       - git+https://github.com/HERA-Team/casa_imaging.git
+      - git+https://github.com/HERA-Team/hera_cal.git
+      - git+https://github.com/HERA-Team/uvtools.git
