@@ -1,0 +1,28 @@
+name: hera_opm_tests
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - aipy
+  - astropy
+  - coverage
+  - ephem
+  - flake8
+  - h5py
+  - matplotlib
+  - numpy
+  - pandas
+  - pip
+  - pyephem
+  - pytest
+  - pytest-runner
+  - pyuvdata
+  - scipy
+  - toml
+  - scikit-learn
+  - pip:
+      - git+https://github.com/HERA-Team/linsolve.git
+      - git+https://github.com/HERA-Team/hera_qm.git
+      - git+https://github.com/HERA-Team/uvtools.git
+      - git+https://github.com/HERA-Team/hera_cal.git
+      - git+https://github.com/HERA-Team/casa_imaging.git

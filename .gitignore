@@ -5,8 +5,10 @@ build/
 dist/
 *.coverage
 *.egg-info/
+.eggs
 hera_opm/GIT_INFO
 pip-wheel-metadata
+coverage.xml
 
 # Sphinx documentation
 docs/_build
