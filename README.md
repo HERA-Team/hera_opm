@@ -1,7 +1,7 @@
 # hera_opm
 
-[![Build Status](https://travis-ci.org/HERA-Team/hera_opm.svg?branch=master)](https://travis-ci.org/HERA-Team/hera_opm)
-[![Coverage Status](https://coveralls.io/repos/github/HERA-Team/hera_opm/badge.svg)](https://coveralls.io/github/HERA-Team/hera_opm)
+[![Run Tests](https://github.com/HERA-Team/hera_opm/workflows/Run%20Tests/badge.svg)](https://github.com/HERA-Team/hera_opm/actions)
+[![Code Coverage](https://codecov.io/gh/HERA-Team/hera_opm/branch/main/graph/badge.svg?token=cFmFFBVHZP)](https://codecov.io/gh/HERA-Team/hera_opm)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
