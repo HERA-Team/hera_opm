@@ -21,6 +21,7 @@ dependencies:
   - toml
   - scikit-learn
   - pip:
+      - pre-commit
       - pytest-cov
       - git+https://github.com/HERA-Team/casa_imaging.git
       - git+https://github.com/HERA-Team/hera_cal.git
