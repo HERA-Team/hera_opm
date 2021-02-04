@@ -5,15 +5,12 @@ channels:
 dependencies:
   - aipy
   - astropy
-  - coverage
-  - ephem
   - flake8
   - h5py
   - matplotlib
   - numpy
   - pandas
   - pip
-  - pyephem
   - pytest
   - pytest-runner
   - pyuvdata
