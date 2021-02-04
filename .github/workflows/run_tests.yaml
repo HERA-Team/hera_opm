@@ -1,0 +1,55 @@
+name: Run Tests
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: Run Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.6, 3.7, 3.8]
+
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set ENV NAME
+        run: |
+          echo "::set-output name=ENV_NAME::hera_opm_tests"
+        id: env_name
+
+      - name: set up Python ${{ matrix.python-version }}
+        uses: conda-incubator/setup-miniconda@v2.0.0
+        with:
+          auto-update-conda: true
+          miniconda-version: "latest"
+          python-version: ${{ matrix.python-version }}
+          environment-file: ci/test_environment.yml
+          activate-environment: ${{ steps.env_name.outputs.ENV_NAME }}
+
+      - name: Conda Info
+        run: |
+          conda info -a
+          conda list
+
+      - name: Run Tests
+        run: |
+          coverage run --source=hera_opm setup.py test
+          coverage xml
+
+      - name: Run Linting
+        run: |
+          pre-commit autoupdate
+          pre-commit run -a
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v1
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          env_vars: PYTHON
+          verbose: true
