@@ -53,7 +53,7 @@ def construct_version_info():
         return data.decode("utf-8")
 
     def unicode_to_str(u):
-        return u
+        return u  # pragma: no cover
 
     version_file = os.path.join(hera_opm_dir, "VERSION")
     version = open(version_file).read().strip()
@@ -135,4 +135,4 @@ def main():  # pragma: no cover
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

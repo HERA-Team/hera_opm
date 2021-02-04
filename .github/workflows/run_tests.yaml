@@ -38,8 +38,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          coverage run --source=hera_opm setup.py test
-          coverage xml
+          pytest --cov=hera_opm --cov-report xml:coverage.xml
 
       - name: Run Linting
         run: |
