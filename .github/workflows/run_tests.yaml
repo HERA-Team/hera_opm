@@ -17,11 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set ENV NAME
-        run: |
-          echo "::set-output name=ENV_NAME::hera_opm_tests"
-        id: env_name
-
       - name: set up Python ${{ matrix.python-version }}
         uses: conda-incubator/setup-miniconda@v2.0.0
         with:
@@ -29,7 +24,7 @@ jobs:
           miniconda-version: "latest"
           python-version: ${{ matrix.python-version }}
           environment-file: ci/test_environment.yml
-          activate-environment: ${{ steps.env_name.outputs.ENV_NAME }}
+          activate-environment: hera_opm_tests
 
       - name: Conda Info
         run: |
