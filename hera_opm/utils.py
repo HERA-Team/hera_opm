@@ -52,6 +52,18 @@ def get_makeflow_ArgumentParser():
         default=False,
         help="Scan metadata of HERA data files before including in workflow. Requires pyuvdata",
     )
+    ap.add_argument(
+        "--rename-bad-files",
+        action="store_true",
+        default=False,
+        help="Rename files with bad metadata (found with --scan-files) with suffix set by --bad-suffix (default is '.METADATA_ERROR').",
+    )
+    ap.add_argument(
+        "--bad-suffix",
+        default=".METADATA_ERROR",
+        type=str,
+        help="String to append to files pyuvdata could not read after running with --scan-files with --rename-bad-files. Default '.METADATA_ERROR'.",
+    )
 
     return ap
 
