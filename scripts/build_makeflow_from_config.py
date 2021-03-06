@@ -39,4 +39,3 @@ mt.build_makeflow_from_config(obsids, config, output)
 
 for obsid in bad_metadata_obsids:
     print(f"Bad metadata in {obsid}")
-
