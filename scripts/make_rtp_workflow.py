@@ -29,6 +29,7 @@ WORKFLOW_CONFIG = (
 )
 CONDA_ENV = "RTP"
 ALLOWED_TAGS = ["engineering", "science"]
+BAD_SUFFIX = ".METADATA_ERROR"
 
 # get around potential problem of HDF5 not being able to lock files
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
@@ -65,7 +66,7 @@ while True:
             except (KeyError, OSError, ValueError):
                 # ignore the file and rename it
                 file_paths.remove(filename)
-                new_filename = filename + ".METADATA_ERROR"
+                new_filename = filename + BAD_SUFFIX
                 try:
                     os.rename(filename, new_filename)
                 except FileNotFoundError:
