@@ -35,11 +35,7 @@ if scan_files:
                 os.rename(obsid, obsid + bad_suffix)
 
 obsid_list = " ".join(obsids)
-print(
-    "Generating makeflow file from config file {0} for obsids {1}".format(
-        config, obsid_list
-    )
-)
+print(f"Generating makeflow file from config file {config} for obsids {obsid_list}")
 mt.build_makeflow_from_config(obsids, config, output)
 
 for obsid in bad_metadata_obsids:
