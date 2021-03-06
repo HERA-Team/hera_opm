@@ -5,6 +5,7 @@
 """Script for generating a makeflow from a config and list of files."""
 
 import sys
+import os
 from hera_opm import mf_tools as mt
 from hera_opm import utils
 
@@ -14,6 +15,8 @@ obsids = args.files
 config = args.config
 output = args.output
 scan_files = args.scan_files
+rename_bad_files = args.rename_bad_files
+bad_suffix = args.bad_suffix
 
 bad_metadata_obsids = []
 if scan_files:
@@ -28,6 +31,8 @@ if scan_files:
         except (KeyError, OSError, ValueError):
             bad_metadata_obsids.append(obsid)
             obsids.remove(obsid)
+            if rename_bad_files:
+                os.rename(obsid, obsid + bad_suffix)
 
 obsid_list = " ".join(obsids)
 print(
@@ -39,3 +44,5 @@ mt.build_makeflow_from_config(obsids, config, output)
 
 for obsid in bad_metadata_obsids:
     print(f"Bad metadata in {obsid}")
+    if rename_bad_files:
+        print(f"    Moved to {obsid + bad_suffix}")
