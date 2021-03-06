@@ -18,6 +18,8 @@ def test_get_makeflow_ArgumentParser():
     for obsid in obsids:
         assert obsid in parsed_args.files
     assert parsed_args.scan_files is False
+    assert parsed_args.rename_bad_files is False
+    assert parsed_args.bad_suffix == ".METADATA_ERROR"
 
     return
 
