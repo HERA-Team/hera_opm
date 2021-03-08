@@ -4,7 +4,7 @@
 
 import os
 import time
-import shutil
+import datetime
 import subprocess
 
 from astropy.time import Time
@@ -29,7 +29,6 @@ WORKFLOW_CONFIG = (
 )
 CONDA_ENV = "RTP"
 ALLOWED_TAGS = ["engineering", "science"]
-BAD_SUFFIX = ".METADATA_ERROR"
 
 # get around potential problem of HDF5 not being able to lock files
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
@@ -66,12 +65,8 @@ while True:
             except (KeyError, OSError, ValueError):
                 # ignore the file and rename it
                 file_paths.remove(filename)
-                new_filename = filename + BAD_SUFFIX
-                try:
-                    os.rename(filename, new_filename)
-                except FileNotFoundError:
-                    # ignore it
-                    pass
+                new_filename = filename + ".METADATA_ERROR"
+                os.rename(filename, new_filename)
                 continue
             # make sure the tag is valid
             if uvd.extra_keywords["tag"] not in ALLOWED_TAGS:
@@ -110,28 +105,19 @@ while True:
                 continue
 
         # make target directory if it doesn't exist
-        jd0 = float(new_files[0][4:17])
-        int_jd = int(jd0)
-        isuffix = 0
-        while True:
-            workdir_name = str(int_jd) + f".run{isuffix}"
-            MF_LOCATION = os.path.join("/home/obs/rtp_makeflow", workdir_name)
-            if os.path.isdir(MF_LOCATION):
-                isuffix += 1
-            else:
-                os.makedirs(MF_LOCATION)
-                break
+        date = datetime.date.today().strftime("%y%m%d")
+        MF_LOCATION = os.path.join("/home/obs/rtp_makeflow", date)
+        if not os.path.isdir(MF_LOCATION):
+            os.makedirs(MF_LOCATION)
 
         # make a date stamp from the first file in the makeflow filename
+        jd0 = float(new_files[0][4:17])
         t0 = Time(jd0, format="jd", out_subfmt="date_hms")
         mf_name = "rtp_{}.mf".format(t0.isot)
         mf_path = os.path.join(MF_LOCATION, mf_name)
 
         # change working location
         os.chdir(MF_LOCATION)
-
-        # make a copy of the TOML file used
-        shutil.copy2(WORKFLOW_CONFIG, MF_LOCATION)
 
         # make a workflow
         mt.build_makeflow_from_config(file_paths, WORKFLOW_CONFIG, mf_path, MF_LOCATION)
@@ -147,13 +133,7 @@ while True:
             subprocess.check_call(screen_cmd1)
             subprocess.check_call(screen_cmd2)
         except subprocess.CalledProcessError as e:
-            # raise ValueError(
-            #     "Error spawning screen session; command was {}; returncode was {:d}; "
-            #     "output was {}; stderr was {}".format(
-            #         e.cmd, e.returncode, e.output, e.stderr
-            #     )
-            # )
-            print(
+            raise ValueError(
                 "Error spawning screen session; command was {}; returncode was {:d}; "
                 "output was {}; stderr was {}".format(
                     e.cmd, e.returncode, e.output, e.stderr
