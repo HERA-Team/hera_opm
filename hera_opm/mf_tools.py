@@ -1477,6 +1477,8 @@ def build_lstbin_makeflow_from_config(
                 print("if [ $? -eq 0 ]; then", file=f2)
                 print("  cd {}".format(work_dir), file=f2)
                 print("  touch {}".format(outfile), file=f2)
+                print("else", file=f2)
+                print("  mv {0} {1}".format(logfile, logfile + ".error"), file=f2)
                 print("fi", file=f2)
                 print("date", file=f2)
             # make file executable
