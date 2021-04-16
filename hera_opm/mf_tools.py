@@ -38,7 +38,7 @@ def get_jd(filename):
         warnings.warn(
             "Warning: Unable to figure out the JD associated with "
             f"{filename}. This may affect chunking and prerequisites."
-        )        
+        )
         return None
 
 
