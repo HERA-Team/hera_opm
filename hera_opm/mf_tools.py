@@ -35,10 +35,9 @@ def get_jd(filename):
         m = re.match(r"zen\.([0-9]{7})\.[0-9]{5}\.", filename)
         return m.groups()[0]
     except AttributeError:
-        warnings.warn(
-            "Warning: Unable to figure out the JD associated with "
-            f"{filename}. This may affect chunking and prerequisites."
-        )
+        wmsg = f"Unable to figure out the JD associated with {filename}. "
+        wmsg += "This may affect chunking and prerequisites."
+        warnings.warn(wmsg)
         return None
 
 
