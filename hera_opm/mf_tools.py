@@ -21,16 +21,25 @@ def get_jd(filename):
     ----------
     filename : str
         File name. Assumed to follow standard convention where name is
-        `zen.xxxxxxx.xxxxx.uv`.
+        `zen.xxxxxxx.xxxxx.uv`. If it does not, a warning is issued and
+        None is returned.
 
     Returns
     -------
     str
-        The integer JD (fractional part truncated).
+        The integer JD (fractional part truncated). Returns None if
+        filename does not match assumed format.
 
     """
-    m = re.match(r"zen\.([0-9]{7})\.[0-9]{5}\.", filename)
-    return m.groups()[0]
+    try:
+        m = re.match(r"zen\.([0-9]{7})\.[0-9]{5}\.", filename)
+        return m.groups()[0]
+    except AttributeError:
+        warnings.warn(
+            "Warning: Unable to figure out the JD associated with "
+            f"{filename}. This may affect chunking and prerequisites."
+        )        
+        return None
 
 
 def _interpolate_config(config, entry):
