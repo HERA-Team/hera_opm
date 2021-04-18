@@ -26,7 +26,7 @@ def get_jd(filename):
 
     Returns
     -------
-    str
+    str or None
         The integer JD (fractional part truncated). Returns None if
         filename does not match assumed format.
 
