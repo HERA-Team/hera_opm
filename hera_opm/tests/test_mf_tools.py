@@ -121,6 +121,19 @@ def test_get_jd():
     return
 
 
+def test_get_jd_no_match():
+    """Test if the file does not contain the JD in a way we recognize"""
+    filename = "foo.txt"
+    with pytest.warns(UserWarning) as record:
+        retval = mt.get_jd(filename)
+    assert len(record) == 1
+    message = record[0].message.args[0]
+    assert message.startswith("Unable to figure out the JD associated with foo.txt")
+    assert retval is None
+
+    return
+
+
 def test_get_config_entry(config_options):
     """Test getting a specific entry from a config file."""
     # retreive config
