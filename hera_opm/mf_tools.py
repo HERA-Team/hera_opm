@@ -1113,16 +1113,17 @@ def build_analysis_makeflow_from_config(
                                 file=f2,
                             )
                             if len(obsid_list) > 1:
-                                print(
-                                    f"add_rtp_task_jobid.py --multiple {filename} {action} $SLURM_JOB_ID"
-                                )
                                 obsid_list_str = " ".join(obsid_list)
                                 print(
-                                    f"add_rtp_task_multiple_track.py {filename} {action} {obsid_list_str}"
+                                    f"add_rtp_task_jobid.py {filename} {action} "
+                                    f"$SLURM_JOB_ID --obsid_list {obsid_list_str}",
+                                    file=f2,
                                 )
                             else:
                                 print(
-                                    f"add_rtp_task_jobid.py {filename} {action} $SLURM_JOB_ID"
+                                    f"add_rtp_task_jobid.py {filename} {action} "
+                                    "$SLURM_JOB_ID",
+                                    file=f2,
                                 )
                         if timeout is not None:
                             print(
