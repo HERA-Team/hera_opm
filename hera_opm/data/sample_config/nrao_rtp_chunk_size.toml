@@ -9,6 +9,7 @@ conda_env = "hera"
 ex_ants = "~/hera/hera_cal/hera_cal/calibrations/herahex_ex_ants.txt"
 base_mem = 10000
 base_cpu = 1
+mandc_report = true
 
 [WorkFlow]
 actions = ["ANT_METRICS", "FIRSTCAL", "FIRSTCAL_METRICS", "OMNICAL",
@@ -36,7 +37,7 @@ args = ["{basename}", "{prev_basename}", "{next_basename}"]
 prereqs = "OMNICAL_METRICS"
 chunk_size = 3
 stride_length = 2
-args = "{basename}"
+args = ["{basename} {obsid_list}"]
 
 [XRFI]
 args = "{basename}"

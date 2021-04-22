@@ -1285,6 +1285,28 @@ def test_prep_args_obsid_list_with_stragglers(config_options):
     return
 
 
+def test_prep_args_obsid_list_returned(config_options):
+    # define args to parse
+    obsids_list = config_options["obsids"]
+    args = "{obsid_list}"
+    obsid = obsids_list[1]
+
+    args, obsid_list = mt.prep_args(
+        args,
+        obsid,
+        obsids=obsids_list,
+        chunk_size="3",
+        time_centered=None,
+        collect_stragglers=False,
+        return_obsid_list=True,
+    )
+    prepped_args = " ".join(obsids_list[0:3])
+    assert args == prepped_args
+    assert obsid_list == list(obsids_list)
+
+    return
+
+
 def test_prep_args_obsid_list_error(config_options):
     # define args to parse
     obsids_list = config_options["obsids"]

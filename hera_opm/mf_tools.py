@@ -523,6 +523,7 @@ def prep_args(
     stride_length="1",
     time_centered=None,
     collect_stragglers=None,
+    return_obsid_list=False,
 ):
     """
     Substitute mini-language in a filename/obsid.
@@ -550,11 +551,17 @@ def prep_args(
     collect_stragglers : bool, optional
         Whether to lump files close to the end of the list ("stragglers") into
         the previous group, or belong to their own smaller group.
+    return_obsid_list : bool, optional
+        Whether to return the list of obsids subtituted for the {obsid_list}
+        argument in the mini-language. Only applies if {obsid_list} is present.
 
     Returns
     -------
     output : str
         `args` string with mini-language substitutions.
+    obsid_list : list of str, optional
+        The list of obsids substituted for {obsid_list}. Only returned if
+        return_obsid_list is True and.
 
     """
     if obsids is not None:
@@ -624,8 +631,13 @@ def prep_args(
                 obsid_list.append(obs)
         file_list = " ".join(obsid_list)
         args = re.sub(r"\{obsid_list\}", file_list, args)
+    else:
+        obsid_list = []
 
-    return args
+    if return_obsid_list:
+        return args, obsid_list
+    else:
+        return args
 
 
 def build_makeflow_from_config(
@@ -1065,7 +1077,7 @@ def build_analysis_makeflow_from_config(
                             infiles.append(os.path.basename(of))
 
                 # replace '{basename}' with actual filename
-                prepped_args = prep_args(
+                prepped_args, obsid_list = prep_args(
                     args,
                     filename,
                     obsids=obsids,
@@ -1073,10 +1085,10 @@ def build_analysis_makeflow_from_config(
                     stride_length=stride_length,
                     time_centered=time_centered,
                     collect_stragglers=collect_stragglers,
+                    return_obsid_list=True,
                 )
 
                 for outfile in outfiles:
-
                     # make logfile name
                     # logfile will capture stdout and stderr
                     logfile = re.sub(r"\.out", ".log", outfile)
@@ -1100,6 +1112,18 @@ def build_analysis_makeflow_from_config(
                                 "add_rtp_process_event.py {} started".format(filename),
                                 file=f2,
                             )
+                            if len(obsid_list) > 1:
+                                print(
+                                    f"add_rtp_task_jobid.py --multiple {filename} {action} $SLURM_JOB_ID"
+                                )
+                                obsid_list_str = " ".join(obsid_list)
+                                print(
+                                    f"add_rtp_task_multiple_track.py {filename} {action} {obsid_list_str}"
+                                )
+                            else:
+                                print(
+                                    f"add_rtp_task_jobid.py {filename} {action} $SLURM_JOB_ID"
+                                )
                         if timeout is not None:
                             print(
                                 "timeout {0} {1} {2}".format(
