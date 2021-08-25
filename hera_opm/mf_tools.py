@@ -1109,7 +1109,9 @@ def build_analysis_makeflow_from_config(
                         print("cd {}".format(parent_dir), file=f2)
                         if mandc_report:
                             print(
-                                "add_rtp_process_event.py {} started".format(filename),
+                                "add_rtp_process_event.py {0} {1} started".format(
+                                    filename, action
+                                ),
                                 file=f2,
                             )
                             if len(obsid_list) > 1:
@@ -1137,8 +1139,8 @@ def build_analysis_makeflow_from_config(
                         print("if [ $? -eq 0 ]; then", file=f2)
                         if mandc_report:
                             print(
-                                "  add_rtp_process_event.py {} finished".format(
-                                    filename
+                                "  add_rtp_process_event.py {0} {1} finished".format(
+                                    filename, action
                                 ),
                                 file=f2,
                             )
@@ -1147,7 +1149,9 @@ def build_analysis_makeflow_from_config(
                         print("else", file=f2)
                         if mandc_report:
                             print(
-                                "  add_rtp_process_event.py {} error".format(filename),
+                                "  add_rtp_process_event.py {0} {1} error".format(
+                                    filename, action
+                                ),
                                 file=f2,
                             )
                         print(
