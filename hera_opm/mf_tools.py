@@ -1406,11 +1406,6 @@ def build_lstbin_makeflow_from_config(
             lst_start = float(
                 get_config_entry(config, "LSTBIN_OPTS", "lst_start", required=True)
             )
-            fixed_lst_start = bool(
-                get_config_entry(
-                    config, "LSTBIN_OPTS", "fixed_lst_start", required=True
-                )
-            )
             ntimes_per_file = int(
                 get_config_entry(
                     config, "LSTBIN_OPTS", "ntimes_per_file", required=True
@@ -1426,7 +1421,6 @@ def build_lstbin_makeflow_from_config(
                 _datafiles,
                 dlst=dlst,
                 lst_start=lst_start,
-                fixed_lst_start=fixed_lst_start,
                 ntimes_per_file=ntimes_per_file,
             )
             nfiles = len(output[2])
