@@ -25,7 +25,7 @@ REDIS_HOST = "redishost"
 REDIS_PORT = 6379
 STORAGE_LOCATION = "/mnt/sn1"
 WORKFLOW_CONFIG = (
-    "/home/obs/src/hera_pipelines/pipelines/h4c/rtp/v1/h4c_rtp_stage_1.toml"
+    "/home/obs/src/hera_pipelines/pipelines/h5c/rtp/v1/h5c_rtp_stage_1.toml"
 )
 CONDA_ENV = "RTP"
 ALLOWED_TAGS = ["engineering", "science"]
