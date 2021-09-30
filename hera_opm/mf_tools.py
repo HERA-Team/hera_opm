@@ -803,7 +803,7 @@ def build_analysis_makeflow_from_config(
         # check that the `timeout' command exists on the system
         try:
             subprocess.check_output(["timeout", "--help"])
-        except OSError:
+        except OSError:  # pragma: no cover
             warnings.warn(
                 'A value for the "timeout" option was specified,'
                 " but the `timeout' command does not appear to be"
@@ -1108,20 +1108,24 @@ def build_analysis_makeflow_from_config(
                         print("date", file=f2)
                         print("cd {}".format(parent_dir), file=f2)
                         if mandc_report:
-                            print(
-                                "add_rtp_process_event.py {0} {1} started".format(
-                                    filename, action
-                                ),
-                                file=f2,
-                            )
                             if len(obsid_list) > 1:
                                 obsid_list_str = " ".join(obsid_list)
+                                print(
+                                    f"add_rtp_process_event.py {filename} {action} "
+                                    f"started --obsid_list {obsid_list_str}",
+                                    file=f2,
+                                )
                                 print(
                                     f"add_rtp_task_jobid.py {filename} {action} "
                                     f"$SLURM_JOB_ID --obsid_list {obsid_list_str}",
                                     file=f2,
                                 )
                             else:
+                                print(
+                                    f"add_rtp_process_event.py {filename} {action} "
+                                    "started",
+                                    file=f2,
+                                )
                                 print(
                                     f"add_rtp_task_jobid.py {filename} {action} "
                                     "$SLURM_JOB_ID",
@@ -1138,22 +1142,34 @@ def build_analysis_makeflow_from_config(
                             print("{0} {1}".format(command, prepped_args), file=f2)
                         print("if [ $? -eq 0 ]; then", file=f2)
                         if mandc_report:
-                            print(
-                                "  add_rtp_process_event.py {0} {1} finished".format(
-                                    filename, action
-                                ),
-                                file=f2,
-                            )
+                            if len(obsid_list) > 1:
+                                print(
+                                    f"  add_rtp_process_event.py {filename} {action} "
+                                    f"finished --obsid_list {obsid_list_str}",
+                                    file=f2,
+                                )
+                            else:
+                                print(
+                                    f"  add_rtp_process_event.py {filename} {action} "
+                                    "finished",
+                                    file=f2,
+                                )
                         print("  cd {}".format(work_dir), file=f2)
                         print("  touch {}".format(outfile), file=f2)
                         print("else", file=f2)
                         if mandc_report:
-                            print(
-                                "  add_rtp_process_event.py {0} {1} error".format(
-                                    filename, action
-                                ),
-                                file=f2,
-                            )
+                            if len(obsid_list) > 1:
+                                print(
+                                    f"  add_rtp_process_event.py {filename} {action} "
+                                    f"error --obsid_list {obsid_list_str}",
+                                    file=f2,
+                                )
+                            else:
+                                print(
+                                    f"  add_rtp_process_event.py {filename} {action} "
+                                    "error",
+                                    file=f2,
+                                )
                         print(
                             "  mv {0} {1}".format(logfile, logfile + ".error"), file=f2
                         )
@@ -1362,7 +1378,7 @@ def build_lstbin_makeflow_from_config(
         # check that the `timeout' command exists on the system
         try:
             subprocess.check_output(["timeout", "--help"])
-        except OSError:
+        except OSError:  # pragma: no cover
             warnings.warn(
                 'A value for the "timeout" option was specified,'
                 " but the `timeout' command does not appear to be"
