@@ -1087,6 +1087,9 @@ def build_analysis_makeflow_from_config(
                     collect_stragglers=collect_stragglers,
                     return_obsid_list=True,
                 )
+                # cast obsid list to string for later
+                if len(obsid_list) > 1:
+                    obsid_list_str = " ".join(obsid_list)
 
                 for outfile in outfiles:
                     # make logfile name
@@ -1109,7 +1112,6 @@ def build_analysis_makeflow_from_config(
                         print("cd {}".format(parent_dir), file=f2)
                         if mandc_report:
                             if len(obsid_list) > 1:
-                                obsid_list_str = " ".join(obsid_list)
                                 print(
                                     f"add_rtp_process_event.py {filename} {action} "
                                     f"started --file_list {obsid_list_str}",
