@@ -1112,12 +1112,12 @@ def build_analysis_makeflow_from_config(
                                 obsid_list_str = " ".join(obsid_list)
                                 print(
                                     f"add_rtp_process_event.py {filename} {action} "
-                                    f"started --obsid_list {obsid_list_str}",
+                                    f"started --file_list {obsid_list_str}",
                                     file=f2,
                                 )
                                 print(
                                     f"add_rtp_task_jobid.py {filename} {action} "
-                                    f"$SLURM_JOB_ID --obsid_list {obsid_list_str}",
+                                    f"$SLURM_JOB_ID --file_list {obsid_list_str}",
                                     file=f2,
                                 )
                             else:
@@ -1145,7 +1145,7 @@ def build_analysis_makeflow_from_config(
                             if len(obsid_list) > 1:
                                 print(
                                     f"  add_rtp_process_event.py {filename} {action} "
-                                    f"finished --obsid_list {obsid_list_str}",
+                                    f"finished --file_list {obsid_list_str}",
                                     file=f2,
                                 )
                             else:
@@ -1161,7 +1161,7 @@ def build_analysis_makeflow_from_config(
                             if len(obsid_list) > 1:
                                 print(
                                     f"  add_rtp_process_event.py {filename} {action} "
-                                    f"error --obsid_list {obsid_list_str}",
+                                    f"error --file_list {obsid_list_str}",
                                     file=f2,
                                 )
                             else:
