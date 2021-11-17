@@ -99,7 +99,7 @@ while True:
             try:
                 with db.sessionmaker() as session:
                     session.add_rtp_process_event(
-                        time=Time.now(), obsid=obsid, event="queued"
+                        time=Time.now(), obsid=obsid, task_name="SETUP", event="queued"
                     )
             except (IntegrityError, UniqueViolation):
                 continue

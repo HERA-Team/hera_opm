@@ -523,6 +523,7 @@ def prep_args(
     stride_length="1",
     time_centered=None,
     collect_stragglers=None,
+    return_obsid_list=False,
 ):
     """
     Substitute mini-language in a filename/obsid.
@@ -550,11 +551,17 @@ def prep_args(
     collect_stragglers : bool, optional
         Whether to lump files close to the end of the list ("stragglers") into
         the previous group, or belong to their own smaller group.
+    return_obsid_list : bool, optional
+        Whether to return the list of obsids subtituted for the {obsid_list}
+        argument in the mini-language. Only applies if {obsid_list} is present.
 
     Returns
     -------
     output : str
         `args` string with mini-language substitutions.
+    obsid_list : list of str, optional
+        The list of obsids substituted for {obsid_list}. Only returned if
+        return_obsid_list is True and.
 
     """
     if obsids is not None:
@@ -624,8 +631,13 @@ def prep_args(
                 obsid_list.append(obs)
         file_list = " ".join(obsid_list)
         args = re.sub(r"\{obsid_list\}", file_list, args)
+    else:
+        obsid_list = []
 
-    return args
+    if return_obsid_list:
+        return args, obsid_list
+    else:
+        return args
 
 
 def build_makeflow_from_config(
@@ -791,7 +803,7 @@ def build_analysis_makeflow_from_config(
         # check that the `timeout' command exists on the system
         try:
             subprocess.check_output(["timeout", "--help"])
-        except OSError:
+        except OSError:  # pragma: no cover
             warnings.warn(
                 'A value for the "timeout" option was specified,'
                 " but the `timeout' command does not appear to be"
@@ -1065,7 +1077,7 @@ def build_analysis_makeflow_from_config(
                             infiles.append(os.path.basename(of))
 
                 # replace '{basename}' with actual filename
-                prepped_args = prep_args(
+                prepped_args, obsid_list = prep_args(
                     args,
                     filename,
                     obsids=obsids,
@@ -1073,10 +1085,13 @@ def build_analysis_makeflow_from_config(
                     stride_length=stride_length,
                     time_centered=time_centered,
                     collect_stragglers=collect_stragglers,
+                    return_obsid_list=True,
                 )
+                # cast obsid list to string for later
+                if len(obsid_list) > 1:
+                    obsid_list_str = " ".join(obsid_list)
 
                 for outfile in outfiles:
-
                     # make logfile name
                     # logfile will capture stdout and stderr
                     logfile = re.sub(r"\.out", ".log", outfile)
@@ -1096,10 +1111,28 @@ def build_analysis_makeflow_from_config(
                         print("date", file=f2)
                         print("cd {}".format(parent_dir), file=f2)
                         if mandc_report:
-                            print(
-                                "add_rtp_process_event.py {} started".format(filename),
-                                file=f2,
-                            )
+                            if len(obsid_list) > 1:
+                                print(
+                                    f"add_rtp_process_event.py {filename} {action} "
+                                    f"started --file_list {obsid_list_str}",
+                                    file=f2,
+                                )
+                                print(
+                                    f"add_rtp_task_jobid.py {filename} {action} "
+                                    f"$SLURM_JOB_ID --file_list {obsid_list_str}",
+                                    file=f2,
+                                )
+                            else:
+                                print(
+                                    f"add_rtp_process_event.py {filename} {action} "
+                                    "started",
+                                    file=f2,
+                                )
+                                print(
+                                    f"add_rtp_task_jobid.py {filename} {action} "
+                                    "$SLURM_JOB_ID",
+                                    file=f2,
+                                )
                         if timeout is not None:
                             print(
                                 "timeout {0} {1} {2}".format(
@@ -1111,20 +1144,34 @@ def build_analysis_makeflow_from_config(
                             print("{0} {1}".format(command, prepped_args), file=f2)
                         print("if [ $? -eq 0 ]; then", file=f2)
                         if mandc_report:
-                            print(
-                                "  add_rtp_process_event.py {} finished".format(
-                                    filename
-                                ),
-                                file=f2,
-                            )
+                            if len(obsid_list) > 1:
+                                print(
+                                    f"  add_rtp_process_event.py {filename} {action} "
+                                    f"finished --file_list {obsid_list_str}",
+                                    file=f2,
+                                )
+                            else:
+                                print(
+                                    f"  add_rtp_process_event.py {filename} {action} "
+                                    "finished",
+                                    file=f2,
+                                )
                         print("  cd {}".format(work_dir), file=f2)
                         print("  touch {}".format(outfile), file=f2)
                         print("else", file=f2)
                         if mandc_report:
-                            print(
-                                "  add_rtp_process_event.py {} error".format(filename),
-                                file=f2,
-                            )
+                            if len(obsid_list) > 1:
+                                print(
+                                    f"  add_rtp_process_event.py {filename} {action} "
+                                    f"error --file_list {obsid_list_str}",
+                                    file=f2,
+                                )
+                            else:
+                                print(
+                                    f"  add_rtp_process_event.py {filename} {action} "
+                                    "error",
+                                    file=f2,
+                                )
                         print(
                             "  mv {0} {1}".format(logfile, logfile + ".error"), file=f2
                         )
@@ -1333,7 +1380,7 @@ def build_lstbin_makeflow_from_config(
         # check that the `timeout' command exists on the system
         try:
             subprocess.check_output(["timeout", "--help"])
-        except OSError:
+        except OSError:  # pragma: no cover
             warnings.warn(
                 'A value for the "timeout" option was specified,'
                 " but the `timeout' command does not appear to be"
