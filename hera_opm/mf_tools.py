@@ -319,7 +319,7 @@ def process_batch_options(
     ncpu=None,
     mail_user="youremail@example.org",
     queue="hera",
-    batch_system="pbs",
+    batch_system="slurm",
     extra_options=None,
 ):
     """Form a series of batch options to be passed to makeflow.
@@ -357,7 +357,7 @@ def process_batch_options(
 
     """
     if batch_system is None:
-        batch_system = "pbs"
+        batch_system = "slurm"
     if batch_system.lower() == "pbs":
         batch_options = "-l vmem={0:d}M,mem={0:d}M".format(mem)
         if ncpu is not None:
