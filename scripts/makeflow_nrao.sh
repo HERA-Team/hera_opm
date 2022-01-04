@@ -36,7 +36,7 @@ fi
 # actually run makeflow
 # test to see if we have a second argument (number of jobs to submit simultaneously)
 if [ "$#" -gt 1 ]; then
-    makeflow -T torque -J "${2}" "${1}"
+    makeflow -T slurm -J "${2}" "${1}"
 else
-    makeflow -T torque "${1}"
+    makeflow -T slurm "${1}"
 fi
