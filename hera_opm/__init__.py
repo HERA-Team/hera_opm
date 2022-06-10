@@ -5,7 +5,22 @@
 
 from . import utils
 from . import mf_tools
-from . import version
 
-__version__ = version.version
+try:
+    from importlib.metadata import version, PackageNotFoundError
+except ImportError:
+    from importlib_metadata import version, PackageNotFoundError
+
+try:
+    from ._version import version as __version__
+except ModuleNotFoundError:  # pragma: no cover
+    try:
+        __version__ = version("hera_opm")
+    except PackageNotFoundError:
+        # package is not installed
+        __version__ = "unknown"
+
+del version
+del PackageNotFoundError
+
 __all__ = ["utils", "mf_tools", "version"]

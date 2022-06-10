@@ -22,5 +22,7 @@ hera_opm/data/test_output/*
 hera_opm/notebooks
 hera_opm/.ipynb_checkpoints/
 
+# version file
+*/_version.py
 # Backup Files
 *~
