@@ -1,22 +1,8 @@
 """Script for installing hera_opm."""
-import json
 import os
-import sys
 from glob import glob
 
 from setuptools import setup
-
-sys.path.append("hera_opm")
-import version  # noqa
-
-data = [
-    version.git_origin,
-    version.git_hash,
-    version.git_description,
-    version.git_branch,
-]
-with open(os.path.join("hera_opm", "GIT_INFO"), "w") as outfile:
-    json.dump(data, outfile)
 
 
 def package_files(package_dir, subdirectory):
@@ -55,7 +41,7 @@ setup_args = {
     "packages": ["hera_opm"],
     "include_package_data": True,
     "scripts": glob("scripts/*.py") + glob("scripts/*.sh"),
-    "version": version.version,
+    "use_scm_version": True,
     "package_data": {"hera_opm": data_files},
     "install_requires": ["toml>=0.9.4"],
     "zip_safe": False,

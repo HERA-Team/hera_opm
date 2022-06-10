@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel", "toml>=0.9.4"]
+requires = ["setuptools", "wheel", "toml>=0.9.4", "setuptools_scm[toml]>=6.2"]
 
 [tool.black]
 line-length = 88
@@ -18,3 +18,8 @@ exclude = '''
   | dist
 )/
 '''
+
+[tool.setuptools_scm]
+write_to = "hera_opm/_version.py"
+parentdir_prefix_version = "hera_opm-"
+fallback_version  = "0.0.0"
