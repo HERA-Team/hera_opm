@@ -200,19 +200,16 @@ def test_make_chunk_list(config_options):
     assert set(
         mt.make_chunk_list(obsid, action, obsids, chunk_size=3, return_outfiles=True)
     ) == set(outfiles[1:])
-    assert (
-        set(
-            mt.make_chunk_list(
-                obsid,
-                action,
-                obsids,
-                chunk_size=3,
-                time_centered=False,
-                return_outfiles=True,
-            )
+    assert set(
+        mt.make_chunk_list(
+            obsid,
+            action,
+            obsids,
+            chunk_size=3,
+            time_centered=False,
+            return_outfiles=True,
         )
-        == set(outfiles[2:])
-    )
+    ) == set(outfiles[2:])
 
     return
 
