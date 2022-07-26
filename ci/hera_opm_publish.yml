@@ -1,0 +1,8 @@
+name: hera_opm_publish
+channels:
+  - conda-forge
+dependencies:
+  - toml>=0.9.4
+  - pip
+  - pip:
+     - build
