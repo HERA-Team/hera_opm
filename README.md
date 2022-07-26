@@ -93,5 +93,5 @@ file docs page](docs/config_files.md).
 ```
 pytest
 ```
-from the root repo directory. This requires `pytest` and `pytest-runner` to be
-installed, along with the other package dependencies.
+from the root repo directory. This may require running `pip install .[test]` to
+install testing dependencies.

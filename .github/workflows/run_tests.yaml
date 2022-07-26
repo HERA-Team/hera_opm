@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, "3.10"]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
@@ -41,7 +41,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          pytest --cov=hera_opm --cov-report xml:coverage.xml
+          python -m pytest --cov=hera_opm --cov-report xml:coverage.xml
 
       - name: Upload Coverage
         uses: codecov/codecov-action@v2
