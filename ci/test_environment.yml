@@ -12,6 +12,7 @@ dependencies:
   - pandas
   - pip
   - pytest
+  - pytest-cov
   - pytest-runner
   - pyuvdata
   - scipy
@@ -19,7 +20,5 @@ dependencies:
   - scikit-learn
   - pip:
       - hera-calibration
-      - pre-commit
-      - pytest-cov
       - uvtools
       - git+https://github.com/HERA-Team/casa_imaging.git

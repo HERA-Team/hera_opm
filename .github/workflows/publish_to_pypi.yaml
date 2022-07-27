@@ -1,4 +1,4 @@
-name: Publish Python distributions to PyPI and TestPyPI
+name: Publish Python distributions to PyPI
 
 on: [push, pull_request]
 
@@ -6,53 +6,26 @@ jobs:
   build-n-publish:
     name: Build and publish to PyPI and TestPyPI
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        # Adding -l {0} helps ensure conda can be found properly
-        shell: bash -l {0}
     env:
-      ENV_NAME: hera_opm_publish
       PYTHON: 3.9
     steps:
       - uses: actions/checkout@main
         with:
           fetch-depth: 0
 
-      - name: Setup Minimamba
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up Python ${{ env.PYTHON }}
+        uses: actions/setup-python@v2
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          use-mamba: true
           python-version: ${{ env.PYTHON }}
-          environment-file: ci/${{ env.ENV_NAME }}.yml
-          activate-environment: ${{ env.ENV_NAME }}
 
-      - name: Conda info
+      - name: Install package
         run: |
-          conda info -a
-          conda list
-
-      - name: Create environment variable
-        if: startsWith(github.ref, 'refs/tags/') != true
-        run: |
-          wget https://gist.github.com/plaplant/0902f09e59166bac742bbd554f3cd2f9/raw/make_dev_version.sh
-          version=$(bash make_dev_version.sh)
-          echo "SETUPTOOLS_SCM_PRETEND_VERSION=$version" >> $GITHUB_ENV
-
-      - name: Check environment variable
-        run: echo $SETUPTOOLS_SCM_PRETEND_VERSION
+          python -m pip install --upgrade pip
+          python -m pip install .[package]
 
       - name: Build a binary wheel and a source tarball
         run: |
           python -m build --sdist --wheel --outdir dist/ .
-
-      - name: Publish to Test PyPI
-        if: startsWith(github.event.ref, 'refs/tags')
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.test_pypi_password }}
-          repository_url: https://test.pypi.org/legacy/
 
       - name: Publish to PyPI
         if: startsWith(github.event.ref, 'refs/tags')
