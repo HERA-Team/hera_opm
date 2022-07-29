@@ -6,13 +6,28 @@ analysis/lstbin pipelines and workflows.
 
 ## Unreleased
 
+## [1.2.1] - 2022-07-29
+
+### Added
+- Support for HTCondor batch submission system.
+
+### Changed
+- Use `setuptools_scm` for package versioning.
+
+## [1.2.0] - 2020-07-24
+
+### Changed
+- Change handling of time pre-requisites in the config file API. See the docs
+  for an updated set of keywords.
+
 ## [1.1.0] - 2020-06-30
 
 ### Added
 - Support for striding through files in time, rather than processing all files.
 
 ### Changed
-- `time_prereqs` renamed to `prereqs`. Other changes to config files are noted in the `docs` folder.
+- `time_prereqs` renamed to `prereqs`. Other changes to config files are noted
+  in the `docs` folder.
 - Use `flake8` instead of `pycodestyle` for style checks.
 
 ### Removed
