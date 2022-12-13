@@ -12,7 +12,7 @@ import subprocess
 import warnings
 import glob
 import toml
-
+import math
 
 def get_jd(filename):
     """Get the JD from a data file name.
@@ -80,7 +80,7 @@ def _interpolate_config(config, entry):
 
 
 def get_config_entry(
-    config, header, item, required=True, interpolate=True, total_length=1
+    config, header, item, required=True, interpolate=True, total_length=1, default=None
 ):
     """Extract a specific entry from config file.
 
@@ -131,7 +131,7 @@ def get_config_entry(
         return entries
     except KeyError:
         if not required:
-            return None
+            return default
         else:
             raise AssertionError(
                 'Error processing config file: item "{0}" under header "{1}" is '
@@ -1449,6 +1449,10 @@ def build_lstbin_makeflow_from_config(
             lst_start = float(
                 get_config_entry(config, "LSTBIN_OPTS", "lst_start", required=True)
             )
+            lst_width = get_config_entry(
+                config, "LSTBIN_OPTS", "lst_width", required=False, default=2*math.pi
+            )
+
             ntimes_per_file = int(
                 get_config_entry(
                     config, "LSTBIN_OPTS", "ntimes_per_file", required=True
@@ -1464,6 +1468,7 @@ def build_lstbin_makeflow_from_config(
                 _datafiles,
                 dlst=dlst,
                 lst_start=lst_start,
+                lst_width=lst_width,
                 ntimes_per_file=ntimes_per_file,
             )
             nfiles = len(output[2])
