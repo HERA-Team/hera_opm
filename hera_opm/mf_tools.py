@@ -1541,6 +1541,14 @@ def build_lstbin_makeflow_from_config(
             print(line1, file=f)
             print(line2, file=f)
 
+        # Write the toml config to the output directory.
+        outdir = get_config_entry(config, "LSTBIN_OPTS", "outdir", required=True)
+        shutil.copy2(config_file, outdir + '/lstbin-config.toml')
+
+        # Also write the conda_env export to the LSTbin dir
+        if conda_env is not None:
+            os.system(f"conda env export -n {conda_env} --file {outdir}/environment.yaml")
+
     return
 
 
