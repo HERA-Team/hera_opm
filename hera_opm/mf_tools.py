@@ -14,6 +14,7 @@ import glob
 import toml
 import math
 
+
 def get_jd(filename):
     """Get the JD from a data file name.
 
@@ -1450,7 +1451,7 @@ def build_lstbin_makeflow_from_config(
                 get_config_entry(config, "LSTBIN_OPTS", "lst_start", required=True)
             )
             lst_width = get_config_entry(
-                config, "LSTBIN_OPTS", "lst_width", required=False, default=2*math.pi
+                config, "LSTBIN_OPTS", "lst_width", required=False, default=2 * math.pi
             )
 
             ntimes_per_file = int(
