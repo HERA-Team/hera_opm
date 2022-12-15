@@ -14,6 +14,7 @@ import glob
 import toml
 import math
 
+
 def get_jd(filename):
     """Get the JD from a data file name.
 
@@ -1450,7 +1451,7 @@ def build_lstbin_makeflow_from_config(
                 get_config_entry(config, "LSTBIN_OPTS", "lst_start", required=True)
             )
             lst_width = get_config_entry(
-                config, "LSTBIN_OPTS", "lst_width", required=False, default=2*math.pi
+                config, "LSTBIN_OPTS", "lst_width", required=False, default=2 * math.pi
             )
 
             ntimes_per_file = int(
@@ -1543,11 +1544,13 @@ def build_lstbin_makeflow_from_config(
 
         # Write the toml config to the output directory.
         outdir = get_config_entry(config, "LSTBIN_OPTS", "outdir", required=True)
-        shutil.copy2(config_file, outdir + '/lstbin-config.toml')
+        shutil.copy2(config_file, outdir + "/lstbin-config.toml")
 
         # Also write the conda_env export to the LSTbin dir
         if conda_env is not None:
-            os.system(f"conda env export -n {conda_env} --file {outdir}/environment.yaml")
+            os.system(
+                f"conda env export -n {conda_env} --file {outdir}/environment.yaml"
+            )
 
     return
 
