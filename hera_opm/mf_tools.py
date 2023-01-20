@@ -1429,7 +1429,6 @@ def build_lstbin_makeflow_from_config(
         )
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
-
         datafiles = get_lstbin_datafiles(config)
 
         # get number of output files
