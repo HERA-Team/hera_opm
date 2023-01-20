@@ -1430,26 +1430,32 @@ def build_lstbin_makeflow_from_config(
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
         # get data files
-        datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=False)
+        datafiles = get_config_entry(
+            config, "LSTBIN_OPTS", "data_files", required=False
+        )
 
         if datafiles is None:
             # These are only required if datafiles wasn't specified specifically.
-            datadir = get_config_entry(config, "LSTBIN_OPTS", 'datadir', required=True)
-            nightdirs = get_config_entry(config, "LSTBIN_OPTS", 'nightdirs', required=True)
-            extension = get_config_entry(config, "LSTBIN_OPTS", 'extension', required=True)
-            label = get_config_entry(config, "LSTBIN_OPTS", 'label', required=True)
-            sd = get_config_entry(config, "LSTBIN_OPTS", 'sd', required=True)
-            jdglob = get_config_entry(config, "LSTBIN_OPTS", 'jdglob', required=False, default='*')
+            datadir = get_config_entry(config, "LSTBIN_OPTS", "datadir", required=True)
+            nightdirs = get_config_entry(
+                config, "LSTBIN_OPTS", "nightdirs", required=True
+            )
+            extension = get_config_entry(
+                config, "LSTBIN_OPTS", "extension", required=True
+            )
+            label = get_config_entry(config, "LSTBIN_OPTS", "label", required=True)
+            sd = get_config_entry(config, "LSTBIN_OPTS", "sd", required=True)
+            jdglob = get_config_entry(
+                config, "LSTBIN_OPTS", "jdglob", required=False, default="*"
+            )
 
             if label:
                 label += "."
 
             datafiles = []
             for nd in nightdirs:
-                datafiles.append(
-                    f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}"
-                )
-                
+                datafiles.append(f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}")
+
         # encapsulate in double quotes
         datafiles = [
             "'{}'".format(
