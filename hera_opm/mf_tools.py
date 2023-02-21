@@ -1719,6 +1719,10 @@ def get_lstbin_datafiles(config):
                 f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}"
             )
 
+    parent_dir = get_config_entry(
+        config, "LSTBIN_OPTS", "parent_dir", required=True
+    )
+
     # encapsulate in double quotes
     return [
         "'{}'".format(
