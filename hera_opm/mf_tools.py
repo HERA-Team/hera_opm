@@ -1452,6 +1452,7 @@ def build_lstbin_makeflow_from_config(
                 )
             )
 
+            print("Searching for files in the following globs: ", datafiles)
             # pre-process files to determine the number of output files
             _datafiles = [
                 sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
