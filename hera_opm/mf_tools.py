@@ -1696,6 +1696,7 @@ def consolidate_logs(
 
     return
 
+
 def get_lstbin_datafiles(config):
     """Determine the datafiles for use in LST-binning makeflow."""
     # get data files
@@ -1703,21 +1704,21 @@ def get_lstbin_datafiles(config):
 
     if datafiles is None:
         # These are only required if datafiles wasn't specified specifically.
-        datadir = get_config_entry(config, "LSTBIN_OPTS", 'datadir', required=True)
-        nightdirs = get_config_entry(config, "LSTBIN_OPTS", 'nightdirs', required=True)
-        extension = get_config_entry(config, "LSTBIN_OPTS", 'extension', required=True)
-        label = get_config_entry(config, "LSTBIN_OPTS", 'label', required=True)
-        sd = get_config_entry(config, "LSTBIN_OPTS", 'sd', required=True)
-        jdglob = get_config_entry(config, "LSTBIN_OPTS", 'jdglob', required=False, default='*')
+        datadir = get_config_entry(config, "LSTBIN_OPTS", "datadir", required=True)
+        nightdirs = get_config_entry(config, "LSTBIN_OPTS", "nightdirs", required=True)
+        extension = get_config_entry(config, "LSTBIN_OPTS", "extension", required=True)
+        label = get_config_entry(config, "LSTBIN_OPTS", "label", required=True)
+        sd = get_config_entry(config, "LSTBIN_OPTS", "sd", required=True)
+        jdglob = get_config_entry(
+            config, "LSTBIN_OPTS", "jdglob", required=False, default="*"
+        )
 
         if label:
             label += "."
 
         datafiles = []
         for nd in nightdirs:
-            datafiles.append(
-                f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}"
-            )
+            datafiles.append(f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}")
 
     parent_dir = get_config_entry(
         config, "LSTBIN_OPTS", "parent_dir", required=True
@@ -1725,8 +1726,6 @@ def get_lstbin_datafiles(config):
 
     # encapsulate in double quotes
     return [
-        "'{}'".format(
-            '"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'")))
-        )
+        "'{}'".format('"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'"))))
         for df in datafiles
     ]
