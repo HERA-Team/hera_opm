@@ -1720,9 +1720,7 @@ def get_lstbin_datafiles(config):
         for nd in nightdirs:
             datafiles.append(f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}")
 
-    parent_dir = get_config_entry(
-        config, "LSTBIN_OPTS", "parent_dir", required=True
-    )
+    parent_dir = get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True)
 
     # encapsulate in double quotes
     return [
