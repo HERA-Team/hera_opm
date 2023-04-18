@@ -1458,14 +1458,15 @@ def build_lstbin_makeflow_from_config(
                 sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
             ]
 
-            output = lstbin.config_lst_bin_files(
+            nfiles = lstbin_simple.get_nlstbins_matching_files(
                 _datafiles,
                 dlst=dlst,
                 lst_start=lst_start,
                 lst_width=lst_width,
                 ntimes_per_file=ntimes_per_file,
+                blts_are_rectangular=get_config_entry(config, "LSTBIN_OPTS", 'blts_are_rectangular', default=None),
+                time_axis_faster_than_bls=get_config_entry(config, "LSTBIN_OPTS", 'time_axis_faster_than_bls', default=None),
             )
-            nfiles = len(output[2])
         else:
             nfiles = 1
 
