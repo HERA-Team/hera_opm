@@ -1464,8 +1464,12 @@ def build_lstbin_makeflow_from_config(
                 lst_start=lst_start,
                 lst_width=lst_width,
                 ntimes_per_file=ntimes_per_file,
-                blts_are_rectangular=get_config_entry(config, "LSTBIN_OPTS", 'blts_are_rectangular', default=None),
-                time_axis_faster_than_bls=get_config_entry(config, "LSTBIN_OPTS", 'time_axis_faster_than_bls', default=None),
+                blts_are_rectangular=get_config_entry(
+                    config, "LSTBIN_OPTS", "blts_are_rectangular", default=None
+                ),
+                time_axis_faster_than_bls=get_config_entry(
+                    config, "LSTBIN_OPTS", "time_axis_faster_than_bls", default=None
+                ),
             )
         else:
             nfiles = 1
