@@ -12,6 +12,7 @@ import subprocess
 import warnings
 import glob
 import toml
+from pathlib import Path
 import math
 
 
@@ -1355,7 +1356,7 @@ def build_lstbin_makeflow_from_config(
 
     """
     # import hera_cal
-    from hera_cal import lstbin
+    from hera_cal import lstbin_simple
 
     # read in config file
     config = toml.load(config_file)
@@ -1397,15 +1398,15 @@ def build_lstbin_makeflow_from_config(
     if "parent_dir" in kwargs:
         parent_dir = Path(kwargs["parent_dir"])
     else:
-        parent_dir = Path(get_config_entry(
-            config, "LSTBIN_OPTS", "parent_dir", required=True
-        ))
+        parent_dir = Path(
+            get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True)
+        )
 
     if work_dir is None:
         work_dir = parent_dir
     else:
         work_dir = Path(work_dir)
-    
+
     makeflowfile = work_dir / fn
 
     # define command
@@ -1436,36 +1437,33 @@ def build_lstbin_makeflow_from_config(
 
         print("Searching for files in the following globs: ", datafiles)
         # pre-process files to determine the number of output files
-        _datafiles = [
-            sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
-        ]
+        _datafiles = [sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles]
         _datafiles = [df for df in _datafiles if len(df) > 0]
 
-
         def get(key: str, **kw):
-            if 'default' in kw:
-                kw['required'] = False
+            if "default" in kw:
+                kw["required"] = False
 
             return get_config_entry(config, "LSTBIN_OPTS", **kw)
 
         lstbin_config_file = get("file_config")
         file_config = lstbin_simple.make_lst_bin_config_file(
-            config_file = lstbin_config_file,
-            data_files = _datafiles,
-            clobber = get('overwrite', default=False),            
-            dlst = get('dlst', default=None),
-            atol: get('atol', default=1e-10), 
-            lst_start get('lst_start', default=None), 
-            lst_width = get('lst_width', default=2*np.pi),
-            ntimes_per_file=get('ntimes_per_file', default=60),
-            blts_are_rectangular = get('blts_are_rectangular', default=None),
-            time_axis_faster_than_bls = get("time_axis_faster_than_bls", default=None),
-            jd_regex = get('jd_regex', default=r"zen\.(\d+\.\d+)\."),
-            lst_branch_cut=get('lst_branch_cut', default=None),
+            config_file=lstbin_config_file,
+            data_files=_datafiles,
+            clobber=get("overwrite", default=False),
+            dlst=get("dlst", default=None),
+            atol=get("atol", default=1e-10),
+            lst_start=get("lst_start", default=None),
+            lst_width=get("lst_width", default=2 * math.pi),
+            ntimes_per_file=get("ntimes_per_file", default=60),
+            blts_are_rectangular=get("blts_are_rectangular", default=None),
+            time_axis_faster_than_bls=get("time_axis_faster_than_bls", default=None),
+            jd_regex=get("jd_regex", default=r"zen\.(\d+\.\d+)\."),
+            lst_branch_cut=get("lst_branch_cut", default=None),
         )
         print(f"Created lstbin config file at {lstbin_config_file}.")
 
-        nfiles = len(file_config['matched_files']) if parallelize else 1
+        nfiles = len(file_config["matched_files"]) if parallelize else 1
 
         # loop over output files
         for output_file_index in range(nfiles):
