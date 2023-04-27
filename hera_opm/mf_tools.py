@@ -1435,7 +1435,10 @@ def build_lstbin_makeflow_from_config(
 
         datafiles = get_lstbin_datafiles(config)
 
-        print("Searching for files in the following globs: ", datafiles)
+        print("Searching for files in the following globs: ")
+        for df in datafiles:
+            print("  " + df.strip("'").strip('"'))
+
         # pre-process files to determine the number of output files
         _datafiles = [sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles]
         _datafiles = [df for df in _datafiles if len(df) > 0]
@@ -1444,7 +1447,7 @@ def build_lstbin_makeflow_from_config(
             if "default" in kw:
                 kw["required"] = False
 
-            return get_config_entry(config, "LSTBIN_OPTS", **kw)
+            return get_config_entry(config, "LSTBIN_OPTS", key, **kw)
 
         lstbin_config_file = Path(get("outdir")) / "file-config.yaml"
         file_config = lstbin_simple.make_lst_bin_config_file(
