@@ -1446,7 +1446,7 @@ def build_lstbin_makeflow_from_config(
 
             return get_config_entry(config, "LSTBIN_OPTS", **kw)
 
-        lstbin_config_file = get("file_config")
+        lstbin_config_file = Path(get("outdir")) / "file-config.yaml"
         file_config = lstbin_simple.make_lst_bin_config_file(
             config_file=lstbin_config_file,
             data_files=_datafiles,
