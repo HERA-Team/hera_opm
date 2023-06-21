@@ -1462,7 +1462,6 @@ def build_lstbin_makeflow_from_config(
             blts_are_rectangular=get("blts_are_rectangular", default=None),
             time_axis_faster_than_bls=get("time_axis_faster_than_bls", default=None),
             jd_regex=get("jd_regex", default=r"zen\.(\d+\.\d+)\."),
-            lst_branch_cut=get("lst_branch_cut", default=None),
         )
         print(f"Created lstbin config file at {lstbin_config_file}.")
 
