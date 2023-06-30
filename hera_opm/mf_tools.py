@@ -1432,7 +1432,7 @@ def build_lstbin_makeflow_from_config(
             base_mem, base_cpu, mail_user, default_queue, batch_system
         )
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
-
+        
         datafiles = get_lstbin_datafiles(config)
 
         print("Searching for files in the following globs: ")
