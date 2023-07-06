@@ -1450,9 +1450,9 @@ def build_lstbin_makeflow_from_config(
             return get_config_entry(config, "LSTBIN_OPTS", key, **kw)
 
         if "outdir" in kwargs:
-            outdir = kwargs["outdir"]
+            outdir = Path(kwargs["outdir"])
         else:
-            outdir = get("outdir")
+            outdir = Path(get("outdir"))
 
         lstbin_config_file = Path(outdir) / "file-config.yaml"
 

@@ -7,6 +7,7 @@ import os
 import shutil
 import gzip
 import toml
+from pathlib import Path
 
 from . import BAD_CONFIG_PATH
 from ..data import DATA_PATH
@@ -868,6 +869,86 @@ def test_build_lstbin_makeflow_from_config_options(
         work_dir=str(work_dir),
         parent_dir=DATA_PATH,
         outdir=work_dir,
+    )
+
+    # make sure the output files we expected appeared
+    assert outfile.exists()
+
+
+@hc_skip
+@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
+@pytest.mark.filterwarnings("ignore: A value for the")
+def test_build_lstbin_makeflow_direct_options(config_options, tmp_path_factory):
+    # Get the config template
+    config_file = config_options["config_file_lstbin_options"]
+    # setup vars
+    work_dir = tmp_path_factory.mktemp("test_output")
+    mf_output = "output.mf"
+    outfile = work_dir / mf_output
+
+    # Make new config with dynamic variables in it...
+    config = work_dir / "inputconf.toml"
+    with open(config_file, "r") as fl:
+        _cfg = toml.load(fl)
+
+    _cfg["LSTBIN_OPTS"]["outdir"] = str(work_dir)
+    _cfg["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
+    print("DP: ", DATA_PATH)
+    with open(config, "w") as fl:
+        toml.dump(_cfg, fl)
+
+    mt.build_lstbin_makeflow_from_config(
+        config,
+        mf_name=outfile,
+        work_dir=str(work_dir),
+    )
+
+    # make sure the output files we expected appeared
+    assert outfile.exists()
+
+
+@hc_skip
+@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
+@pytest.mark.filterwarnings("ignore: A value for the")
+def test_build_lstbin_makeflow_simple(config_options, tmp_path_factory):
+    # Get the config template
+    config_file = config_options["config_file_lstbin"].replace(
+        "lstbin.", "lstbin_simple."
+    )
+
+    # setup vars
+    work_dir = tmp_path_factory.mktemp("test_output")
+    mf_output = "output.mf"
+    outfile = work_dir / mf_output
+
+    # Make new config with dynamic variables in it...
+    config = work_dir / "inputconf.toml"
+    with open(config_file, "r") as fl:
+        _cfg = toml.load(fl)
+
+    _cfg["LSTBIN_OPTS"]["outdir"] = str(work_dir)
+    _cfg["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
+    _cfg["LSTBIN_OPTS"]["datadir"] = str(work_dir)
+
+    with open(config, "w") as fl:
+        toml.dump(_cfg, fl)
+
+    # Also, put our input files into nightly folders
+    (work_dir / "2458043").mkdir()
+    (work_dir / "2458044").mkdir()
+    (work_dir / "2458045").mkdir()
+    for fl in Path(DATA_PATH).glob("zen.*.uvh5"):
+        if "2458043." in fl.name:
+            shutil.copy(fl, work_dir / "2458043/")
+        elif "2458044." in fl.name:
+            shutil.copy(fl, work_dir / "2458044/")
+        elif "2458045." in fl.name:
+            shutil.copy(fl, work_dir / "2458045/")
+
+    mt.build_lstbin_makeflow_from_config(
+        config,
+        mf_name=outfile,
+        work_dir=str(work_dir),
     )
 
     # make sure the output files we expected appeared
