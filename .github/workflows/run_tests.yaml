@@ -44,7 +44,7 @@ jobs:
           python -m pytest --cov=hera_opm --cov-report xml:coverage.xml
 
       - name: Upload Coverage
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
           flags: unittests
