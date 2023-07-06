@@ -1433,7 +1433,7 @@ def build_lstbin_makeflow_from_config(
         )
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
-        datafiles = get_lstbin_datafiles(config)
+        datafiles = get_lstbin_datafiles(config, parent_dir)
 
         print("Searching for files in the following globs: ")
         for df in datafiles:
@@ -1449,12 +1449,28 @@ def build_lstbin_makeflow_from_config(
 
             return get_config_entry(config, "LSTBIN_OPTS", key, **kw)
 
-        lstbin_config_file = Path(get("outdir")) / "file-config.yaml"
+        if "outdir" in kwargs:
+            outdir = kwargs["outdir"]
+        else:
+            outdir = get("outdir")
+
+        lstbin_config_file = Path(outdir) / "file-config.yaml"
+
+        # Get dlst. Updated version supports leaving dlst unspecified or set as null.
+        # To support older versions which required string 'None', set that to None here.
+        dlst = get("dlst", default=None)
+        if dlst.lower() == "none":
+            warnings.warn(
+                "dlst should not be set to (string) 'None', but rather left unspecified in your TOML.",
+                DeprecationWarning,
+            )
+            dlst = None
+
         file_config = lstbin_simple.make_lst_bin_config_file(
             config_file=lstbin_config_file,
             data_files=_datafiles,
             clobber=get("overwrite", default=False),
-            dlst=get("dlst", default=None),
+            dlst=dlst,
             atol=get("atol", default=1e-10),
             lst_start=get("lst_start", default=None),
             lst_width=get("lst_width", default=2 * math.pi),
@@ -1529,8 +1545,7 @@ def build_lstbin_makeflow_from_config(
             print(line2, file=f)
 
         # Write the toml config to the output directory.
-        outdir = get_config_entry(config, "LSTBIN_OPTS", "outdir", required=True)
-        shutil.copy2(config_file, outdir + "/lstbin-config.toml")
+        shutil.copy2(config_file, outdir / "lstbin-config.toml")
 
         # Also write the conda_env export to the LSTbin dir
         if conda_env is not None:
@@ -1691,7 +1706,7 @@ def consolidate_logs(
     return
 
 
-def get_lstbin_datafiles(config):
+def get_lstbin_datafiles(config, parent_dir):
     """Determine the datafiles for use in LST-binning makeflow."""
     # get data files
     datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=False)
@@ -1713,8 +1728,6 @@ def get_lstbin_datafiles(config):
         datafiles = []
         for nd in nightdirs:
             datafiles.append(f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}")
-
-    parent_dir = get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True)
 
     # encapsulate in double quotes
     return [
