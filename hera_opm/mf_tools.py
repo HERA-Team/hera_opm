@@ -121,10 +121,8 @@ def get_config_entry(
         This error is raised if the specified entry is required but not present.
 
     """
-    if default is not None and required is None:
-        required = False
-    else:
-        required = True
+    if required is None:
+        required = default is None
 
     try:
         entries = config[header][item]
