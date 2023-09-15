@@ -82,7 +82,7 @@ def _interpolate_config(config, entry):
 
 
 def get_config_entry(
-    config, header, item, required=True, interpolate=True, total_length=1, default=None
+    config, header, item, required=None, interpolate=True, total_length=1, default=None
 ):
     """Extract a specific entry from config file.
 
@@ -96,7 +96,7 @@ def get_config_entry(
         The attribute to retreive, e.g., 'mem'.
     required : bool
         Whether the attribute is required or not. If required and not present,
-        an error is raised. Default is True.
+        an error is raised. Default is True unless default is set to be not None.
     interpolate : bool
         Whether to interpolate the entry with an option found elsewhere in the
         config file. Interpolation is triggered by a string with the template
@@ -106,6 +106,8 @@ def get_config_entry(
         If this parameter is in ["stride_length", "chunk_size"],
         the entry will be further parsed to interpret 'all', and be replaced
         with `total_length`.
+    default
+        The default value, if any. If set, do not require the parameter.
 
     Returns
     -------
@@ -119,6 +121,11 @@ def get_config_entry(
         This error is raised if the specified entry is required but not present.
 
     """
+    if default is not None and required is None:
+        required = False
+    else:
+        required = True
+
     try:
         entries = config[header][item]
         if interpolate:
@@ -1329,6 +1336,36 @@ def build_analysis_makeflow_from_config(
     return
 
 
+def get_lstbin_datafiles(config, parent_dir):
+    """Determine the datafiles for use in LST-binning makeflow."""
+    # get data files
+    datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=False)
+
+    if datafiles is None:
+        # These are only required if datafiles wasn't specified specifically.
+        datadir = get_config_entry(config, "LSTBIN_OPTS", "datadir", required=True)
+        nightdirs = get_config_entry(config, "LSTBIN_OPTS", "nightdirs", required=True)
+        extension = get_config_entry(config, "LSTBIN_OPTS", "extension", required=True)
+        label = get_config_entry(config, "LSTBIN_OPTS", "label", required=True)
+        sd = get_config_entry(config, "LSTBIN_OPTS", "sd", required=True)
+        jdglob = get_config_entry(
+            config, "LSTBIN_OPTS", "jdglob", required=False, default="*"
+        )
+
+        if label:
+            label += "."
+
+        datafiles = []
+        for nd in nightdirs:
+            datafiles.append(f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}")
+
+    # encapsulate in double quotes
+    return [
+        "'{}'".format('"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'"))))
+        for df in datafiles
+    ]
+
+
 def build_lstbin_makeflow_from_config(
     config_file, mf_name=None, work_dir=None, **kwargs
 ):
@@ -1443,22 +1480,16 @@ def build_lstbin_makeflow_from_config(
         _datafiles = [sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles]
         _datafiles = [df for df in _datafiles if len(df) > 0]
 
-        def get(key: str, **kw):
-            if "default" in kw:
-                kw["required"] = False
-
-            return get_config_entry(config, "LSTBIN_OPTS", key, **kw)
-
         if "outdir" in kwargs:
             outdir = Path(kwargs["outdir"])
         else:
-            outdir = Path(get("outdir"))
+            outdir = Path(get_config_entry(config, "LSTBIN_OPTS", "outdir"))
 
         lstbin_config_file = Path(outdir) / "file-config.yaml"
 
         # Get dlst. Updated version supports leaving dlst unspecified or set as null.
         # To support older versions which required string 'None', set that to None here.
-        dlst = get("dlst", default=None)
+        dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst")
         if dlst.lower() == "none":
             warnings.warn(
                 "dlst should not be set to (string) 'None', but rather left unspecified in your TOML.",
@@ -1466,18 +1497,37 @@ def build_lstbin_makeflow_from_config(
             )
             dlst = None
 
+        clobber = get_config_entry(config, "LSTBIN_OPTS", "overwrite", default=False)
+        atol = get_config_entry(config, "LSTBIN_OPTS", "atol", default=1e-10)
+        lst_start = get_config_entry(config, "LSTBIN_OPTS", "lst_start", default=None)
+        lst_width = get_config_entry(
+            config, "LSTBIN_OPTS", "lst_width", default=2 * math.pi
+        )
+        ntimes_per_file = get_config_entry(
+            config, "LSTBIN_OPTS", "ntimes_per_file", default=60
+        )
+        blts_are_rectangular = get_config_entry(
+            config, "LSTBIN_OPTS", "blts_are_rectangular", default=None
+        )
+        time_axis_faster_than_bls = get_config_entry(
+            config, "LSTBIN_OPTS", "time_axis_faster_than_bls", default=None
+        )
+        jd_regex = get_config_entry(
+            config, "LSTBIN_OPTS", "jd_regex", default=r"zen\.(\d+\.\d+)\."
+        )
+
         file_config = lstbin_simple.make_lst_bin_config_file(
             config_file=lstbin_config_file,
             data_files=_datafiles,
-            clobber=get("overwrite", default=False),
+            clobber=clobber,
             dlst=dlst,
-            atol=get("atol", default=1e-10),
-            lst_start=get("lst_start", default=None),
-            lst_width=get("lst_width", default=2 * math.pi),
-            ntimes_per_file=get("ntimes_per_file", default=60),
-            blts_are_rectangular=get("blts_are_rectangular", default=None),
-            time_axis_faster_than_bls=get("time_axis_faster_than_bls", default=None),
-            jd_regex=get("jd_regex", default=r"zen\.(\d+\.\d+)\."),
+            atol=atol,
+            lst_start=lst_start,
+            lst_width=lst_width,
+            ntimes_per_file=ntimes_per_file,
+            blts_are_rectangular=blts_are_rectangular,
+            time_axis_faster_than_bls=time_axis_faster_than_bls,
+            jd_regex=jd_regex,
         )
         print(f"Created lstbin config file at {lstbin_config_file}.")
 
@@ -1704,33 +1754,3 @@ def consolidate_logs(
         os.remove(output_fn)
 
     return
-
-
-def get_lstbin_datafiles(config, parent_dir):
-    """Determine the datafiles for use in LST-binning makeflow."""
-    # get data files
-    datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=False)
-
-    if datafiles is None:
-        # These are only required if datafiles wasn't specified specifically.
-        datadir = get_config_entry(config, "LSTBIN_OPTS", "datadir", required=True)
-        nightdirs = get_config_entry(config, "LSTBIN_OPTS", "nightdirs", required=True)
-        extension = get_config_entry(config, "LSTBIN_OPTS", "extension", required=True)
-        label = get_config_entry(config, "LSTBIN_OPTS", "label", required=True)
-        sd = get_config_entry(config, "LSTBIN_OPTS", "sd", required=True)
-        jdglob = get_config_entry(
-            config, "LSTBIN_OPTS", "jdglob", required=False, default="*"
-        )
-
-        if label:
-            label += "."
-
-        datafiles = []
-        for nd in nightdirs:
-            datafiles.append(f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}")
-
-    # encapsulate in double quotes
-    return [
-        "'{}'".format('"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'"))))
-        for df in datafiles
-    ]
