@@ -12,6 +12,8 @@ import subprocess
 import warnings
 import glob
 import toml
+from pathlib import Path
+import math
 
 
 def get_jd(filename):
@@ -80,7 +82,7 @@ def _interpolate_config(config, entry):
 
 
 def get_config_entry(
-    config, header, item, required=True, interpolate=True, total_length=1
+    config, header, item, required=None, interpolate=True, total_length=1, default=None
 ):
     """Extract a specific entry from config file.
 
@@ -94,7 +96,7 @@ def get_config_entry(
         The attribute to retreive, e.g., 'mem'.
     required : bool
         Whether the attribute is required or not. If required and not present,
-        an error is raised. Default is True.
+        an error is raised. Default is True unless default is set to be not None.
     interpolate : bool
         Whether to interpolate the entry with an option found elsewhere in the
         config file. Interpolation is triggered by a string with the template
@@ -104,6 +106,8 @@ def get_config_entry(
         If this parameter is in ["stride_length", "chunk_size"],
         the entry will be further parsed to interpret 'all', and be replaced
         with `total_length`.
+    default
+        The default value, if any. If set, do not require the parameter.
 
     Returns
     -------
@@ -117,6 +121,9 @@ def get_config_entry(
         This error is raised if the specified entry is required but not present.
 
     """
+    if required is None:
+        required = default is None
+
     try:
         entries = config[header][item]
         if interpolate:
@@ -131,7 +138,7 @@ def get_config_entry(
         return entries
     except KeyError:
         if not required:
-            return None
+            return default
         else:
             raise AssertionError(
                 'Error processing config file: item "{0}" under header "{1}" is '
@@ -1327,6 +1334,36 @@ def build_analysis_makeflow_from_config(
     return
 
 
+def get_lstbin_datafiles(config, parent_dir):
+    """Determine the datafiles for use in LST-binning makeflow."""
+    # get data files
+    datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=False)
+
+    if datafiles is None:
+        # These are only required if datafiles wasn't specified specifically.
+        datadir = get_config_entry(config, "LSTBIN_OPTS", "datadir", required=True)
+        nightdirs = get_config_entry(config, "LSTBIN_OPTS", "nightdirs", required=True)
+        extension = get_config_entry(config, "LSTBIN_OPTS", "extension", required=True)
+        label = get_config_entry(config, "LSTBIN_OPTS", "label", required=True)
+        sd = get_config_entry(config, "LSTBIN_OPTS", "sd", required=True)
+        jdglob = get_config_entry(
+            config, "LSTBIN_OPTS", "jdglob", required=False, default="*"
+        )
+
+        if label:
+            label += "."
+
+        datafiles = []
+        for nd in nightdirs:
+            datafiles.append(f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}")
+
+    # encapsulate in double quotes
+    return [
+        "'{}'".format('"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'"))))
+        for df in datafiles
+    ]
+
+
 def build_lstbin_makeflow_from_config(
     config_file, mf_name=None, work_dir=None, **kwargs
 ):
@@ -1354,7 +1391,7 @@ def build_lstbin_makeflow_from_config(
 
     """
     # import hera_cal
-    from hera_cal import lstbin
+    from hera_cal import lstbin_simple
 
     # read in config file
     config = toml.load(config_file)
@@ -1367,7 +1404,7 @@ def build_lstbin_makeflow_from_config(
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
 
     # get general options
-    path_to_do_scripts = get_config_entry(config, "Options", "path_to_do_scripts")
+    path_to_do_scripts = Path(get_config_entry(config, "Options", "path_to_do_scripts"))
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
     source_script = get_config_entry(config, "Options", "source_script", required=False)
     batch_system = get_config_entry(config, "Options", "batch_system", required=False)
@@ -1394,18 +1431,21 @@ def build_lstbin_makeflow_from_config(
     # determine whether or not to parallelize
     parallelize = get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)
     if "parent_dir" in kwargs:
-        parent_dir = kwargs["parent_dir"]
+        parent_dir = Path(kwargs["parent_dir"])
     else:
-        parent_dir = get_config_entry(
-            config, "LSTBIN_OPTS", "parent_dir", required=True
+        parent_dir = Path(
+            get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True)
         )
+
     if work_dir is None:
         work_dir = parent_dir
-    makeflowfile = os.path.join(work_dir, fn)
+    else:
+        work_dir = Path(work_dir)
+
+    makeflowfile = work_dir / fn
 
     # define command
-    command = "do_LSTBIN.sh"
-    command = os.path.join(path_to_do_scripts, command)
+    command = path_to_do_scripts / "do_LSTBIN.sh"
 
     # write makeflow file
     with open(makeflowfile, "w") as f:
@@ -1428,47 +1468,72 @@ def build_lstbin_makeflow_from_config(
         )
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
-        # get data files
-        datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=True)
-        # encapsulate in double quotes
-        datafiles = [
-            "'{}'".format(
-                '"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'")))
-            )
-            for df in datafiles
-        ]
+        datafiles = get_lstbin_datafiles(config, parent_dir)
 
-        # get number of output files
-        if parallelize:
-            # get LST-specific config options
-            dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst", required=True)
-            if dlst == "None":
-                dlst = None
-            else:
-                dlst = float(dlst)
-            lst_start = float(
-                get_config_entry(config, "LSTBIN_OPTS", "lst_start", required=True)
-            )
-            ntimes_per_file = int(
-                get_config_entry(
-                    config, "LSTBIN_OPTS", "ntimes_per_file", required=True
-                )
-            )
+        print("Searching for files in the following globs: ")
+        for df in datafiles:
+            print("  " + df.strip("'").strip('"'))
 
-            # pre-process files to determine the number of output files
-            _datafiles = [
-                sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles
-            ]
+        # pre-process files to determine the number of output files
+        _datafiles = [sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles]
+        _datafiles = [df for df in _datafiles if len(df) > 0]
 
-            output = lstbin.config_lst_bin_files(
-                _datafiles,
-                dlst=dlst,
-                lst_start=lst_start,
-                ntimes_per_file=ntimes_per_file,
-            )
-            nfiles = len(output[2])
+        if "outdir" in kwargs:
+            outdir = Path(kwargs["outdir"])
         else:
-            nfiles = 1
+            outdir = Path(get_config_entry(config, "LSTBIN_OPTS", "outdir"))
+
+        lstbin_config_file = Path(outdir) / "file-config.yaml"
+
+        # Get dlst. Updated version supports leaving dlst unspecified or set as null.
+        # To support older versions which required string 'None', set that to None here.
+        dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst")
+        if dlst.lower() == "none":
+            warnings.warn(
+                "dlst should not be set to (string) 'None', but rather left unspecified in your TOML.",
+                DeprecationWarning,
+            )
+            dlst = None
+
+        clobber = get_config_entry(config, "LSTBIN_OPTS", "overwrite", default=False)
+        atol = get_config_entry(config, "LSTBIN_OPTS", "atol", default=1e-10)
+        lst_start = get_config_entry(config, "LSTBIN_OPTS", "lst_start", default=None)
+        lst_width = get_config_entry(
+            config, "LSTBIN_OPTS", "lst_width", default=2 * math.pi
+        )
+        ntimes_per_file = get_config_entry(
+            config, "LSTBIN_OPTS", "ntimes_per_file", default=60
+        )
+        blts_are_rectangular = get_config_entry(
+            config, "LSTBIN_OPTS", "blts_are_rectangular", default=None, required=False
+        )
+        time_axis_faster_than_bls = get_config_entry(
+            config,
+            "LSTBIN_OPTS",
+            "time_axis_faster_than_bls",
+            default=None,
+            required=False,
+        )
+        jd_regex = get_config_entry(
+            config, "LSTBIN_OPTS", "jd_regex", default=r"zen\.(\d+\.\d+)\."
+        )
+
+        file_config = lstbin_simple.make_lst_bin_config_file(
+            config_file=lstbin_config_file,
+            data_files=_datafiles,
+            clobber=clobber,
+            dlst=dlst,
+            atol=atol,
+            lst_start=lst_start,
+            lst_width=lst_width,
+            ntimes_per_file=ntimes_per_file,
+            blts_are_rectangular=blts_are_rectangular,
+            time_axis_faster_than_bls=time_axis_faster_than_bls,
+            jd_regex=jd_regex,
+        )
+        print(f"Created lstbin config file at {lstbin_config_file}.")
+
+        nfiles = len(file_config["matched_files"]) if parallelize else 1
 
         # loop over output files
         for output_file_index in range(nfiles):
@@ -1477,33 +1542,23 @@ def build_lstbin_makeflow_from_config(
                 config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
 
             # make outfile list
-            outfile = f"lstbin_outfile_{output_file_index}.LSTBIN.out"
+            outfile = Path(f"lstbin_outfile_{output_file_index}.LSTBIN.out")
 
             # get args list for lst-binning step
-            _args = [
-                get_config_entry(config, "LSTBIN_OPTS", a, required=True)
+            args = [
+                str(get_config_entry(config, "LSTBIN_OPTS", a, required=True))
                 for a in lstbin_args
             ]
-            args = []
-            for a in _args:
-                args.append(str(a))
-
-            # extend datafiles
-            args.extend(datafiles)
-
             # turn into string
             args = " ".join(args)
 
             # make logfile name
             # logfile will capture stdout and stderr
-            logfile = re.sub(r"\.out", ".log", outfile)
-            logfile = os.path.join(work_dir, logfile)
+            logfile = work_dir / outfile.with_suffix(".log").name
 
             # make a small wrapper script that will run the actual command
             # can't embed if; then statements in makeflow script
-            wrapper_script = re.sub(r"\.out", ".sh", outfile)
-            wrapper_script = "wrapper_{}".format(wrapper_script)
-            wrapper_script = os.path.join(work_dir, wrapper_script)
+            wrapper_script = work_dir / f"wrapper_{outfile.with_suffix('.sh').name}"
             with open(wrapper_script, "w") as f2:
                 print("#!/bin/bash", file=f2)
                 if source_script is not None:
@@ -1523,7 +1578,12 @@ def build_lstbin_makeflow_from_config(
                 print("  cd {}".format(work_dir), file=f2)
                 print("  touch {}".format(outfile), file=f2)
                 print("else", file=f2)
-                print("  mv {0} {1}".format(logfile, logfile + ".error"), file=f2)
+                print(
+                    "  mv {0} {1}".format(
+                        logfile, logfile.parent / f"{logfile.name}.error"
+                    ),
+                    file=f2,
+                )
                 print("fi", file=f2)
                 print("date", file=f2)
             # make file executable
@@ -1535,6 +1595,15 @@ def build_lstbin_makeflow_from_config(
             line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
             print(line1, file=f)
             print(line2, file=f)
+
+        # Write the toml config to the output directory.
+        shutil.copy2(config_file, outdir / "lstbin-config.toml")
+
+        # Also write the conda_env export to the LSTbin dir
+        if conda_env is not None:
+            os.system(
+                f"conda env export -n {conda_env} --file {outdir}/environment.yaml"
+            )
 
     return
 

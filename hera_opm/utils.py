@@ -64,7 +64,13 @@ def get_makeflow_ArgumentParser():
         type=str,
         help="String to append to files pyuvdata could not read after running with --scan-files with --rename-bad-files. Default '.METADATA_ERROR'.",
     )
-
+    ap.add_argument(
+        "-d",
+        "--work-dir",
+        default=None,
+        help="Directory into which all wrappers and makeflow file will be written.",
+        type=str,
+    )
     return ap
 
 

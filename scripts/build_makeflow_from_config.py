@@ -17,6 +17,7 @@ output = args.output
 scan_files = args.scan_files
 rename_bad_files = args.rename_bad_files
 bad_suffix = args.bad_suffix
+work_dir = args.work_dir
 
 bad_metadata_obsids = []
 if scan_files:
@@ -36,7 +37,7 @@ if scan_files:
 
 obsid_list = " ".join(obsids)
 print(f"Generating makeflow file from config file {config} for obsids {obsid_list}")
-mt.build_makeflow_from_config(obsids, config, output)
+mt.build_makeflow_from_config(obsids, config, output, work_dir=work_dir)
 
 for obsid in bad_metadata_obsids:
     print(f"Bad metadata in {obsid}")
