@@ -910,7 +910,8 @@ def test_build_lstbin_makeflow_direct_options(config_options, tmp_path_factory):
 @hc_skip
 @pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
 @pytest.mark.filterwarnings("ignore: A value for the")
-def test_build_lstbin_makeflow_simple(config_options, tmp_path_factory):
+@pytest.mark.parametrize("label", ["", "label."])
+def test_build_lstbin_makeflow_simple(config_options, tmp_path_factory, label):
     # Get the config template
     config_file = config_options["config_file_lstbin"].replace(
         "lstbin.", "lstbin_simple."
@@ -929,6 +930,7 @@ def test_build_lstbin_makeflow_simple(config_options, tmp_path_factory):
     _cfg["LSTBIN_OPTS"]["outdir"] = str(work_dir)
     _cfg["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
     _cfg["LSTBIN_OPTS"]["datadir"] = str(work_dir)
+    _cfg["LSTBIN_OPTS"]["label"] = str(label).removesuffix(".")
 
     with open(config, "w") as fl:
         toml.dump(_cfg, fl)
@@ -938,12 +940,13 @@ def test_build_lstbin_makeflow_simple(config_options, tmp_path_factory):
     (work_dir / "2458044").mkdir()
     (work_dir / "2458045").mkdir()
     for fl in Path(DATA_PATH).glob("zen.*.uvh5"):
+        newfl = fl.with_suffix(f".{label}uvh5").name
         if "2458043." in fl.name:
-            shutil.copy(fl, work_dir / "2458043/")
+            shutil.copy(fl, work_dir / "2458043" / newfl)
         elif "2458044." in fl.name:
-            shutil.copy(fl, work_dir / "2458044/")
+            shutil.copy(fl, work_dir / "2458044" / newfl)
         elif "2458045." in fl.name:
-            shutil.copy(fl, work_dir / "2458045/")
+            shutil.copy(fl, work_dir / "2458045" / newfl)
 
     mt.build_lstbin_makeflow_from_config(
         config,
