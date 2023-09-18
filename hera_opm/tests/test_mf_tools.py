@@ -930,7 +930,7 @@ def test_build_lstbin_makeflow_simple(config_options, tmp_path_factory, label):
     _cfg["LSTBIN_OPTS"]["outdir"] = str(work_dir)
     _cfg["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
     _cfg["LSTBIN_OPTS"]["datadir"] = str(work_dir)
-    _cfg["LSTBIN_OPTS"]["label"] = str(label).removesuffix(".")
+    _cfg["LSTBIN_OPTS"]["label"] = str(label)[:-1]
 
     with open(config, "w") as fl:
         toml.dump(_cfg, fl)
