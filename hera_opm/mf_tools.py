@@ -1505,10 +1505,14 @@ def build_lstbin_makeflow_from_config(
             config, "LSTBIN_OPTS", "ntimes_per_file", default=60
         )
         blts_are_rectangular = get_config_entry(
-            config, "LSTBIN_OPTS", "blts_are_rectangular", default=None
+            config, "LSTBIN_OPTS", "blts_are_rectangular", default=None, required=False
         )
         time_axis_faster_than_bls = get_config_entry(
-            config, "LSTBIN_OPTS", "time_axis_faster_than_bls", default=None
+            config,
+            "LSTBIN_OPTS",
+            "time_axis_faster_than_bls",
+            default=None,
+            required=False,
         )
         jd_regex = get_config_entry(
             config, "LSTBIN_OPTS", "jd_regex", default=r"zen\.(\d+\.\d+)\."
