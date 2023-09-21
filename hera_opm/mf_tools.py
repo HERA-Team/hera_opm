@@ -1490,7 +1490,7 @@ def build_lstbin_makeflow_from_config(
         dlst = get_config_entry(
             config, "LSTBIN_OPTS", "dlst", default=None, required=False
         )
-        if dlst.lower() == "none":
+        if isinstance(dlst, str) and dlst.lower() in ("none", "null", ""):
             warnings.warn(
                 "dlst should not be set to (string) 'None', but rather left unspecified in your TOML.",
                 DeprecationWarning,
