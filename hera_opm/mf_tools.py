@@ -1487,7 +1487,9 @@ def build_lstbin_makeflow_from_config(
 
         # Get dlst. Updated version supports leaving dlst unspecified or set as null.
         # To support older versions which required string 'None', set that to None here.
-        dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst")
+        dlst = get_config_entry(
+            config, "LSTBIN_OPTS", "dlst", default=None, required=False
+        )
         if dlst.lower() == "none":
             warnings.warn(
                 "dlst should not be set to (string) 'None', but rather left unspecified in your TOML.",
@@ -1497,7 +1499,9 @@ def build_lstbin_makeflow_from_config(
 
         clobber = get_config_entry(config, "LSTBIN_OPTS", "overwrite", default=False)
         atol = get_config_entry(config, "LSTBIN_OPTS", "atol", default=1e-10)
-        lst_start = get_config_entry(config, "LSTBIN_OPTS", "lst_start", default=None)
+        lst_start = get_config_entry(
+            config, "LSTBIN_OPTS", "lst_start", default=None, required=False
+        )
         lst_width = get_config_entry(
             config, "LSTBIN_OPTS", "lst_width", default=2 * math.pi
         )
