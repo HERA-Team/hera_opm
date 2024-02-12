@@ -1,4 +1,5 @@
 """Tests for utils.py"""
+
 import pytest
 import hera_opm.utils as utils
 
