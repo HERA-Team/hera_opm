@@ -1,4 +1,5 @@
 """Script for installing hera_opm."""
+
 import os
 from glob import glob
 
@@ -22,7 +23,7 @@ def package_files(package_dir, subdirectory):
     """
     paths = []
     directory = os.path.join(package_dir, subdirectory)
-    for (path, directories, filenames) in os.walk(directory):
+    for path, directories, filenames in os.walk(directory):
         for filename in filenames:
             path = path.replace(package_dir + "/", "")
             paths.append(os.path.join(path, filename))
