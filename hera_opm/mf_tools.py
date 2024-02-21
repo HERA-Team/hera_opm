@@ -1391,7 +1391,7 @@ def build_lstbin_makeflow_from_config(
 
     """
     # import hera_cal
-    from hera_cal import lstbin_simple
+    from hera_cal import lst_stack as lstbin
 
     # read in config file
     config = toml.load(config_file)
@@ -1522,7 +1522,7 @@ def build_lstbin_makeflow_from_config(
             config, "LSTBIN_OPTS", "jd_regex", default=r"zen\.(\d+\.\d+)\."
         )
 
-        file_config = lstbin_simple.make_lst_bin_config_file(
+        file_config = lstbin.make_lst_bin_config_file(
             config_file=lstbin_config_file,
             data_files=_datafiles,
             clobber=clobber,
