@@ -1363,6 +1363,92 @@ def get_lstbin_datafiles(config, parent_dir):
         for df in datafiles
     ]
 
+def _legacy_make_lstbin_config_file(config, outdir: Path, datafiles):
+    try:
+        from hera_cal.lst_stack import make_lst_bin_config_file
+    except ImportError:
+        from hera_cal.lstbin_simple import make_lst_bin_config_file
+
+    # Get dlst. Updated version supports leaving dlst unspecified or set as null.
+    # To support older versions which required string 'None', set that to None here.
+    dlst = get_config_entry(
+        config, "LSTBIN_OPTS", "dlst", default=None, required=False
+    )
+    if isinstance(dlst, str) and dlst.lower() in ("none", "null", ""):
+        warnings.warn(
+            "dlst should not be set to (string) 'None', but rather left unspecified in your TOML.",
+            DeprecationWarning,
+        )
+        dlst = None
+
+    lstbin_config_file = Path(outdir) / "file-config.yaml"
+
+    clobber = get_config_entry(config, "LSTBIN_OPTS", "overwrite", default=False)
+    atol = get_config_entry(config, "LSTBIN_OPTS", "atol", default=1e-10)
+    lst_start = get_config_entry(
+        config, "LSTBIN_OPTS", "lst_start", default=None, required=False
+    )
+    lst_width = get_config_entry(
+        config, "LSTBIN_OPTS", "lst_width", default=2 * math.pi
+    )
+    ntimes_per_file = get_config_entry(
+        config, "LSTBIN_OPTS", "ntimes_per_file", default=60
+    )
+    blts_are_rectangular = get_config_entry(
+        config, "LSTBIN_OPTS", "blts_are_rectangular", default=None, required=False
+    )
+    time_axis_faster_than_bls = get_config_entry(
+        config,
+        "LSTBIN_OPTS",
+        "time_axis_faster_than_bls",
+        default=None,
+        required=False,
+    )
+    jd_regex = get_config_entry(
+        config, "LSTBIN_OPTS", "jd_regex", default=r"zen\.(\d+\.\d+)\."
+    )
+
+    file_config = make_lst_bin_config_file(
+        config_file=lstbin_config_file,
+        data_files=datafiles,
+        clobber=clobber,
+        dlst=dlst,
+        atol=atol,
+        lst_start=lst_start,
+        lst_width=lst_width,
+        ntimes_per_file=ntimes_per_file,
+        blts_are_rectangular=blts_are_rectangular,
+        time_axis_faster_than_bls=time_axis_faster_than_bls,
+        jd_regex=jd_regex,
+    )
+    print(f"Created lstbin config file at {lstbin_config_file}.")
+
+    return len(file_config['matched_files'])
+
+def make_lstbin_config_file(config, outdir: str) -> int:
+    # This must be a TOML file that specifies how to construct the LSTbin file-config
+    binning_config_file = get_config_entry(
+        config,
+        "LSTBIN_OPTS",
+        "binning-config",
+        required=True,
+    )
+
+    from hera_cal.lst_stack.config import LSTBinConfiguration
+
+    lstconfig = LSTBinConfiguration.from_toml(binning_config_file)
+    matched_files = lstconfig.get_matched_files()
+    lst_file_config = lstconfig.create_config(matched_files)
+
+    lstbin_config_file = Path(outdir) / "file-config.h5"
+
+    lst_file_config.write(lstbin_config_file)
+
+    return len(lst_file_config.matched_files)
+
+
+
+
 
 def build_lstbin_makeflow_from_config(
     config_file, mf_name=None, work_dir=None, **kwargs
@@ -1391,7 +1477,6 @@ def build_lstbin_makeflow_from_config(
 
     """
     # import hera_cal
-    from hera_cal import lst_stack as lstbin
 
     # read in config file
     config = toml.load(config_file)
@@ -1437,10 +1522,7 @@ def build_lstbin_makeflow_from_config(
             get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True)
         )
 
-    if work_dir is None:
-        work_dir = parent_dir
-    else:
-        work_dir = Path(work_dir)
+    work_dir = Path(work_dir or parent_dir)
 
     makeflowfile = work_dir / fn
 
@@ -1468,76 +1550,28 @@ def build_lstbin_makeflow_from_config(
         )
         print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
-        datafiles = get_lstbin_datafiles(config, parent_dir)
-
-        print("Searching for files in the following globs: ")
-        for df in datafiles:
-            print("  " + df.strip("'").strip('"'))
-
-        # pre-process files to determine the number of output files
-        _datafiles = [sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles]
-        _datafiles = [df for df in _datafiles if len(df) > 0]
-
         if "outdir" in kwargs:
             outdir = Path(kwargs["outdir"])
         else:
             outdir = Path(get_config_entry(config, "LSTBIN_OPTS", "outdir"))
 
-        lstbin_config_file = Path(outdir) / "file-config.yaml"
+        try:
+            nfiles = make_lstbin_config_file(config, outdir)
+        except ImportError:
+            datafiles = get_lstbin_datafiles(config, parent_dir)
 
-        # Get dlst. Updated version supports leaving dlst unspecified or set as null.
-        # To support older versions which required string 'None', set that to None here.
-        dlst = get_config_entry(
-            config, "LSTBIN_OPTS", "dlst", default=None, required=False
-        )
-        if isinstance(dlst, str) and dlst.lower() in ("none", "null", ""):
-            warnings.warn(
-                "dlst should not be set to (string) 'None', but rather left unspecified in your TOML.",
-                DeprecationWarning,
-            )
-            dlst = None
+            print("Searching for files in the following globs: ")
+            for df in datafiles:
+                print("  " + df.strip("'").strip('"'))
 
-        clobber = get_config_entry(config, "LSTBIN_OPTS", "overwrite", default=False)
-        atol = get_config_entry(config, "LSTBIN_OPTS", "atol", default=1e-10)
-        lst_start = get_config_entry(
-            config, "LSTBIN_OPTS", "lst_start", default=None, required=False
-        )
-        lst_width = get_config_entry(
-            config, "LSTBIN_OPTS", "lst_width", default=2 * math.pi
-        )
-        ntimes_per_file = get_config_entry(
-            config, "LSTBIN_OPTS", "ntimes_per_file", default=60
-        )
-        blts_are_rectangular = get_config_entry(
-            config, "LSTBIN_OPTS", "blts_are_rectangular", default=None, required=False
-        )
-        time_axis_faster_than_bls = get_config_entry(
-            config,
-            "LSTBIN_OPTS",
-            "time_axis_faster_than_bls",
-            default=None,
-            required=False,
-        )
-        jd_regex = get_config_entry(
-            config, "LSTBIN_OPTS", "jd_regex", default=r"zen\.(\d+\.\d+)\."
-        )
+            # pre-process files to determine the number of output files
+            _datafiles = [sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles]
+            _datafiles = [df for df in _datafiles if len(df) > 0]
 
-        file_config = lstbin.make_lst_bin_config_file(
-            config_file=lstbin_config_file,
-            data_files=_datafiles,
-            clobber=clobber,
-            dlst=dlst,
-            atol=atol,
-            lst_start=lst_start,
-            lst_width=lst_width,
-            ntimes_per_file=ntimes_per_file,
-            blts_are_rectangular=blts_are_rectangular,
-            time_axis_faster_than_bls=time_axis_faster_than_bls,
-            jd_regex=jd_regex,
-        )
-        print(f"Created lstbin config file at {lstbin_config_file}.")
-
-        nfiles = len(file_config["matched_files"]) if parallelize else 1
+            nfiles = _legacy_make_lstbin_config_file(config, outdir)
+        
+        if not parallelize:
+            nfiles = 1
 
         # loop over output files
         for output_file_index in range(nfiles):
