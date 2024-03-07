@@ -1739,7 +1739,7 @@ if [ $? -eq 0 ]; then
     cd {work_dir}
     touch {{outfile}}
 else
-    mv {{logfile}} {{logfile.parent / f"{logfile.name}.error"}}
+    mv {{logfile}} {{logfile}}.error
 fi
 date
     """
