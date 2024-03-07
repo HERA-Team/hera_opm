@@ -1448,7 +1448,7 @@ def make_lstbin_config_file(config, outdir: str) -> int:
     for flist in lstconfig.data_files:
         if len(flist) == 0:
             continue
-        
+
         print(f"{flist[0].parent.name}: {len(flist)}")
 
     matched_files = lstconfig.get_matched_files()
@@ -1727,7 +1727,7 @@ def build_lstbin_notebook_makeflow_from_config(
     source_script_line = f"source {source_script}" if source_script else ""
     conda_env_line = f"conda activate {conda_env}" if conda_env else ""
     cmd = f"{command} {{args}}"
-    cmdline = f"timeout {timeout} {cmdline}" if timeout is not None else cmd
+    cmdline = f"timeout {timeout} {cmd}" if timeout is not None else cmd
 
     wrapper_template = f"""#!/bin/bash
 {source_script_line}
