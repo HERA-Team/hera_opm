@@ -1446,8 +1446,11 @@ def make_lstbin_config_file(config, outdir: str) -> int:
     print(f"Found {len(lstconfig.data_files)} nights of data.")
     print("Each night has the following number of files:")
     for flist in lstconfig.data_files:
-        print(f"{flist[0].parent.name}: {len(flist)}")
+        if len(flist) == 0:
+            continue
         
+        print(f"{flist[0].parent.name}: {len(flist)}")
+
     matched_files = lstconfig.get_matched_files()
     lst_file_config = lstconfig.create_config(matched_files)
 
