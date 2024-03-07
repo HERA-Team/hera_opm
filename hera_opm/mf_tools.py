@@ -1737,9 +1737,9 @@ cd {work_dir}
 {cmdline}
 if [ $? -eq 0 ]; then
     cd {work_dir}
-    touch {outfile}
+    touch {{outfile}}
 else
-    mv {logfile} {logfile.parent / f"{logfile.name}.error"}
+    mv {{logfile}} {{logfile.parent / f"{logfile.name}.error"}}
 fi
 date
     """
@@ -1780,7 +1780,7 @@ export BATCH_OPTIONS = {batch_options}
             wrapper_script = work_dir / f"wrapper_{outfile.with_suffix('.sh').name}"
             
             with open(wrapper_script, "w") as f2:
-                f2.write(wrapper_template.format(args=args))
+                f2.write(wrapper_template.format(args=args, outfile=outfile, logfile=logfile))
 
             # make file executable
             os.chmod(wrapper_script, 0o755)
