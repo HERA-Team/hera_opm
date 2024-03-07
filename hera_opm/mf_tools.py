@@ -1676,9 +1676,6 @@ def build_lstbin_notebook_makeflow_from_config(
 
     makeflowfile = work_dir / mf_name
 
-    # get LSTBIN arguments
-    lstbin_args = get_config_entry(config, "LSTBIN", "args", required=False)
-
     # set output_file_select to None
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
     config['LSTBIN_OPTS']['thisfile'] = str(config_file.absolute())
@@ -1699,6 +1696,9 @@ def build_lstbin_notebook_makeflow_from_config(
     if len(actions) == 0:
         raise ValueError("No actions found in the workflow.")
     action = actions[0]
+
+    # get LSTBIN arguments
+    lstbin_args = get_config_entry(config, action, "args", required=False)
 
     # define command
     command = path_to_do_scripts / f"do_{action}.sh"
