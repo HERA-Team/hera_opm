@@ -1443,6 +1443,11 @@ def make_lstbin_config_file(config, outdir: str) -> int:
     from hera_cal.lst_stack.config import LSTBinConfiguration
 
     lstconfig = LSTBinConfiguration.from_toml(binning_config_file)
+    print(f"Found {len(lstconfig.data_files)} nights of data.")
+    print("Each night has the following number of files:")
+    for flist in lstconfig.data_files:
+        print(f"{flist[0].parent.name}: {len(flist)}")
+        
     matched_files = lstconfig.get_matched_files()
     lst_file_config = lstconfig.create_config(matched_files)
 
@@ -1641,7 +1646,6 @@ def build_lstbin_notebook_makeflow_from_config(
     config_file: str | Path, 
     mf_name: str | None=None, 
     work_dir: str | Path | None=None, 
-    **kwargs
 ) -> None:
     """Construct a notebook-based  LST-binning  makeflow file from input data and a config_file.
 
@@ -1661,7 +1665,6 @@ def build_lstbin_notebook_makeflow_from_config(
     config_file = Path(config_file)
     # read in config file
     config = toml.load(config_file)
-    cf = config_file.name
 
     if mf_name is None:
         mf_name = config_file.with_suffix(".mf").name
