@@ -1683,13 +1683,13 @@ def build_lstbin_notebook_makeflow_from_config(
     # Also write a YAML version of just the parameters, to be used to run 
     # the notebook
     cfg_opts = toml.load(config_file)['LSTAVG_OPTS']
-    yaml_file = outdir / "lstavg-config.toml"
-    with open(yaml_file, "w") as fl:
+    lstavg_config = outdir / "lstavg-config.toml"
+    with open(lstavg_config, "w") as fl:
         toml.dump(cfg_opts, fl)
 
     # set output_file_select to None
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
-    config['LSTBIN_OPTS']['yamlfile'] = str(yaml_file.absolute())
+    config['LSTBIN_OPTS']['lstavg_toml_file'] = str(lstavg_config.absolute())
 
     # get general options
     path_to_do_scripts = Path(get_config_entry(config, "Options", "path_to_do_scripts"))
