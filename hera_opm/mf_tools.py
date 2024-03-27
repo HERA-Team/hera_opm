@@ -14,7 +14,6 @@ import glob
 import toml
 from pathlib import Path
 import math
-import yaml
 
 def get_jd(filename):
     """Get the JD from a data file name.
@@ -1676,9 +1675,21 @@ def build_lstbin_notebook_makeflow_from_config(
 
     makeflowfile = work_dir / mf_name
 
+    outdir = Path(get_config_entry(config, "LSTBIN_OPTS", "outdir"))
+
+    # Write the toml config to the output directory.
+    shutil.copy2(config_file, outdir / "lstbin-config.toml")
+
+    # Also write a YAML version of just the parameters, to be used to run 
+    # the notebook
+    cfg_opts = toml.load(config_file)['LSTAVG_OPTS']
+    yaml_file = outdir / "lstavg-config.toml"
+    with open(yaml_file, "w") as fl:
+        toml.dump(cfg_opts, fl)
+
     # set output_file_select to None
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
-    config['LSTBIN_OPTS']['thisfile'] = str(config_file.absolute())
+    config['LSTBIN_OPTS']['yamlfile'] = str(yaml_file.absolute())
 
     # get general options
     path_to_do_scripts = Path(get_config_entry(config, "Options", "path_to_do_scripts"))
@@ -1716,7 +1727,6 @@ def build_lstbin_notebook_makeflow_from_config(
         base_mem, base_cpu, mail_user, default_queue, batch_system
     )
 
-    outdir = Path(get_config_entry(config, "LSTBIN_OPTS", "outdir"))
 
      # The new way in H6C+ (notebook interface)
     nfiles = make_lstbin_config_file(config, outdir)
@@ -1791,14 +1801,6 @@ export BATCH_OPTIONS = {batch_options}
             fl.write(lines)
 
         
-        # Write the toml config to the output directory.
-        shutil.copy2(config_file, outdir / "lstbin-config.toml")
-
-        # Also write a YAML version of just the parameters, to be used to run 
-        # the notebook
-        cfg_opts = toml.load(config_file)['LSTAVG_OPTS']
-        with open(outdir / "lstavg-config.yaml", "w") as fl:
-            yaml.dump(cfg_opts, fl)
 
         # Also write the conda_env export to the LSTbin dir
         if conda_env is not None:
