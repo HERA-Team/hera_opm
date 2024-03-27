@@ -14,7 +14,7 @@ import glob
 import toml
 from pathlib import Path
 import math
-
+import yaml
 
 def get_jd(filename):
     """Get the JD from a data file name.
@@ -1790,8 +1790,15 @@ export BATCH_OPTIONS = {batch_options}
             lines = f"{outfile}: {command}\n\t{wrapper_script} > {logfile} 2>&1\n"
             fl.write(lines)
 
+        
         # Write the toml config to the output directory.
         shutil.copy2(config_file, outdir / "lstbin-config.toml")
+
+        # Also write a YAML version of just the parameters, to be used to run 
+        # the notebook
+        cfg_opts = toml.load(config_file)['LSTAVG_OPTS']
+        with open(outdir / "lstavg-config.yaml", "w") as fl:
+            yaml.dump(cfg_opts, fl)
 
         # Also write the conda_env export to the LSTbin dir
         if conda_env is not None:
