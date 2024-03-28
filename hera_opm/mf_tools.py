@@ -1700,8 +1700,11 @@ def build_lstbin_notebook_makeflow_from_config(
     config['LSTBIN_OPTS']['kernel'] = conda_env
 
     if 'make_plots' not in config['LSTBIN_OPTS']:
+        print('not in there')
         if 'plot_every' in config["LSTBIN_OPTS"]:
+            print('plot every is...')
             plot_every = int(get_config_entry(config, "LSTBIN_OPTS", "plot_every", required=False))
+            print(plot_every)
         else:
             plot_every = 1
     else:
