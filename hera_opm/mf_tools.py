@@ -1671,7 +1671,7 @@ def build_lstbin_notebook_makeflow_from_config(
     if mf_name is None:
         mf_name = config_file.with_suffix(".mf").name
         
-    work_dir = Path(work_dir or config_file.parent)
+    work_dir = Path(work_dir or config_file.parent).absolute()
 
     makeflowfile = work_dir / mf_name
 
