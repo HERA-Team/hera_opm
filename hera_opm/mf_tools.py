@@ -2,6 +2,7 @@
 # Copyright (c) 2018 The HERA Collaboration
 # Licensed under the 2-clause BSD License
 """Module for converting a config file into a makeflow script."""
+from __future__ import annotations
 
 import os
 import re
