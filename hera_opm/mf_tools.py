@@ -1738,7 +1738,7 @@ def build_lstbin_notebook_makeflow_from_config(
 
     lstbin_config_file, nfiles = make_lstbin_config_file(config, outdir)
     config['LSTBIN_OPTS']['lstconf'] = str(lstbin_config_file.absolute())
-        
+
     if not parallelize:
         nfiles = 1
 
@@ -1777,8 +1777,10 @@ export BATCH_OPTIONS = {batch_options}
             # if parallize, update output_file_select
             if parallelize:
                 config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
+                print("PLOT_EVERY: ", plot_every)
                 if plot_every > 0:
                     config["LSTBIN_OPTS"]['make_plots'] = str(output_file_index % plot_every == 0)
+                    print(config['LSTBIN_OPTS']['make_plots'])
                 else:
                     config["LSTBIN_OPTS"]['make_plots'] = "False"
 
