@@ -1457,7 +1457,7 @@ def make_lstbin_config_file(config, outdir: str) -> int:
 
     lst_file_config.write(lstbin_config_file)
 
-    return len(lst_file_config.matched_files)
+    return lstbin_config_file, len(lst_file_config.matched_files)
 
 
 
@@ -1687,7 +1687,6 @@ def build_lstbin_notebook_makeflow_from_config(
     with open(lstavg_config, "w") as fl:
         toml.dump(cfg_opts, fl)
 
-
     # get general options
     path_to_do_scripts = Path(get_config_entry(config, "Options", "path_to_do_scripts"))
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
@@ -1737,10 +1736,9 @@ def build_lstbin_notebook_makeflow_from_config(
         base_mem, base_cpu, mail_user, default_queue, batch_system
     )
 
-
-     # The new way in H6C+ (notebook interface)
-    nfiles = make_lstbin_config_file(config, outdir)
-    
+    lstbin_config_file, nfiles = make_lstbin_config_file(config, outdir)
+    config['LSTBIN_OPTS']['lstconf'] = str(lstbin_config_file.absolute())
+        
     if not parallelize:
         nfiles = 1
 
