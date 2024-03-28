@@ -1700,11 +1700,8 @@ def build_lstbin_notebook_makeflow_from_config(
     config['LSTBIN_OPTS']['kernel'] = conda_env
 
     if 'make_plots' not in config['LSTBIN_OPTS']:
-        print('not in there')
         if 'plot_every' in config["LSTBIN_OPTS"]:
-            print('plot every is...')
             plot_every = int(get_config_entry(config, "LSTBIN_OPTS", "plot_every", required=False))
-            print(plot_every)
         else:
             plot_every = 1
     else:
@@ -1780,10 +1777,8 @@ export BATCH_OPTIONS = {batch_options}
             # if parallize, update output_file_select
             if parallelize:
                 config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
-                print("PLOT_EVERY: ", plot_every)
                 if plot_every > 0:
                     config["LSTBIN_OPTS"]['make_plots'] = str(output_file_index % plot_every == 0)
-                    print(config['LSTBIN_OPTS']['make_plots'])
                 else:
                     config["LSTBIN_OPTS"]['make_plots'] = "False"
 
