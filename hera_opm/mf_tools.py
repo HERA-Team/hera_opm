@@ -1690,7 +1690,8 @@ def build_lstbin_notebook_makeflow_from_config(
     # set output_file_select to None
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
     config['LSTBIN_OPTS']['lstavg_toml_file'] = str(lstavg_config.absolute())
-
+    config['LSTBIN_OPTS']['kernel'] = str(get_config_entry(config, "LSTBIN_OPTS", "conda_env", required=True))
+    
     # get general options
     path_to_do_scripts = Path(get_config_entry(config, "Options", "path_to_do_scripts"))
     conda_env = get_config_entry(config, "Options", "conda_env", required=False)
