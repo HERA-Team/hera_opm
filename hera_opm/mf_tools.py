@@ -15,6 +15,7 @@ import toml
 from pathlib import Path
 import math
 
+
 def get_jd(filename):
     """Get the JD from a data file name.
 
@@ -706,6 +707,7 @@ def build_makeflow_from_config(
 
     return
 
+
 def _get_timeout(config):
     timeout = get_config_entry(config, "Options", "timeout", required=False)
     if timeout is not None:
@@ -720,6 +722,7 @@ def _get_timeout(config):
                 " from the config file"
             )
     return timeout
+
 
 def build_analysis_makeflow_from_config(
     obsids, config_file, mf_name=None, work_dir=None
@@ -1368,6 +1371,7 @@ def get_lstbin_datafiles(config, parent_dir):
         for df in datafiles
     ]
 
+
 def _legacy_make_lstbin_config_file(config, outdir: Path, datafiles):
     try:
         from hera_cal.lst_stack import make_lst_bin_config_file
@@ -1376,9 +1380,7 @@ def _legacy_make_lstbin_config_file(config, outdir: Path, datafiles):
 
     # Get dlst. Updated version supports leaving dlst unspecified or set as null.
     # To support older versions which required string 'None', set that to None here.
-    dlst = get_config_entry(
-        config, "LSTBIN_OPTS", "dlst", default=None, required=False
-    )
+    dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst", default=None, required=False)
     if isinstance(dlst, str) and dlst.lower() in ("none", "null", ""):
         warnings.warn(
             "dlst should not be set to (string) 'None', but rather left unspecified in your TOML.",
@@ -1428,7 +1430,8 @@ def _legacy_make_lstbin_config_file(config, outdir: Path, datafiles):
     )
     print(f"Created lstbin config file at {lstbin_config_file}.")
 
-    return len(file_config['matched_files'])
+    return len(file_config["matched_files"])
+
 
 def make_lstbin_config_file(config, outdir: str) -> int:
     # This must be a TOML file that specifies how to construct the LSTbin file-config
@@ -1458,9 +1461,6 @@ def make_lstbin_config_file(config, outdir: str) -> int:
     lst_file_config.write(lstbin_config_file)
 
     return lstbin_config_file, len(lst_file_config.matched_files)
-
-
-
 
 
 def build_lstbin_makeflow_from_config(
@@ -1568,7 +1568,7 @@ def build_lstbin_makeflow_from_config(
         _datafiles = [df for df in _datafiles if len(df) > 0]
 
         nfiles = _legacy_make_lstbin_config_file(config, outdir)
-        
+
         if not parallelize:
             nfiles = 1
 
@@ -1644,10 +1644,11 @@ def build_lstbin_makeflow_from_config(
 
     return
 
+
 def build_lstbin_notebook_makeflow_from_config(
-    config_file: str | Path, 
-    mf_name: str | None=None, 
-    work_dir: str | Path | None=None, 
+    config_file: str | Path,
+    mf_name: str | None = None,
+    work_dir: str | Path | None = None,
 ) -> None:
     """Construct a notebook-based  LST-binning  makeflow file from input data and a config_file.
 
@@ -1661,7 +1662,7 @@ def build_lstbin_notebook_makeflow_from_config(
         The name of makeflow file. Defaults to "<config_file_basename>.mf" if not
         specified.
     work_dir : str or Path, optional
-        The directory in which to write the makeflow file and wrapper files. 
+        The directory in which to write the makeflow file and wrapper files.
         If not specified, the parent directory of the config file will be used.
     """
     config_file = Path(config_file)
@@ -1670,7 +1671,7 @@ def build_lstbin_notebook_makeflow_from_config(
 
     if mf_name is None:
         mf_name = config_file.with_suffix(".mf").name
-        
+
     work_dir = Path(work_dir or config_file.parent).absolute()
 
     makeflowfile = work_dir / mf_name
@@ -1680,9 +1681,9 @@ def build_lstbin_notebook_makeflow_from_config(
     # Write the toml config to the output directory.
     shutil.copy2(config_file, outdir / "lstbin-config.toml")
 
-    # Also write a YAML version of just the parameters, to be used to run 
+    # Also write a YAML version of just the parameters, to be used to run
     # the notebook
-    cfg_opts = toml.load(config_file)['LSTAVG_OPTS']
+    cfg_opts = toml.load(config_file)["LSTAVG_OPTS"]
     lstavg_config = outdir / "lstavg-config.toml"
     with open(lstavg_config, "w") as fl:
         toml.dump(cfg_opts, fl)
@@ -1696,20 +1697,22 @@ def build_lstbin_notebook_makeflow_from_config(
 
     # set output_file_select to None
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
-    config['LSTBIN_OPTS']['lstavg_toml_file'] = str(lstavg_config.absolute())
-    config['LSTBIN_OPTS']['kernel'] = conda_env
+    config["LSTBIN_OPTS"]["lstavg_toml_file"] = str(lstavg_config.absolute())
+    config["LSTBIN_OPTS"]["kernel"] = conda_env
 
-    if 'make_plots' not in config['LSTBIN_OPTS']:
-        if 'plot_every' in config["LSTBIN_OPTS"]:
-            plot_every = int(get_config_entry(config, "LSTBIN_OPTS", "plot_every", required=False))
+    if "make_plots" not in config["LSTBIN_OPTS"]:
+        if "plot_every" in config["LSTBIN_OPTS"]:
+            plot_every = int(
+                get_config_entry(config, "LSTBIN_OPTS", "plot_every", required=False)
+            )
         else:
             plot_every = 1
     else:
-        plot_every = int(bool(config['LSTBIN_OPTS']['make_plots']))
+        plot_every = int(bool(config["LSTBIN_OPTS"]["make_plots"]))
 
     # determine whether or not to parallelize
     parallelize = get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)
-    
+
     actions = get_config_entry(config, "WorkFlow", "actions", required=True)
     if len(actions) > 1:
         raise ValueError("This function only supports a single action in the workflow.")
@@ -1727,9 +1730,7 @@ def build_lstbin_notebook_makeflow_from_config(
     base_mem = get_config_entry(config, "Options", "base_mem", required=True)
     base_cpu = get_config_entry(config, "Options", "base_cpu", required=False)
     mail_user = get_config_entry(config, "Options", "mail_user", required=False)
-    default_queue = get_config_entry(
-        config, "Options", "default_queue", required=False
-    )
+    default_queue = get_config_entry(config, "Options", "default_queue", required=False)
     if default_queue is None:
         default_queue = "hera"
     batch_options = process_batch_options(
@@ -1737,7 +1738,7 @@ def build_lstbin_notebook_makeflow_from_config(
     )
 
     lstbin_config_file, nfiles = make_lstbin_config_file(config, outdir)
-    config['LSTBIN_OPTS']['lstconf'] = str(lstbin_config_file.absolute())
+    config["LSTBIN_OPTS"]["lstconf"] = str(lstbin_config_file.absolute())
 
     if not parallelize:
         nfiles = 1
@@ -1769,18 +1770,21 @@ date
         fl.write(
             f"""# makeflow file generated from config file {config_file.name}
 # created at {dt}
-export BATCH_OPTIONS = {batch_options}            
-""")
-       
+export BATCH_OPTIONS = {batch_options}
+"""
+        )
+
         # loop over output files
         for output_file_index in range(nfiles):
             # if parallize, update output_file_select
             if parallelize:
                 config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
                 if plot_every > 0:
-                    config["LSTBIN_OPTS"]['make_plots'] = str(output_file_index % plot_every == 0)
+                    config["LSTBIN_OPTS"]["make_plots"] = str(
+                        output_file_index % plot_every == 0
+                    )
                 else:
-                    config["LSTBIN_OPTS"]['make_plots'] = "False"
+                    config["LSTBIN_OPTS"]["make_plots"] = "False"
 
             # make outfile list
             outfile = Path(f"{output_file_index:04}.LSTBIN.out")
@@ -1800,9 +1804,11 @@ export BATCH_OPTIONS = {batch_options}
             # make a small wrapper script that will run the actual command
             # can't embed if; then statements in makeflow script
             wrapper_script = work_dir / f"wrapper_{outfile.with_suffix('.sh').name}"
-            
+
             with open(wrapper_script, "w") as f2:
-                f2.write(wrapper_template.format(args=args, outfile=outfile, logfile=logfile))
+                f2.write(
+                    wrapper_template.format(args=args, outfile=outfile, logfile=logfile)
+                )
 
             # make file executable
             os.chmod(wrapper_script, 0o755)
@@ -1812,13 +1818,12 @@ export BATCH_OPTIONS = {batch_options}
             lines = f"{outfile}: {command}\n\t{wrapper_script} > {logfile} 2>&1\n"
             fl.write(lines)
 
-        
-
         # Also write the conda_env export to the LSTbin dir
         if conda_env is not None:
             os.system(
                 f"conda env export -n {conda_env} --file {outdir}/environment.yaml"
             )
+
 
 def clean_wrapper_scripts(work_dir):
     """Clean up wrapper scripts from work directory.
