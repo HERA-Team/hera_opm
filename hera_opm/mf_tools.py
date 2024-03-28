@@ -1700,6 +1700,14 @@ def build_lstbin_notebook_makeflow_from_config(
     config['LSTBIN_OPTS']['lstavg_toml_file'] = str(lstavg_config.absolute())
     config['LSTBIN_OPTS']['kernel'] = conda_env
 
+    if 'make_plots' not in config['LSTBIN_OPTS']:
+        if 'plot_every' in config["LSTBIN_OPTS"]:
+            plot_every = int(get_config_entry(config, "LSTBIN_OPTS", "plot_every", required=False))
+        else:
+            plot_every = 1
+    else:
+        plot_every = int(bool(config['LSTBIN_OPTS']['make_plots']))
+
     # determine whether or not to parallelize
     parallelize = get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)
     
@@ -1771,6 +1779,10 @@ export BATCH_OPTIONS = {batch_options}
             # if parallize, update output_file_select
             if parallelize:
                 config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
+                if plot_every > 0:
+                    config["LSTBIN_OPTS"]['make_plots'] = str(output_file_index % plot_every == 0)
+                else:
+                    config["LSTBIN_OPTS"]['make_plots'] = "False"
 
             # make outfile list
             outfile = Path(f"{output_file_index:04}.LSTBIN.out")
