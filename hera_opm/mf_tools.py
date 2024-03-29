@@ -1674,6 +1674,9 @@ def build_lstbin_notebook_makeflow_from_config(
     outdir = Path(get_config_entry(config, "LSTBIN_OPTS", "outdir"))
 
     # Write the toml config to the output directory.
+    if not outdir.exists():
+        outdir.mkdir()
+        
     shutil.copy2(config_file, outdir / "lstbin-config.toml")
 
     # Also write a YAML version of just the parameters, to be used to run 
