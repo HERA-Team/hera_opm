@@ -3,7 +3,6 @@ requires = ["setuptools", "wheel", "toml>=0.9.4", "setuptools_scm[toml]>=6.2"]
 
 [tool.black]
 line-length = 88
-py36 = false
 exclude = '''
 /(
     \.eggs
