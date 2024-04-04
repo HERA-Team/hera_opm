@@ -11,10 +11,8 @@ import gzip
 import shutil
 import subprocess
 import warnings
-import glob
 import toml
 from pathlib import Path
-import math
 
 
 def get_jd(filename):
@@ -680,7 +678,7 @@ def build_makeflow_from_config(
     "lstbin" type, and call the appropriate funciton below.
 
     """
-    if isinstance(config_file, str):
+    if isinstance(config_file, (str, Path)):
         # read in config file
         config = toml.load(config_file)
     else:
@@ -695,15 +693,10 @@ def build_makeflow_from_config(
         build_lstbin_makeflow_from_config(
             config_file, mf_name=mf_name, work_dir=work_dir, **kwargs
         )
-    elif makeflow_type == "lstbin-notebook":
-        build_lstbin_notebook_makeflow_from_config(
-            config_file, mf_name=mf_name, work_dir=work_dir, **kwargs
-        )
     else:
         raise ValueError(
-            "unknown makeflow_type {} specified; must be 'analysis' or 'lstbin'".format(
-                makeflow_type
-            )
+            f"unknown makeflow_type '{makeflow_type}' specified; "
+            "must be 'analysis' or 'lstbin'"
         )
 
     return
@@ -1343,104 +1336,14 @@ def build_analysis_makeflow_from_config(
     return
 
 
-def get_lstbin_datafiles(config, parent_dir):
-    """Determine the datafiles for use in LST-binning makeflow."""
-    # get data files
-    datafiles = get_config_entry(config, "LSTBIN_OPTS", "data_files", required=False)
-
-    if datafiles is None:
-        # These are only required if datafiles wasn't specified specifically.
-        datadir = get_config_entry(config, "LSTBIN_OPTS", "datadir", required=True)
-        nightdirs = get_config_entry(config, "LSTBIN_OPTS", "nightdirs", required=True)
-        extension = get_config_entry(config, "LSTBIN_OPTS", "extension", required=True)
-        label = get_config_entry(config, "LSTBIN_OPTS", "label", required=True)
-        sd = get_config_entry(config, "LSTBIN_OPTS", "sd", required=True)
-        jdglob = get_config_entry(
-            config, "LSTBIN_OPTS", "jdglob", required=False, default="*"
-        )
-
-        if label:
-            label += "."
-
-        datafiles = []
-        for nd in nightdirs:
-            datafiles.append(f"{datadir}/{nd}/zen.{jdglob}.{sd}.{label}{extension}")
-
-    # encapsulate in double quotes
-    return [
-        "'{}'".format('"{}"'.format(os.path.join(parent_dir, df.strip('"').strip("'"))))
-        for df in datafiles
-    ]
-
-
-def _legacy_make_lstbin_config_file(config, outdir: Path, datafiles):
-    try:
-        from hera_cal.lst_stack import make_lst_bin_config_file
-    except ImportError:
-        from hera_cal.lstbin_simple import make_lst_bin_config_file
-
-    # Get dlst. Updated version supports leaving dlst unspecified or set as null.
-    # To support older versions which required string 'None', set that to None here.
-    dlst = get_config_entry(config, "LSTBIN_OPTS", "dlst", default=None, required=False)
-    if isinstance(dlst, str) and dlst.lower() in ("none", "null", ""):
-        warnings.warn(
-            "dlst should not be set to (string) 'None', but rather left unspecified in your TOML.",
-            DeprecationWarning,
-        )
-        dlst = None
-
-    lstbin_config_file = Path(outdir) / "file-config.yaml"
-
-    clobber = get_config_entry(config, "LSTBIN_OPTS", "overwrite", default=False)
-    atol = get_config_entry(config, "LSTBIN_OPTS", "atol", default=1e-10)
-    lst_start = get_config_entry(
-        config, "LSTBIN_OPTS", "lst_start", default=None, required=False
-    )
-    lst_width = get_config_entry(
-        config, "LSTBIN_OPTS", "lst_width", default=2 * math.pi
-    )
-    ntimes_per_file = get_config_entry(
-        config, "LSTBIN_OPTS", "ntimes_per_file", default=60
-    )
-    blts_are_rectangular = get_config_entry(
-        config, "LSTBIN_OPTS", "blts_are_rectangular", default=None, required=False
-    )
-    time_axis_faster_than_bls = get_config_entry(
-        config,
-        "LSTBIN_OPTS",
-        "time_axis_faster_than_bls",
-        default=None,
-        required=False,
-    )
-    jd_regex = get_config_entry(
-        config, "LSTBIN_OPTS", "jd_regex", default=r"zen\.(\d+\.\d+)\."
-    )
-
-    file_config = make_lst_bin_config_file(
-        config_file=lstbin_config_file,
-        data_files=datafiles,
-        clobber=clobber,
-        dlst=dlst,
-        atol=atol,
-        lst_start=lst_start,
-        lst_width=lst_width,
-        ntimes_per_file=ntimes_per_file,
-        blts_are_rectangular=blts_are_rectangular,
-        time_axis_faster_than_bls=time_axis_faster_than_bls,
-        jd_regex=jd_regex,
-    )
-    print(f"Created lstbin config file at {lstbin_config_file}.")
-
-    return len(file_config["matched_files"])
-
-
 def make_lstbin_config_file(config, outdir: str) -> int:
     # This must be a TOML file that specifies how to construct the LSTbin file-config
     lstconfig = config["FILE_CFG"]
 
-    from hera_cal.lst_stack.config import LSTBinConfiguration
+    from hera_cal.lst_stack.config import LSTBinConfigurator
 
-    lstconfig = LSTBinConfiguration.from_toml(toml.dumps(lstconfig))
+    print(lstconfig)
+    lstconfig = LSTBinConfigurator.from_toml(toml.dumps(lstconfig))
     print(f"Found {len(lstconfig.data_files)} nights of data.")
     print("Each night has the following number of files:")
     for flist in lstconfig.data_files:
@@ -1460,191 +1363,10 @@ def make_lstbin_config_file(config, outdir: str) -> int:
 
 
 def build_lstbin_makeflow_from_config(
-    config_file, mf_name=None, work_dir=None, **kwargs
-):
-    """Construct an LST-binning makeflow file from input data and a config_file.
-
-    Parameters
-    ----------
-    config_file : str
-        Full path to config file containing options.
-    mf_name : str
-        The name of makeflow file. Defaults to "<config_file_basename>.mf" if not
-        specified.
-
-    Returns
-    -------
-    None
-
-
-    Notes
-    -----
-    The major difference between this function and the one above is the use of
-    the `config_lst_bin_files` function from hera_cal, which is used to
-    determine the number of output files, which are parallelized over in the
-    makeflow.
-
-    """
-    # import hera_cal
-
-    # read in config file
-    config = toml.load(config_file)
-    cf = os.path.basename(config_file)
-
-    # get LSTBIN arguments
-    lstbin_args = get_config_entry(config, "LSTBIN", "args", required=False)
-
-    # set output_file_select to None
-    config["LSTBIN_OPTS"]["output_file_select"] = str("None")
-
-    # get general options
-    path_to_do_scripts = Path(get_config_entry(config, "Options", "path_to_do_scripts"))
-    conda_env = get_config_entry(config, "Options", "conda_env", required=False)
-    source_script = get_config_entry(config, "Options", "source_script", required=False)
-    batch_system = get_config_entry(config, "Options", "batch_system", required=False)
-    timeout = _get_timeout(config)
-
-    # open file for writing
-    if mf_name is not None:
-        fn = mf_name
-    else:
-        base, ext = os.path.splitext(cf)
-        fn = "{0}.mf".format(base)
-
-    # determine whether or not to parallelize
-    parallelize = get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)
-    if "parent_dir" in kwargs:
-        parent_dir = Path(kwargs["parent_dir"])
-    else:
-        parent_dir = Path(
-            get_config_entry(config, "LSTBIN_OPTS", "parent_dir", required=True)
-        )
-
-    work_dir = Path(work_dir or parent_dir)
-
-    makeflowfile = work_dir / fn
-
-    # define command
-    command = path_to_do_scripts / "do_LSTBIN.sh"
-
-    # write makeflow file
-    with open(makeflowfile, "w") as f:
-        # add comment at top of file listing date of creation and config file name
-        dt = time.strftime("%H:%M:%S on %d %B %Y")
-        print("# makeflow file generated from config file {}".format(cf), file=f)
-        print("# created at {}".format(dt), file=f)
-
-        # add resource information
-        base_mem = get_config_entry(config, "Options", "base_mem", required=True)
-        base_cpu = get_config_entry(config, "Options", "base_cpu", required=False)
-        mail_user = get_config_entry(config, "Options", "mail_user", required=False)
-        default_queue = get_config_entry(
-            config, "Options", "default_queue", required=False
-        )
-        if default_queue is None:
-            default_queue = "hera"
-        batch_options = process_batch_options(
-            base_mem, base_cpu, mail_user, default_queue, batch_system
-        )
-        print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
-
-        if "outdir" in kwargs:
-            outdir = Path(kwargs["outdir"])
-        else:
-            outdir = Path(get_config_entry(config, "LSTBIN_OPTS", "outdir"))
-
-        datafiles = get_lstbin_datafiles(config, parent_dir)
-
-        print("Searching for files in the following globs: ")
-        for df in datafiles:
-            print("  " + df.strip("'").strip('"'))
-
-        # pre-process files to determine the number of output files
-        _datafiles = [sorted(glob.glob(df.strip("'").strip('"'))) for df in datafiles]
-        _datafiles = [df for df in _datafiles if len(df) > 0]
-
-        nfiles = _legacy_make_lstbin_config_file(config, outdir, _datafiles)
-
-        if not parallelize:
-            nfiles = 1
-
-        # loop over output files
-        for output_file_index in range(nfiles):
-            # if parallize, update output_file_select
-            if parallelize:
-                config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
-
-            # make outfile list
-            outfile = Path(f"lstbin_outfile_{output_file_index}.LSTBIN.out")
-
-            # get args list for lst-binning step
-            args = [
-                str(get_config_entry(config, "LSTBIN_OPTS", a, required=True))
-                for a in lstbin_args
-            ]
-            # turn into string
-            args = " ".join(args)
-
-            # make logfile name
-            # logfile will capture stdout and stderr
-            logfile = work_dir / outfile.with_suffix(".log").name
-
-            # make a small wrapper script that will run the actual command
-            # can't embed if; then statements in makeflow script
-            wrapper_script = work_dir / f"wrapper_{outfile.with_suffix('.sh').name}"
-            with open(wrapper_script, "w") as f2:
-                print("#!/bin/bash", file=f2)
-                if source_script is not None:
-                    print("source {}".format(source_script), file=f2)
-                if conda_env is not None:
-                    print("conda activate {}".format(conda_env), file=f2)
-                print("date", file=f2)
-                print("cd {}".format(parent_dir), file=f2)
-                if timeout is not None:
-                    print(
-                        "timeout {0} {1} {2}".format(timeout, command, args),
-                        file=f2,
-                    )
-                else:
-                    print("{0} {1}".format(command, args), file=f2)
-                print("if [ $? -eq 0 ]; then", file=f2)
-                print("  cd {}".format(work_dir), file=f2)
-                print("  touch {}".format(outfile), file=f2)
-                print("else", file=f2)
-                print(
-                    "  mv {0} {1}".format(
-                        logfile, logfile.parent / f"{logfile.name}.error"
-                    ),
-                    file=f2,
-                )
-                print("fi", file=f2)
-                print("date", file=f2)
-            # make file executable
-            os.chmod(wrapper_script, 0o755)
-
-            # first line lists target file to make (dummy output file), and requirements
-            # second line is "build rule", which runs the shell script and makes the output file
-            line1 = "{0}: {1}".format(outfile, command)
-            line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
-            print(line1, file=f)
-            print(line2, file=f)
-
-        # Write the toml config to the output directory.
-        shutil.copy2(config_file, outdir / "lstbin-config.toml")
-
-        # Also write the conda_env export to the LSTbin dir
-        if conda_env is not None:
-            os.system(
-                f"conda env export -n {conda_env} --file {outdir}/environment.yaml"
-            )
-
-    return
-
-
-def build_lstbin_notebook_makeflow_from_config(
     config_file: str | Path,
     mf_name: str | None = None,
     work_dir: str | Path | None = None,
+    outdir: str | Path | None = None,
 ) -> None:
     """Construct a notebook-based  LST-binning  makeflow file from input data and a config_file.
 
@@ -1672,7 +1394,7 @@ def build_lstbin_notebook_makeflow_from_config(
 
     makeflowfile = work_dir / mf_name
 
-    outdir = Path(get_config_entry(config, "LSTBIN_OPTS", "outdir"))
+    outdir = Path(outdir or get_config_entry(config, "LSTBIN_OPTS", "outdir"))
 
     # Write the toml config to the output directory.
     if not outdir.exists():
@@ -1698,16 +1420,6 @@ def build_lstbin_notebook_makeflow_from_config(
     config["LSTBIN_OPTS"]["output_file_select"] = str("None")
     config["LSTBIN_OPTS"]["lstavg_toml_file"] = str(lstavg_config.absolute())
     config["LSTBIN_OPTS"]["kernel"] = conda_env
-
-    if "make_plots" not in config["LSTBIN_OPTS"]:
-        if "plot_every" in config["LSTBIN_OPTS"]:
-            plot_every = int(
-                get_config_entry(config, "LSTBIN_OPTS", "plot_every", required=False)
-            )
-        else:
-            plot_every = 1
-    else:
-        plot_every = int(bool(config["LSTBIN_OPTS"]["make_plots"]))
 
     # determine whether or not to parallelize
     parallelize = get_config_entry(config, "LSTBIN_OPTS", "parallelize", required=True)
@@ -1778,12 +1490,6 @@ export BATCH_OPTIONS = {batch_options}
             # if parallize, update output_file_select
             if parallelize:
                 config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
-                if plot_every > 0:
-                    config["LSTBIN_OPTS"]["make_plots"] = str(
-                        output_file_index % plot_every == 0
-                    )
-                else:
-                    config["LSTBIN_OPTS"]["make_plots"] = "False"
 
             # make outfile list
             outfile = Path(f"{output_file_index:04}.LSTBIN.out")
