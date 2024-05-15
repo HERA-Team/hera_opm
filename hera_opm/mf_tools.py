@@ -1342,7 +1342,6 @@ def make_lstbin_config_file(config, outdir: str) -> int:
 
     from hera_cal.lst_stack.config import LSTBinConfigurator
 
-    print(lstconfig)
     lstconfig = LSTBinConfigurator.from_toml(toml.dumps(lstconfig))
     print(f"Found {len(lstconfig.data_files)} nights of data.")
     print("Each night has the following number of files:")
