@@ -1557,7 +1557,7 @@ def build_lstbin_makeflow_from_config(
             args = " ".join(args)
 
             # make logfile name
-            # logfile will capture stdout and stderr
+            # logfile will capture stdout and stderr, yes it will
             logfile = work_dir / outfile.with_suffix(".log").name
 
             # make a small wrapper script that will run the actual command
