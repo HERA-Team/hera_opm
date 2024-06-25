@@ -1402,7 +1402,7 @@ def build_lstbin_makeflow_from_config(
     shutil.copy2(config_file, outdir / "lstbin-config.toml")
 
     # Also write a YAML version of just the parameters, to be used to run
-    # the notebook
+    # the notebook.
     cfg_opts = toml.load(config_file)["LSTAVG_OPTS"]
     lstavg_config = outdir / "lstavg-config.toml"
     with open(lstavg_config, "w") as fl:
