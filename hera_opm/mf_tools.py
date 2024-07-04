@@ -1357,20 +1357,20 @@ def make_lstbin_config_file(
 
     matched_files = lstconfig.get_matched_files()
 
-    # Split up the baselines into chunks that will be LST-binned together.
-    # This is just to save on RAM.
-    if bl_chunk_size is None:
-        bl_chunk_size = len(lstconfig.antpairs)
-    else:
-        bl_chunk_size = min(bl_chunk_size, len(lstconfig.antpairs))
-
-    n_bl_chunks = int(math.ceil(len(config.antpairs) / bl_chunk_size))
-
     lst_file_config = lstconfig.create_config(matched_files)
 
     lstbin_config_file = Path(outdir) / "file-config.h5"
 
     lst_file_config.write(lstbin_config_file)
+
+    # Split up the baselines into chunks that will be LST-binned together.
+    # This is just to save on RAM.
+    if bl_chunk_size is None:
+        bl_chunk_size = len(lst_file_config.antpairs)
+    else:
+        bl_chunk_size = min(bl_chunk_size, len(lst_file_config.antpairs))
+
+    n_bl_chunks = int(math.ceil(len(lst_file_config.antpairs) / bl_chunk_size))
 
     return lstbin_config_file, len(lst_file_config.matched_files), n_bl_chunks
 
