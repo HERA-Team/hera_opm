@@ -146,9 +146,8 @@ def lsttoml_notebook_datafiles(
         fl,
         datafiles={
             "datadir": str(datafiles_in_nightly_folders),
-            "nightdirs": [fl.name for fl in datafiles_in_nightly_folders.glob("*")],
-            "sum_or_diff": "HH",
-            "extension": "uvh5",
+            "nights": [fl.name for fl in datafiles_in_nightly_folders.glob("*")],
+            "fileglob": "zen.{night}.*.HH.uvh5",
         },
         notebook=True,
     )
