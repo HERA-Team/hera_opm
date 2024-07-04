@@ -1417,7 +1417,9 @@ def build_lstbin_makeflow_from_config(
 
     # Also write a YAML version of just the parameters, to be used to run
     # the notebook.
-    cfg_opts = toml.load(config_file)["LSTAVG_OPTS"]
+    cfg_opts = config["LSTAVG_OPTS"]
+    # Interpolate the parameters
+    cfg_opts = {k: get_config_entry(config, "LSTAVG_OPTS", k) for k in cfg_opts}
     lstavg_config = outdir / "lstavg-config.toml"
     with open(lstavg_config, "w") as fl:
         toml.dump(cfg_opts, fl)
