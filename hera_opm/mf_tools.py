@@ -13,6 +13,8 @@ import subprocess
 import warnings
 import toml
 from pathlib import Path
+import math
+from itertools import product
 
 
 def get_jd(filename):
@@ -1336,7 +1338,9 @@ def build_analysis_makeflow_from_config(
     return
 
 
-def make_lstbin_config_file(config, outdir: str) -> int:
+def make_lstbin_config_file(
+    config, outdir: str, bl_chunk_size: int | None = None
+) -> int:
     # This must be a TOML file that specifies how to construct the LSTbin file-config
     lstconfig = config["FILE_CFG"]
 
@@ -1352,13 +1356,23 @@ def make_lstbin_config_file(config, outdir: str) -> int:
         print(f"{flist[0].parent.name}: {len(flist)}")
 
     matched_files = lstconfig.get_matched_files()
+
+    # Split up the baselines into chunks that will be LST-binned together.
+    # This is just to save on RAM.
+    if bl_chunk_size is None:
+        bl_chunk_size = len(lstconfig.antpairs)
+    else:
+        bl_chunk_size = min(bl_chunk_size, len(lstconfig.antpairs))
+
+    n_bl_chunks = int(math.ceil(len(config.antpairs) / bl_chunk_size))
+
     lst_file_config = lstconfig.create_config(matched_files)
 
     lstbin_config_file = Path(outdir) / "file-config.h5"
 
     lst_file_config.write(lstbin_config_file)
 
-    return lstbin_config_file, len(lst_file_config.matched_files)
+    return lstbin_config_file, len(lst_file_config.matched_files), n_bl_chunks
 
 
 def build_lstbin_makeflow_from_config(
@@ -1447,7 +1461,13 @@ def build_lstbin_makeflow_from_config(
         base_mem, base_cpu, mail_user, default_queue, batch_system
     )
 
-    lstbin_config_file, nfiles = make_lstbin_config_file(config, outdir)
+    bl_chunk_size = get_config_entry(
+        config, "LSTBIN_OPTS", "bl_chunk_size", required=False
+    )
+
+    lstbin_config_file, nfiles, nbl_chunks = make_lstbin_config_file(
+        config, outdir, bl_chunk_size=bl_chunk_size
+    )
     config["LSTBIN_OPTS"]["lstconf"] = str(lstbin_config_file.absolute())
 
     if not parallelize:
@@ -1485,13 +1505,14 @@ export BATCH_OPTIONS = {batch_options}
         )
 
         # loop over output files
-        for output_file_index in range(nfiles):
+        for output_file_index, bl_chunk in product(range(nfiles), range(nbl_chunks)):
             # if parallize, update output_file_select
             if parallelize:
                 config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
+                config["LSTBIN_OPTS"]["output_blchnk_select"] = str(bl_chunk)
 
             # make outfile list
-            outfile = Path(f"{output_file_index:04}.LSTBIN.out")
+            outfile = Path(f"{output_file_index:04}.b{bl_chunk:03}.LSTBIN.out")
 
             # get args list for lst-binning step
             args = [
