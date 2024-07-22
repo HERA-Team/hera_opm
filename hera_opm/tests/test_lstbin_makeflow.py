@@ -191,4 +191,3 @@ def test_build_makeflow_from_config_lstbin_options(
 
     # make sure the output files we expected appeared
     assert outfile.exists()
-
