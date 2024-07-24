@@ -17,7 +17,6 @@ def make_lstbin_config_file(
     lstbin_opts=None,
     file_cfg=None,
     lstavg_opts=None,
-    bl_chunk_size: int | None = 5000,
 ):
     """Make a lstbin config file."""
     options = {
@@ -37,7 +36,6 @@ def make_lstbin_config_file(
             "parallelize": True,
             "outdir": str(fl.parent),
             "parent_dir": str(fl.parent),
-            "bl_chunk_size": bl_chunk_size,
         },
         **(lstbin_opts or {}),
     }
@@ -57,6 +55,7 @@ def make_lstbin_config_file(
     lstavg_opts = {
         **{
             "outdir": "../data",
+            "bl_chunk_size": 5000,
             "fname_format": "{inpaint_mode}/zen.{kind}.{lst:7.5f}.sum.uvh5",
             "overwrite": True,
             "write_med_mad": True,
@@ -101,18 +100,6 @@ def lsttoml_direct_datafiles(tmp_path_factory) -> Path:
     fl = tmp_path_factory.mktemp("data") / "lstbin_direct.toml"
     make_lstbin_config_file(
         fl, datafiles=["zen.2458043.40141.HH.uvh5", "zen.2458043.40887.HH.uvh5"]
-    )
-    return fl
-
-
-@pytest.fixture(scope="module")
-def lsttoml_direct_datafiles_blchunk_none(tmp_path_factory) -> Path:
-    """Make a direct lstbin config file."""
-    fl = tmp_path_factory.mktemp("data") / "lstbin_direct.toml"
-    make_lstbin_config_file(
-        fl,
-        datafiles=["zen.2458043.40141.HH.uvh5", "zen.2458043.40887.HH.uvh5"],
-        bl_chunk_size=None,
     )
     return fl
 
@@ -171,7 +158,6 @@ def lsttoml_notebook_datafiles(
     "config_file",
     [
         "lsttoml_direct_datafiles",
-        "lsttoml_direct_datafiles_blchunk_none",
         "lsttoml_direct_datafiles_glob",
         "lsttoml_notebook_datafiles",
     ],
