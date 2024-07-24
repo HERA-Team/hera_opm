@@ -37,6 +37,7 @@ def make_lstbin_config_file(
             "parallelize": True,
             "outdir": str(fl.parent),
             "parent_dir": str(fl.parent),
+            "bl_chunk_size": bl_chunk_size,
         },
         **(lstbin_opts or {}),
     }
@@ -56,7 +57,6 @@ def make_lstbin_config_file(
     lstavg_opts = {
         **{
             "outdir": "../data",
-            "bl_chunk_size": bl_chunk_size,
             "fname_format": "{inpaint_mode}/zen.{kind}.{lst:7.5f}.sum.uvh5",
             "overwrite": True,
             "write_med_mad": True,
