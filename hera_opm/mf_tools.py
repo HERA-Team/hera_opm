@@ -1356,7 +1356,6 @@ def make_lstbin_config_file(
         print(f"{flist[0].parent.name}: {len(flist)}")
 
     matched_files = lstconfig.get_matched_files()
-
     lst_file_config = lstconfig.create_config(matched_files)
 
     lstbin_config_file = Path(outdir) / "file-config.h5"
