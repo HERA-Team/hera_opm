@@ -7,22 +7,10 @@ import os
 import shutil
 import gzip
 import toml
-from pathlib import Path
 
 from . import BAD_CONFIG_PATH
 from ..data import DATA_PATH
 from .. import mf_tools as mt
-
-# define a pytest marker for skipping lstbin tests
-try:
-    import hera_cal  # noqa
-
-    hc_installed = True
-except ImportError:
-    hc_installed = False
-hc_skip = pytest.mark.skipif(
-    not hc_installed, reason="hera_cal must be installed for this test"
-)
 
 
 @pytest.fixture(scope="module")
@@ -43,12 +31,6 @@ def config_options():
     )
     config_dict["config_file_nopol"] = os.path.join(
         DATA_PATH, "sample_config", "nrao_rtp_nopol.toml"
-    )
-    config_dict["config_file_lstbin"] = os.path.join(
-        DATA_PATH, "sample_config", "lstbin.toml"
-    )
-    config_dict["config_file_lstbin_options"] = os.path.join(
-        DATA_PATH, "sample_config", "lstbin_options.toml"
     )
     config_dict["config_file_setup_teardown"] = os.path.join(
         DATA_PATH, "sample_config", "nrao_rtp_setup_teardown.toml"
@@ -800,164 +782,6 @@ def test_setup_teardown_errors(config_options):
     return
 
 
-@hc_skip
-@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
-@pytest.mark.filterwarnings("ignore:dlst should not be set to (string) 'None'")
-@pytest.mark.parametrize(
-    "provide_outfile,v2", [(False, False), (True, False), (False, True)]
-)
-def test_build_lstbin_makeflow_from_config(
-    config_options, tmp_path_factory, provide_outfile: bool, v2: bool
-):
-    # define load in config
-    config_file = config_options["config_file_lstbin"]
-
-    if v2:
-        config_file = config_file.replace("lstbin", "lstbin_v2")
-
-    # setup vars
-    work_dir = tmp_path_factory.mktemp("test_output")
-    if provide_outfile:
-        mf_output = "output.mf"
-    else:
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
-    outfile = work_dir / mf_output
-
-    kwargs = {"work_dir": str(work_dir), "parent_dir": DATA_PATH, "outdir": work_dir}
-    if provide_outfile:
-        kwargs["mf_name"] = outfile
-
-    mt.build_lstbin_makeflow_from_config(config_file, **kwargs)
-
-    # make sure the output files we expected appeared
-    assert outfile.exists()
-
-    # check that the wrapper scripts have the right lines in them
-    wrapper_scripts = [
-        f for f in sorted(os.listdir(work_dir)) if f.startswith("wrapper_")
-    ]
-    with open(work_dir / wrapper_scripts[0]) as infile:
-        lines = infile.readlines()
-    assert lines[0].strip() == "#!/bin/bash"
-    assert lines[1].strip() == "source ~/.bashrc"
-    assert lines[2].strip() == "conda activate hera"
-    assert lines[3].strip() == "date"
-
-
-@hc_skip
-@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
-@pytest.mark.filterwarnings("ignore: A value for the")
-@pytest.mark.parametrize("provide_outfile", [True, False])
-def test_build_lstbin_makeflow_from_config_options(
-    config_options, tmp_path_factory, provide_outfile
-):
-    # define load in config
-    config_file = config_options["config_file_lstbin_options"]
-
-    # setup vars
-    work_dir = tmp_path_factory.mktemp("test_output")
-    if provide_outfile:
-        mf_output = "output.mf"
-    else:
-        mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
-
-    outfile = work_dir / mf_output
-
-    mt.build_lstbin_makeflow_from_config(
-        config_file,
-        mf_name=outfile,
-        work_dir=str(work_dir),
-        parent_dir=DATA_PATH,
-        outdir=work_dir,
-    )
-
-    # make sure the output files we expected appeared
-    assert outfile.exists()
-
-
-@hc_skip
-@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
-@pytest.mark.filterwarnings("ignore: A value for the")
-def test_build_lstbin_makeflow_direct_options(config_options, tmp_path_factory):
-    # Get the config template
-    config_file = config_options["config_file_lstbin_options"]
-    # setup vars
-    work_dir = tmp_path_factory.mktemp("test_output")
-    mf_output = "output.mf"
-    outfile = work_dir / mf_output
-
-    # Make new config with dynamic variables in it...
-    config = work_dir / "inputconf.toml"
-    with open(config_file, "r") as fl:
-        _cfg = toml.load(fl)
-
-    _cfg["LSTBIN_OPTS"]["outdir"] = str(work_dir)
-    _cfg["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
-    print("DP: ", DATA_PATH)
-    with open(config, "w") as fl:
-        toml.dump(_cfg, fl)
-
-    mt.build_lstbin_makeflow_from_config(
-        config,
-        mf_name=outfile,
-        work_dir=str(work_dir),
-    )
-
-    # make sure the output files we expected appeared
-    assert outfile.exists()
-
-
-@hc_skip
-@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
-@pytest.mark.filterwarnings("ignore: A value for the")
-@pytest.mark.parametrize("label", ["", "label."])
-def test_build_lstbin_makeflow_simple(config_options, tmp_path_factory, label):
-    # Get the config template
-    config_file = config_options["config_file_lstbin"].replace(
-        "lstbin.", "lstbin_simple."
-    )
-
-    # setup vars
-    work_dir = tmp_path_factory.mktemp("test_output")
-    mf_output = "output.mf"
-    outfile = work_dir / mf_output
-
-    # Make new config with dynamic variables in it...
-    config = work_dir / "inputconf.toml"
-    with open(config_file, "r") as fl:
-        _cfg = toml.load(fl)
-
-    _cfg["LSTBIN_OPTS"]["outdir"] = str(work_dir)
-    _cfg["LSTBIN_OPTS"]["parent_dir"] = DATA_PATH
-    _cfg["LSTBIN_OPTS"]["datadir"] = str(work_dir)
-    _cfg["LSTBIN_OPTS"]["label"] = str(label)[:-1]
-
-    with open(config, "w") as fl:
-        toml.dump(_cfg, fl)
-
-    # Also, put our input files into nightly folders
-    (work_dir / "2458043").mkdir()
-    (work_dir / "2458044").mkdir()
-    (work_dir / "2458045").mkdir()
-    for fl in Path(DATA_PATH).glob("zen.*.uvh5"):
-        newfl = fl.with_suffix(f".{label}uvh5").name
-        if "2458043." in fl.name:
-            shutil.copy(fl, work_dir / "2458043" / newfl)
-        elif "2458044." in fl.name:
-            shutil.copy(fl, work_dir / "2458044" / newfl)
-        elif "2458045." in fl.name:
-            shutil.copy(fl, work_dir / "2458045" / newfl)
-
-    mt.build_lstbin_makeflow_from_config(
-        config,
-        mf_name=outfile,
-        work_dir=str(work_dir),
-    )
-
-    # make sure the output files we expected appeared
-    assert outfile.exists()
-
-
 def test_build_makeflow_from_config(config_options):
     # define args
     obsids = config_options["obsids"][:1]
@@ -983,31 +807,6 @@ def test_build_makeflow_from_config(config_options):
         mt.build_makeflow_from_config(obsids, config_file, work_dir=work_dir)
 
     return
-
-
-@hc_skip
-@pytest.mark.filterwarnings("ignore:The default for the `center` keyword has changed")
-@pytest.mark.filterwarnings("ignore: A value for the")
-@pytest.mark.filterwarnings("ignore:dlst should not be set to (string) 'None'")
-def test_build_makeflow_from_config_lstbin_options(config_options, tmp_path_factory):
-    # test lstbin version with options
-    obsids = config_options["obsids"][:1]
-    config_file = config_options["config_file_lstbin_options"]
-    work_dir = tmp_path_factory.mktemp("test_output")
-    mf_output = os.path.splitext(os.path.basename(config_file))[0] + ".mf"
-    outfile = work_dir / mf_output
-
-    mt.build_makeflow_from_config(
-        obsids,
-        config_file,
-        mf_name=str(outfile),
-        work_dir=str(work_dir),
-        parent_dir=DATA_PATH,
-        outdir=work_dir,
-    )
-
-    # make sure the output files we expected appeared
-    assert outfile.exists()
 
 
 def test_clean_wrapper_scripts():
