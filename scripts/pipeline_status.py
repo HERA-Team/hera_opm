@@ -58,13 +58,15 @@ except BaseException:
     timeout = None
 
 
-def elapsed_time(log_lines):
-    """Take a list of lines in a log file and calculates the elapsed time in minutes.
+def elapsed_time(first_line, last_line):
+    """Take the first and last lines of a log file and calculates the elapsed time in minutes.
 
     Parameters
     ----------
-    log_lines : list of str
-        List of lines in a log file, like that produced by [file].readlines().
+    first_line : str
+        The first line of a log file, like that produced by [file].readlines().
+    last_line : str
+        The last line of a log file, like that produced by [file].readlines().
 
     Returns
     -------
@@ -73,11 +75,11 @@ def elapsed_time(log_lines):
         returns -1. If the file has no start time, returns -2.
     """
     try:
-        start = dateparser.parse(log_lines[0], ignoretz=True)
+        start = dateparser.parse(first_line, ignoretz=True)
     except BaseException:
         start = None
     try:
-        end = dateparser.parse(log_lines[-1], ignoretz=True)
+        end = dateparser.parse(last_line, ignoretz=True)
     except BaseException:
         end = None
 
@@ -102,7 +104,9 @@ def inspect_log_files(log_files, out_files):
     Returns
     -------
     average_runtime : float
-        The average runtime of all finished jobs that took longer than a second, in minutes.
+        The average runtime of all finished jobs that took longer than 10 seconds, in minutes.
+    total_runtime : float
+        The total runtime of all finished jobs, in hours.
     nRunning : int
         The number of jobs believed to be running (start time with no stop time).
     nErrored : int
@@ -156,6 +160,7 @@ def inspect_log_files(log_files, out_files):
 
     return (
         average_runtime,
+        np.sum(runtimes) / 60.0,
         np.sum(runtimes == -1),
         len(errored_logs),
         len(timed_out_logs),
@@ -211,18 +216,9 @@ for job in workflow:
             logged += glob.glob(os.path.join(wdir, "*." + job + ".*log*"))
             done += glob.glob(os.path.join(wdir, "*." + job + ".*out"))
     logged = filter_errors(logged)
-    average_runtime, nRunning, nErrored, nTimedOut = inspect_log_files(logged, done)
+    average_runtime, total_runtime, nRunning, nErrored, nTimedOut = inspect_log_files(logged, done)
 
-    print("Average (non-trivial) runtime:", average_runtime, "minutes")
-    print(
-        len(total),
-        "\t|\t",
-        len(done),
-        "\t|\t",
-        nRunning,
-        "\t|\t",
-        nErrored,
-        "\t|\t",
-        nTimedOut,
-    )
+    print(f"Average per-job (non-trivial) runtime: {average_runtime:.2f} minutes")
+    print(f"Total runtime: {total_runtime:.2f} hours")
+    print(f'{len(total)}\t|\t{len(done)}\t|\t{nRunning}\t|\t{nErrored}\t|\t{nTimedOut}')
     print("total\t|\tdone\t|\trunning\t|\terrored\t|\ttimed out\n\n")
