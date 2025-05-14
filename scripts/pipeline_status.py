@@ -120,9 +120,16 @@ def inspect_log_files(log_files, out_files):
     errored_logs = []
     timed_out_logs = []
     for log_file in log_files:
-        with open(log_file, "r") as f:
-            log_lines = f.readlines()
-        runtimes.append(elapsed_time(log_lines))
+        with open(log_file, "rb") as f:
+            first_line = f.readline().decode(errors="ignore")
+            try:
+                # Seek to the end and back up a bit to catch the last line
+                f.seek(-64, os.SEEK_END)
+            except:
+                # If that fails, read the whole file
+                f.seek(0)
+            last_line = f.readlines()[-1].decode(errors="ignore")
+        runtimes.append(elapsed_time(first_line, last_line))
 
         # It timed out
         if (
