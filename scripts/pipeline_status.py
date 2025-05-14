@@ -223,9 +223,11 @@ for job in workflow:
             logged += glob.glob(os.path.join(wdir, "*." + job + ".*log*"))
             done += glob.glob(os.path.join(wdir, "*." + job + ".*out"))
     logged = filter_errors(logged)
-    average_runtime, total_runtime, nRunning, nErrored, nTimedOut = inspect_log_files(logged, done)
+    average_runtime, total_runtime, nRunning, nErrored, nTimedOut = inspect_log_files(
+        logged, done
+    )
 
     print(f"Average per-job (non-trivial) runtime: {average_runtime:.2f} minutes")
     print(f"Total runtime: {total_runtime:.2f} hours")
-    print(f'{len(total)}\t|\t{len(done)}\t|\t{nRunning}\t|\t{nErrored}\t|\t{nTimedOut}')
+    print(f"{len(total)}\t|\t{len(done)}\t|\t{nRunning}\t|\t{nErrored}\t|\t{nTimedOut}")
     print("total\t|\tdone\t|\trunning\t|\terrored\t|\ttimed out\n\n")
