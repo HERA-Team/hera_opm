@@ -125,7 +125,7 @@ def inspect_log_files(log_files, out_files):
             try:
                 # Seek to the end and back up a bit to catch the last line
                 f.seek(-64, os.SEEK_END)
-            except:
+            except OSError:
                 # If that fails, read the whole file
                 f.seek(0)
             last_line = f.readlines()[-1].decode(errors="ignore")
@@ -145,6 +145,8 @@ def inspect_log_files(log_files, out_files):
             if error_warned:
                 print("Errors also suspected in", log_file)
             else:
+                with open(log_file, "r") as f:
+                    log_lines = f.readlines()
                 print("\n\nError Suspected (no .out found) in", log_file)
                 print("------------------------------------------------\n")
                 print("".join(log_lines))
