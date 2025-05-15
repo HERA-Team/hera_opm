@@ -167,7 +167,7 @@ def inspect_log_files(log_files, out_files):
 
     return (
         average_runtime,
-        np.sum(runtimes) / 60.0,
+        np.sum(runtimes[runtimes > 0]) / 60.0,
         np.sum(runtimes == -1),
         len(errored_logs),
         len(timed_out_logs),
