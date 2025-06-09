@@ -132,8 +132,9 @@ def inspect_log_files(log_files, out_files):
         runtimes.append(elapsed_time(first_line, last_line))
 
         # Check if the log file has a corresponding .out file
-        if ((log_file.replace(".log", ".out") not in out_files) and
-            (log_file.replace(".log.error", ".out") not in out_files)):
+        if (log_file.replace(".log", ".out") not in out_files) and (
+            log_file.replace(".log.error", ".out") not in out_files
+        ):
             # It timed out
             if timeout is not None and (np.abs(runtimes[-1]) > 0.99 * timeout):
                 timed_out_logs.append(log_file)
