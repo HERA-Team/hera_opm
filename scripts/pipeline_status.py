@@ -131,7 +131,7 @@ def inspect_log_files(log_files, out_files):
             last_line = f.readlines()[-1].decode(errors="ignore")
         runtimes.append(elapsed_time(first_line, last_line))
 
-        # Check if the log file has a corresponding .out file
+        # Check if this .log file is missing the corresponding .out file
         if (log_file.replace(".log", ".out") not in out_files) and (
             log_file.replace(".log.error", ".out") not in out_files
         ):
