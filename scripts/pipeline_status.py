@@ -131,27 +131,25 @@ def inspect_log_files(log_files, out_files):
             last_line = f.readlines()[-1].decode(errors="ignore")
         runtimes.append(elapsed_time(first_line, last_line))
 
-        # It timed out
-        if (
-            timeout is not None
-            and (np.abs(runtimes[-1]) > 0.99 * timeout)
-            and (log_file.replace(".log", ".out") not in out_files)
-            and (log_file.replace(".log.error", ".out") not in out_files)
-        ):
-            timed_out_logs.append(log_file)
-        # It ran but there's no .out, so it errored
-        elif ".log.error" in log_file:
-            errored_logs.append(log_file)
-            if error_warned:
-                print("Errors also suspected in", log_file)
-            else:
-                with open(log_file, "r") as f:
-                    log_lines = f.readlines()
-                print("\n\nError Suspected (no .out found) in", log_file)
-                print("------------------------------------------------\n")
-                print("".join(log_lines))
-                print("------------------------------------------------\n")
-                error_warned = True
+        # Check if the log file has a corresponding .out file
+        if ((log_file.replace(".log", ".out") not in out_files) and
+            (log_file.replace(".log.error", ".out") not in out_files)):
+            # It timed out
+            if timeout is not None and (np.abs(runtimes[-1]) > 0.99 * timeout):
+                timed_out_logs.append(log_file)
+            # It ran but there's no .out, so it errored
+            elif ".log.error" in log_file:
+                errored_logs.append(log_file)
+                if error_warned:
+                    print("Errors also suspected in", log_file)
+                else:
+                    with open(log_file, "r") as f:
+                        log_lines = f.readlines()
+                    print("\n\nError Suspected (no .out found) in", log_file)
+                    print("------------------------------------------------\n")
+                    print("".join(log_lines))
+                    print("------------------------------------------------\n")
+                    error_warned = True
     if error_warned:
         print("\n")
     if len(timed_out_logs) > 0:
