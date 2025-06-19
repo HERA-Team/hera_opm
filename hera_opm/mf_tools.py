@@ -695,6 +695,10 @@ def build_makeflow_from_config(
         build_lstbin_makeflow_from_config(
             config_file, mf_name=mf_name, work_dir=work_dir, **kwargs
         )
+    elif makeflow_type == "lstbin_single_baseline":
+        build_lstbin_single_baseline_makeflow_from_config(
+            config_file, mf_name=mf_name, work_dir=work_dir, **kwargs
+        )
     else:
         raise ValueError(
             f"unknown makeflow_type '{makeflow_type}' specified; "
@@ -1336,6 +1340,38 @@ def build_analysis_makeflow_from_config(
             print(line2, file=f)
 
     return
+
+
+def build_lstbin_single_baseline_makeflow_from_config(
+    config_file, mf_name=None, work_dir=None
+):
+    """Construct a makeflow file for LST-binning single-baseline files from a config file.
+    Thin wrapper around build_analysis_makeflow_from_config() that handles getting baseline
+    strings like "0_1" to use instead of obsids to help parlellize over files. 
+
+    Parameters
+    ----------
+    config_file : str
+        The full path to a toml file with makeflow_type = "lstbin_single_baseline".
+            The toml file should have a section called "FILE_CFG" with a sub-section
+            called "datafiles" that contains "datadir", "nights", and "fileglob" keys.
+    mf_name : str
+        The name of makeflow file. Defaults to "<config_file_basename>.mf" if not
+        specified.
+    work_dir : str
+        The full path to the "work directory" where all of the wrapper scripts and log
+        files will be made. Defaults to the current directory.
+    """
+
+    from hera_cal.lst_stack.config import LSTBinConfiguratorSingleBaseline
+
+    cfg = LSTBinConfiguratorSingleBaseline.from_toml(config_file)
+    baseline_strings = list(cfg.bl_to_file_map.keys())
+
+    # ignore warnings about baseline_strings not being parsable as JDs
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message=".*Unable to figure out the JD.*")
+        build_analysis_makeflow_from_config(baseline_strings, config_file, mf_name=mf_name, work_dir=work_dir)
 
 
 def make_lstbin_config_file(
