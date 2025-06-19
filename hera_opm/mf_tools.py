@@ -1347,7 +1347,7 @@ def build_lstbin_single_baseline_makeflow_from_config(
 ):
     """Construct a makeflow file for LST-binning single-baseline files from a config file.
     Thin wrapper around build_analysis_makeflow_from_config() that handles getting baseline
-    strings like "0_1" to use instead of obsids to help parallelize over files. 
+    strings like "0_1" to use instead of obsids to help parallelize over files.
 
     Parameters
     ----------
