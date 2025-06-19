@@ -7,6 +7,9 @@ import os
 import shutil
 import gzip
 import toml
+from pathlib import Path
+import sys
+import types
 
 from . import BAD_CONFIG_PATH
 from ..data import DATA_PATH
@@ -1186,3 +1189,99 @@ def test_build_analysis_makeflow_error_obsid_list(config_options):
     assert str(cm.value).startswith("{obsid_list} must be the last argument")
 
     return
+
+@pytest.fixture()
+def tmp_cfg_dir(tmp_path: Path) -> Path:
+    """
+    tmp_cfg_dir/
+      ├── 2459861/
+      │   ├── 0_1.uvh5
+      │   └── 1_2.uvh5
+      ├── 2459862/
+      │   ├── 0_1.uvh5
+      │   └── 1_2.uvh5
+      ├── do_LST_STACK_NOTEBOOK_SINGLE_BL.sh
+      └── cfg.toml
+    """
+    nights    = ["2459861", "2459862"]
+    baselines = ["0_1", "1_2"]
+
+    # 1) fake “do_” script
+    sh = tmp_path / "do_LST_STACK_NOTEBOOK_SINGLE_BL.sh"
+    sh.write_text("#!/bin/bash\necho OK\n")
+    sh.chmod(0o755)
+
+    # 2) touch empty uvh5 files so hera_cal can discover them
+    for night in nights:
+        night_dir = tmp_path / night
+        night_dir.mkdir()
+        for bl in baselines:
+            (night_dir / f"{bl}.uvh5").touch()
+
+    # 3) minimal TOML
+    toml_text = f"""
+[Options]
+makeflow_type      = "lstbin_single_baseline"
+path_to_do_scripts = "{tmp_path}"
+base_mem           = 512
+conda_env          = "unit-test"
+
+[WorkFlow]
+actions            = ["LST_STACK_NOTEBOOK_SINGLE_BL"]
+
+[LST_STACK_NOTEBOOK_SINGLE_BL]
+args               = ["--flag", "FOO"]
+
+[FILE_CFG]
+[FILE_CFG.datafiles]
+datadir  = "{tmp_path}"
+nights   = {nights}
+fileglob = "{{night}}/{{baseline}}.uvh5"
+"""
+    (tmp_path / "cfg.toml").write_text(toml_text.strip())
+
+    return tmp_path
+
+
+def test_build_makeflow_single_baseline(tmp_cfg_dir: Path):
+    """
+    smoke-test: ``build_makeflow_from_config`` correctly notices the new
+    makeflow_type and writes a *.mf file without crashing.
+    """
+    cfg_file = tmp_cfg_dir / "cfg.toml"
+    work_dir = tmp_cfg_dir / "work"
+    work_dir.mkdir()
+
+    # -- run the high-level dispatcher (it will call the single-baseline helper)
+    mt.build_makeflow_from_config([], cfg_file, work_dir=work_dir)
+
+    # -- a single makeflow should now exist
+    mf_file = work_dir / "cfg.mf"
+    assert mf_file.exists(), "dispatcher failed to create the makeflow file"
+
+
+def test_wrapper_scripts_single_baseline(tmp_cfg_dir: Path):
+    """
+    Ensure that wrapper scripts are created for *baseline* strings, **not** JDs.
+    """
+    cfg_file = tmp_cfg_dir / "cfg.toml"
+    work_dir = tmp_cfg_dir / "work2"
+    work_dir.mkdir()
+
+    mt.build_lstbin_single_baseline_makeflow_from_config(cfg_file, work_dir=work_dir)
+
+    # Wrapper names use the pattern  "<baseline>.<ACTION>.sh"
+    expected = {
+        work_dir / f"wrapper_{bl}.LST_STACK_NOTEBOOK_SINGLE_BL.sh" for bl in ("0_1", "1_2")
+    }
+    missing = {p for p in expected if not p.exists()}
+    assert not missing, f"missing wrapper scripts: {missing}"
+
+
+def test_get_jd_accepts_baseline_strings():
+    """
+    `get_jd` must *not* raise when handed a baseline string (0_1, 1_2, …).
+    It should return None but only emit the UserWarning we rely on.
+    """
+    with pytest.warns(UserWarning, match="Unable to figure out the JD"):
+        assert mt.get_jd("3_4") is None
