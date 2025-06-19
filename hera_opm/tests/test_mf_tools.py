@@ -1190,6 +1190,7 @@ def test_build_analysis_makeflow_error_obsid_list(config_options):
 
     return
 
+
 @pytest.fixture()
 def tmp_cfg_dir(tmp_path: Path) -> Path:
     """
@@ -1203,7 +1204,7 @@ def tmp_cfg_dir(tmp_path: Path) -> Path:
       ├── do_LST_STACK_NOTEBOOK_SINGLE_BL.sh
       └── cfg.toml
     """
-    nights    = ["2459861", "2459862"]
+    nights = ["2459861", "2459862"]
     baselines = ["0_1", "1_2"]
 
     # 1) fake “do_” script
@@ -1272,7 +1273,8 @@ def test_wrapper_scripts_single_baseline(tmp_cfg_dir: Path):
 
     # Wrapper names use the pattern  "<baseline>.<ACTION>.sh"
     expected = {
-        work_dir / f"wrapper_{bl}.LST_STACK_NOTEBOOK_SINGLE_BL.sh" for bl in ("0_1", "1_2")
+        work_dir / f"wrapper_{bl}.LST_STACK_NOTEBOOK_SINGLE_BL.sh"
+        for bl in ("0_1", "1_2")
     }
     missing = {p for p in expected if not p.exists()}
     assert not missing, f"missing wrapper scripts: {missing}"
