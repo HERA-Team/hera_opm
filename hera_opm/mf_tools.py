@@ -1347,7 +1347,7 @@ def build_lstbin_single_baseline_makeflow_from_config(
 ):
     """Construct a makeflow file for LST-binning single-baseline files from a config file.
     Thin wrapper around build_analysis_makeflow_from_config() that handles getting baseline
-    strings like "0_1" to use instead of obsids to help parlellize over files. 
+    strings like "0_1" to use instead of obsids to help parlellize over files.
 
     Parameters
     ----------
@@ -1371,7 +1371,9 @@ def build_lstbin_single_baseline_makeflow_from_config(
     # ignore warnings about baseline_strings not being parsable as JDs
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message=".*Unable to figure out the JD.*")
-        build_analysis_makeflow_from_config(baseline_strings, config_file, mf_name=mf_name, work_dir=work_dir)
+        build_analysis_makeflow_from_config(
+            baseline_strings, config_file, mf_name=mf_name, work_dir=work_dir
+        )
 
 
 def make_lstbin_config_file(
