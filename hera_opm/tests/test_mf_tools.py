@@ -8,8 +8,6 @@ import shutil
 import gzip
 import toml
 from pathlib import Path
-import sys
-import types
 
 from . import BAD_CONFIG_PATH
 from ..data import DATA_PATH
