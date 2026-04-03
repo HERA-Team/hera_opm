@@ -318,7 +318,7 @@ def test_process_batch_options_slurm():
         mem, ncpu, mail_user, queue, batch_system, extra_options
     )
     assert "--mem 8000M" in batch_options
-    assert "-n 1" in batch_options
+    assert "--cpus-per-task 1" in batch_options
     assert "--mail-user youremail@example.org" in batch_options
     assert "-p hera" in batch_options
     assert "--gres=gpu" in batch_options
