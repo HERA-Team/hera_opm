@@ -38,10 +38,16 @@ def get_jd(filename):
         m = re.match(r"zen\.([0-9]{7})\.[0-9]{5}\.", filename)
         return m.groups()[0]
     except AttributeError:
-        wmsg = f"Unable to figure out the JD associated with {filename}. "
-        wmsg += "This may affect chunking and prerequisites."
-        warnings.warn(wmsg)
+        if not get_jd._warned:
+            wmsg = f"Unable to figure out the JD associated with {filename}. "
+            wmsg += "This may affect chunking and prerequisites. "
+            wmsg += "This may also be true for other files (warning suppressed)."
+            warnings.warn(wmsg)
+            get_jd._warned = True
         return None
+
+
+get_jd._warned = False
 
 
 def _interpolate_config(config, entry):

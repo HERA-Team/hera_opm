@@ -7,6 +7,7 @@ import os
 import shutil
 import gzip
 import toml
+import warnings
 from pathlib import Path
 
 from . import BAD_CONFIG_PATH
@@ -108,12 +109,18 @@ def test_get_jd():
 def test_get_jd_no_match():
     """Test if the file does not contain the JD in a way we recognize"""
     filename = "foo.txt"
+    mt.get_jd._warned = False
     with pytest.warns(UserWarning) as record:
         retval = mt.get_jd(filename)
     assert len(record) == 1
     message = record[0].message.args[0]
     assert message.startswith("Unable to figure out the JD associated with foo.txt")
     assert retval is None
+
+    # subsequent calls with unparseable names should not re-emit the warning
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert mt.get_jd("bar.txt") is None
 
     return
 
@@ -1283,5 +1290,6 @@ def test_get_jd_accepts_baseline_strings():
     `get_jd` must *not* raise when handed a baseline string (0_1, 1_2, …).
     It should return None but only emit the UserWarning we rely on.
     """
+    mt.get_jd._warned = False
     with pytest.warns(UserWarning, match="Unable to figure out the JD"):
         assert mt.get_jd("3_4") is None
