@@ -2,6 +2,7 @@
 # Copyright (c) 2020 The HERA Collaboration
 # Licensed under the 2-clause BSD License
 """Tests for mf_tools.py."""
+
 import pytest
 import os
 import shutil
