@@ -773,6 +773,58 @@ def test_build_analysis_makeflow_from_config_setup_teardown(config_options):
     return
 
 
+def test_build_analysis_makeflow_from_config_rule_order(config_options, tmp_path):
+    """Test that makeflow will submit rules for the earliest obsids first.
+
+    makeflow submits ready rules starting from the bottom of the file, so the
+    rules should be written in reverse, each still following its own
+    BATCH_OPTIONS.
+    """
+    config_file = tmp_path / "rule_order.toml"
+    config_file.write_text(
+        """
+[Options]
+makeflow_type = "analysis"
+path_to_do_scripts = "/path/to/do_scripts"
+base_mem = 1000
+
+[WorkFlow]
+actions = ["SETUP", "ANT_METRICS", "FIRSTCAL", "TEARDOWN"]
+
+[ANT_METRICS]
+args = "{basename}"
+mem = 2000
+
+[FIRSTCAL]
+args = "{basename}"
+mem = 3000
+"""
+    )
+    # obsids span multiple JDs and are passed in out of order
+    obsids = config_options["obsids_time_discontinuous"][::-1]
+    mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=tmp_path)
+
+    # record the target of each rule and the BATCH_OPTIONS in effect for it
+    rules = []
+    batch_options = None
+    with open(tmp_path / "rule_order.mf") as f:
+        for line in f:
+            if line.startswith("export BATCH_OPTIONS"):
+                batch_options = line
+            elif line.strip() and not line.startswith(("#", "\t")):
+                rules.append((line.split(":")[0], batch_options))
+
+    targets = [target for target, _ in rules]
+    assert targets[0] == "setup.out"
+    assert targets[-1] == "teardown.out"
+    mems = {"ANT_METRICS": 2000, "FIRSTCAL": 3000}
+    expected = [f"{obsid}.{action}.out" for obsid in sorted(obsids) for action in mems]
+    assert targets[-2:0:-1] == expected
+    for target, batch_options in rules[1:-1]:
+        action = target.split(".")[-2]
+        assert f"--mem {mems[action]}M" in batch_options
+
+
 def test_setup_teardown_errors(config_options):
     # define config to load
     config_file = config_options["bad_setup_config_file"]
@@ -1049,6 +1101,35 @@ def test_sort_obsids(config_options):
     return
 
 
+def test_sort_obsids_numbers_by_value():
+    """Test that numbers in obsids are compared by value, so 2_0 is before 12_0."""
+    obsids = ["12_0", "2_10", "0_1", "2_0", "2_9"]
+    assert mt.sort_obsids(obsids) == ["0_1", "2_0", "2_9", "2_10", "12_0"]
+
+    obsids = [
+        "/data/zen.LST.baseline.12_0.sum.uvh5",
+        "/data/zen.LST.baseline.2_0.sum.uvh5",
+    ]
+    assert mt.sort_obsids(obsids) == obsids[::-1]
+
+
+def test_sort_obsids_unusual_names():
+    """Test sorting names that aren't in the usual "0_1" baseline format."""
+    # numbers are compared by value, whatever the separators, prefixes, or suffixes
+    assert mt.sort_obsids(["ant12-0", "ant2-0"]) == ["ant2-0", "ant12-0"]
+    obsids = ["12_0_ee", "2_0_nn", "2_0_ee"]
+    assert mt.sort_obsids(obsids) == ["2_0_ee", "2_0_nn", "12_0_ee"]
+
+    # names that do and don't start with a number can be sorted together, and
+    # characters that look like digits but aren't (like "²") are treated as text
+    assert mt.sort_obsids(["a_1", "2_0", "1²"]) == ["1²", "2_0", "a_1"]
+
+    # names whose numbers have the same values are sorted the same way, no
+    # matter what order they come in
+    assert mt.sort_obsids(["1_0", "01_0"]) == ["01_0", "1_0"]
+    assert mt.sort_obsids(["01_0", "1_0"]) == ["01_0", "1_0"]
+
+
 def test_prep_args_obsid_list(config_options):
     # define args to parse
     obsids_list = config_options["obsids"]
@@ -1283,6 +1364,33 @@ def test_wrapper_scripts_single_baseline(tmp_cfg_dir: Path):
     }
     missing = {p for p in expected if not p.exists()}
     assert not missing, f"missing wrapper scripts: {missing}"
+
+
+def test_rule_order_single_baseline(tmp_cfg_dir: Path):
+    """
+    Ensure that makeflow will submit baselines in order, e.g., 2_0 before 12_0.
+
+    makeflow submits ready rules from the bottom of the file up, so they are
+    written in reverse.
+    """
+    # add baselines that would be out of order if sorted as strings
+    for night in ("2459861", "2459862"):
+        for bl in ("2_0", "12_0"):
+            (tmp_cfg_dir / night / f"{bl}.uvh5").touch()
+    cfg_file = tmp_cfg_dir / "cfg.toml"
+    work_dir = tmp_cfg_dir / "work3"
+    work_dir.mkdir()
+
+    mt.build_lstbin_single_baseline_makeflow_from_config(cfg_file, work_dir=work_dir)
+
+    targets = [
+        line.split(":")[0]
+        for line in (work_dir / "cfg.mf").read_text().splitlines()
+        if line and not line.startswith(("#", "\t", "export"))
+    ]
+    assert targets[::-1] == [
+        f"{bl}.LST_STACK_NOTEBOOK_SINGLE_BL.out" for bl in ("0_1", "1_2", "2_0", "12_0")
+    ]
 
 
 def test_get_jd_accepts_baseline_strings():
