@@ -205,3 +205,35 @@ def test_build_makeflow_from_config_lstbin_options(
 
     # make sure the output files we expected appeared
     assert outfile.exists()
+
+
+def test_lstbin_makeflow_rule_order(tmp_path_factory):
+    """Test that makeflow will submit the first output file and bl chunk first.
+
+    makeflow submits ready rules from the bottom of the file up, so they should
+    be written in reverse.
+    """
+    config_file = tmp_path_factory.mktemp("data") / "lstbin_order.toml"
+    make_lstbin_config_file(
+        config_file,
+        datafiles=[
+            "zen.2458043.*.HH.uvh5",
+            "zen.2458044.*.HH.uvh5",
+            "zen.2458045.*.HH.uvh5",
+        ],
+        bl_chunk_size=10,
+    )
+    work_dir = tmp_path_factory.mktemp("test_output")
+    mt.build_lstbin_makeflow_from_config(
+        config_file, work_dir=work_dir, outdir=work_dir
+    )
+
+    targets = [
+        line.split(":")[0]
+        for line in (work_dir / "lstbin_order.mf").read_text().splitlines()
+        if line and not line.startswith(("#", "\t", "export"))
+    ]
+    # 4 output files, each with 3 bl chunks
+    assert targets[::-1] == [
+        f"{i:04}.b{j:03}.LSTBIN.out" for i in range(4) for j in range(3)
+    ]

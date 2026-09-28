@@ -173,6 +173,34 @@ def make_outfile_name(obsid, action):
     return [f"{obsid}.{action}.out"]
 
 
+def _natural_sort_key(name):
+    """Get a key for sorting names with any numbers in them compared by value.
+
+    For example, "2_0" sorts before "12_0", even though "1" < "2" as characters.
+    This works for names in any format, and names whose numbers have the same
+    values (e.g., "01_0" and "1_0") are sorted as plain strings, so the order
+    does not depend on the order the names came in.
+
+    Parameters
+    ----------
+    name : str
+        The name to get the sort key for.
+
+    Returns
+    -------
+    tuple of (list of str and int, str)
+        The name split into alternating non-digit and digit parts, with the
+        digit parts converted to ints, and then the name itself to break ties.
+
+    """
+    parts = re.split(r"(\d+)", name)
+    # re.split with a capture group puts the digit parts at the odd indices, so
+    # every key has text at even indices and ints at odd ones, and comparing
+    # two keys never compares text with an int
+    parts = [int(part) if i % 2 else part for i, part in enumerate(parts)]
+    return parts, name
+
+
 def sort_obsids(obsids, jd=None, return_basenames=False):
     """
     Sort obsids in a given day.
@@ -192,6 +220,7 @@ def sort_obsids(obsids, jd=None, return_basenames=False):
     -------
     sortd_obsids : list of str
         Obsids (basename or absolute path), sorted by filename for given Julian day.
+        Numbers in filenames are compared by value, so "2_0" comes before "12_0".
     """
     if jd is None:
         jd = ""
@@ -202,7 +231,7 @@ def sort_obsids(obsids, jd=None, return_basenames=False):
         if jd in os.path.basename(os.path.abspath(o))
     ]
     to_sort = list(zip(keys, range(len(obsids))))
-    temp = sorted(to_sort, key=lambda obs: obs[0])
+    temp = sorted(to_sort, key=lambda obs: _natural_sort_key(obs[0]))
     argsort = [obs[1] for obs in temp]
 
     sorted_obsids = [obsids[i] for i in argsort]
@@ -940,6 +969,8 @@ def build_analysis_makeflow_from_config(
             setup_outfiles = [outfile]
 
         # main loop over actual data files
+        # rules are collected here and written to the makeflow file after the loop
+        rules = []
         sorted_obsids = sort_obsids(obsids, return_basenames=False)
         for obsind, obsid in enumerate(sorted_obsids):
             # get parent directory
@@ -1043,7 +1074,9 @@ def build_analysis_makeflow_from_config(
                 batch_options = process_batch_options(
                     mem, ncpu, mail_user, queue, batch_system, extra_options
                 )
-                print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
+                # BATCH_OPTIONS applies to the rules that follow it in the file,
+                # so keep it together with the rule for this action
+                rule_lines = ["export BATCH_OPTIONS = {}".format(batch_options)]
 
                 # make rules
                 if prereqs is not None:
@@ -1202,8 +1235,18 @@ def build_analysis_makeflow_from_config(
                     infiles = " ".join(infiles)
                     line1 = "{0}: {1}".format(outfile, infiles)
                     line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
-                    print(line1, file=f)
-                    print(line2, file=f)
+                    rule_lines.extend([line1, line2])
+                rules.append(rule_lines)
+
+        # makeflow submits ready rules in the reverse of the order they appear in
+        # the file, so write them backwards to have the earliest obsids go first
+        print(
+            "# rules are in reverse order since makeflow submits from the bottom up",
+            file=f,
+        )
+        for rule_lines in reversed(rules):
+            for line in rule_lines:
+                print(line, file=f)
 
         # if we have a teardown step, add it here
         if "TEARDOWN" in workflow:
@@ -1545,12 +1588,17 @@ date
         fl.write(
             f"""# makeflow file generated from config file {config_file.name}
 # created at {dt}
+# rules are in reverse order since makeflow submits from the bottom up
 export BATCH_OPTIONS = {batch_options}
 """
         )
 
         # loop over output files
-        for output_file_index, bl_chunk in product(range(nfiles), range(nbl_chunks)):
+        # makeflow submits ready rules in the reverse of the order they appear in
+        # the file, so loop backwards to have the first output files go first
+        for output_file_index, bl_chunk in reversed(
+            list(product(range(nfiles), range(nbl_chunks)))
+        ):
             # if parallize, update output_file_select
             if parallelize:
                 config["LSTBIN_OPTS"]["output_file_select"] = str(output_file_index)
