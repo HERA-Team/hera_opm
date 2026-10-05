@@ -2,6 +2,7 @@
 # Copyright (c) 2020 The HERA Collaboration
 # Licensed under the 2-clause BSD License
 """Tests for mf_tools.py."""
+
 import pytest
 import os
 import shutil
@@ -781,8 +782,7 @@ def test_build_analysis_makeflow_from_config_rule_order(config_options, tmp_path
     BATCH_OPTIONS.
     """
     config_file = tmp_path / "rule_order.toml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 [Options]
 makeflow_type = "analysis"
 path_to_do_scripts = "/path/to/do_scripts"
@@ -798,8 +798,7 @@ mem = 2000
 [FIRSTCAL]
 args = "{basename}"
 mem = 3000
-"""
-    )
+""")
     # obsids span multiple JDs and are passed in out of order
     obsids = config_options["obsids_time_discontinuous"][::-1]
     mt.build_analysis_makeflow_from_config(obsids, config_file, work_dir=tmp_path)
