@@ -2,6 +2,7 @@
 # Copyright (c) 2018 The HERA Collaboration
 # Licensed under the 2-clause BSD License
 """Module for converting a config file into a makeflow script."""
+
 from __future__ import annotations
 
 import os
@@ -1585,13 +1586,11 @@ date
     with open(makeflowfile, "w") as fl:
         # add comment at top of file listing date of creation and config file name
         dt = time.strftime("%H:%M:%S on %d %B %Y")
-        fl.write(
-            f"""# makeflow file generated from config file {config_file.name}
+        fl.write(f"""# makeflow file generated from config file {config_file.name}
 # created at {dt}
 # rules are in reverse order since makeflow submits from the bottom up
 export BATCH_OPTIONS = {batch_options}
-"""
-        )
+""")
 
         # loop over output files
         # makeflow submits ready rules in the reverse of the order they appear in
