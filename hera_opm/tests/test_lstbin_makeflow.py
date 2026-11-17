@@ -228,12 +228,17 @@ def test_lstbin_makeflow_rule_order(tmp_path_factory):
         config_file, work_dir=work_dir, outdir=work_dir
     )
 
-    targets = [
-        line.split(":")[0]
-        for line in (work_dir / "lstbin_order.mf").read_text().splitlines()
-        if line and not line.startswith(("#", "\t", "export"))
-    ]
+    # record the target of each rule and the job name in the BATCH_OPTIONS for it
+    targets, job_names = [], []
+    job_name = None
+    for line in (work_dir / "lstbin_order.mf").read_text().splitlines():
+        if line.startswith("export BATCH_OPTIONS"):
+            job_name = line.split(" -J ")[-1]
+        elif line and not line.startswith(("#", "\t")):
+            targets.append(line.split(":")[0])
+            job_names.append(job_name)
     # 4 output files, each with 3 bl chunks
     assert targets[::-1] == [
         f"{i:04}.b{j:03}.LSTBIN.out" for i in range(4) for j in range(3)
     ]
+    assert job_names == [target[: -len(".out")] for target in targets]

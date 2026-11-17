@@ -364,6 +364,7 @@ def process_batch_options(
     queue="hera",
     batch_system="slurm",
     extra_options=None,
+    job_name=None,
 ):
     """Form a series of batch options to be passed to makeflow.
 
@@ -385,6 +386,11 @@ def process_batch_options(
         so will be unique for a given batch_system. For example, when using
         slurm, one could use this option to specify "gres=gpu" or something
         similar.
+    job_name : str, optional
+        The name to give the job, which squeue shows. Only used with slurm,
+        where it replaces the "makeflow0", "makeflow1", ... that makeflow names
+        jobs by itself (makeflow puts these options after its own -J, and sbatch
+        takes the last -J it is given). A -J in extra_options overrides it.
 
     Returns
     -------
@@ -417,6 +423,8 @@ def process_batch_options(
             batch_options += " --mail-user {}".format(mail_user)
         if queue is not None:
             batch_options += " -p {}".format(queue)
+        if job_name is not None:
+            batch_options += " -J {}".format(job_name)
     elif batch_system.lower() == "htcondor":
         batch_options = r"request_memory = {0:d} M".format(mem)
         if ncpu is not None:
@@ -433,6 +441,16 @@ def process_batch_options(
     if extra_options is not None:
         batch_options += " " + extra_options
     return batch_options
+
+
+def _job_name(outfile):
+    """Name a rule's batch job after its output file, without the ".out".
+
+    That's also the name of the job's log, which ends in ".log" instead (or
+    ".log.error", if the job failed).
+    """
+    name = os.path.basename(str(outfile))
+    return name[: -len(".out")] if name.endswith(".out") else name
 
 
 def _determine_stride_partitioning(
@@ -922,7 +940,13 @@ def build_analysis_makeflow_from_config(
                 if base_cpu is not None:
                     ncpu = base_cpu
             batch_options = process_batch_options(
-                mem, ncpu, mail_user, queue, batch_system, extra_options
+                mem,
+                ncpu,
+                mail_user,
+                queue,
+                batch_system,
+                extra_options,
+                job_name=_job_name(outfile),
             )
             print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
@@ -1071,12 +1095,7 @@ def build_analysis_makeflow_from_config(
                         ncpu = base_cpu
                 if queue is None:
                     queue = default_queue
-                batch_options = process_batch_options(
-                    mem, ncpu, mail_user, queue, batch_system, extra_options
-                )
-                # BATCH_OPTIONS applies to the rules that follow it in the file,
-                # so keep it together with the rule for this action
-                rule_lines = ["export BATCH_OPTIONS = {}".format(batch_options)]
+                rule_lines = []
 
                 # make rules
                 if prereqs is not None:
@@ -1235,6 +1254,18 @@ def build_analysis_makeflow_from_config(
                     infiles = " ".join(infiles)
                     line1 = "{0}: {1}".format(outfile, infiles)
                     line2 = "\t{0} > {1} 2>&1\n".format(wrapper_script, logfile)
+                    # BATCH_OPTIONS applies to the rules that follow it in the file,
+                    # so give each rule its own, which also names its job
+                    batch_options = process_batch_options(
+                        mem,
+                        ncpu,
+                        mail_user,
+                        queue,
+                        batch_system,
+                        extra_options,
+                        job_name=_job_name(outfile),
+                    )
+                    rule_lines.append("export BATCH_OPTIONS = {}".format(batch_options))
                     rule_lines.extend([line1, line2])
                 rules.append(rule_lines)
 
@@ -1342,7 +1373,13 @@ def build_analysis_makeflow_from_config(
             if queue is None:
                 queue = default_queue
             batch_options = process_batch_options(
-                mem, ncpu, mail_user, queue, batch_system, extra_options
+                mem,
+                ncpu,
+                mail_user,
+                queue,
+                batch_system,
+                extra_options,
+                job_name=_job_name(outfile),
             )
             print("export BATCH_OPTIONS = {}".format(batch_options), file=f)
 
@@ -1545,9 +1582,6 @@ def build_lstbin_makeflow_from_config(
     default_queue = get_config_entry(config, "Options", "default_queue", required=False)
     if default_queue is None:
         default_queue = "hera"
-    batch_options = process_batch_options(
-        base_mem, base_cpu, mail_user, default_queue, batch_system
-    )
 
     bl_chunk_size = get_config_entry(
         config, "LSTBIN_OPTS", "bl_chunk_size", required=False
@@ -1589,7 +1623,6 @@ date
             f"""# makeflow file generated from config file {config_file.name}
 # created at {dt}
 # rules are in reverse order since makeflow submits from the bottom up
-export BATCH_OPTIONS = {batch_options}
 """
         )
 
@@ -1630,6 +1663,18 @@ export BATCH_OPTIONS = {batch_options}
 
             # make file executable
             os.chmod(wrapper_script, 0o755)
+
+            # BATCH_OPTIONS applies to the rules that follow it in the file, so give
+            # each rule its own, which also names its job
+            batch_options = process_batch_options(
+                base_mem,
+                base_cpu,
+                mail_user,
+                default_queue,
+                batch_system,
+                job_name=_job_name(outfile),
+            )
+            fl.write(f"export BATCH_OPTIONS = {batch_options}\n")
 
             # first line lists target file to make (dummy output file), and requirements
             # second line is "build rule", which runs the shell script and makes the output file
