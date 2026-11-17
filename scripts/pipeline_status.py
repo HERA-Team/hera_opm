@@ -180,6 +180,35 @@ def read_first_and_last_lines(log_file):
     return first_line, last_line
 
 
+def read_log_file(log_file):
+    """Read the first and last lines of a log file, following it if it was renamed.
+
+    The working directories are only listed once, at the start of the report, so a job
+    that has failed since then will have renamed its .log file to .log.error.
+
+    Parameters
+    ----------
+    log_file : str
+        The log file to read.
+
+    Returns
+    -------
+    log_file : str
+        The path to the log file, after any renaming.
+    lines : tuple of str or None
+        The first and last lines of the file, or None if it no longer exists.
+    """
+    paths = [log_file]
+    if log_file.endswith(".log"):
+        paths.append(log_file + ".error")
+    for path in paths:
+        try:
+            return path, read_first_and_last_lines(path)
+        except FileNotFoundError:
+            pass
+    return log_file, None
+
+
 def inspect_log_files(log_files, out_files, log_lines):
     """Look at log files, compute the average non-zero runtime, and print example errors.
 
@@ -337,8 +366,12 @@ with ThreadPoolExecutor(max_workers=N_READ_THREADS) as executor:
         total = find_files("wrapper_*." + job + ".*sh", job)
         logged = find_files("*." + job + ".*log*", job)
         done = set(find_files("*." + job + ".*out", job))
-        log_lines = dict(zip(logged, executor.map(read_first_and_last_lines, logged)))
-        logged = filter_errors(logged, log_lines)
+        log_lines = {
+            path: lines
+            for path, lines in executor.map(read_log_file, logged)
+            if lines is not None
+        }
+        logged = filter_errors(list(log_lines), log_lines)
         average_runtime, total_runtime, nRunning, nErrored, nTimedOut = (
             inspect_log_files(logged, done, log_lines)
         )
