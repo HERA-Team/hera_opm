@@ -330,8 +330,36 @@ def test_process_batch_options_slurm():
     assert "--mail-user youremail@example.org" in batch_options
     assert "-p hera" in batch_options
     assert "--gres=gpu" in batch_options
+    assert "-J" not in batch_options
 
     return
+
+
+def test_process_batch_options_job_name():
+    mem = 8000
+    batch_options = mt.process_batch_options(mem, job_name="a.ACTION")
+    assert batch_options.endswith(" -J a.ACTION")
+    # a -J in the extra options comes after it, so wins
+    batch_options = mt.process_batch_options(
+        mem, extra_options="-J other", job_name="a.ACTION"
+    )
+    assert batch_options.endswith(" -J a.ACTION -J other")
+    # only slurm takes a job name
+    for batch_system in ["pbs", "htcondor"]:
+        batch_options = mt.process_batch_options(
+            mem, batch_system=batch_system, job_name="a.ACTION"
+        )
+        assert "a.ACTION" not in batch_options
+
+    return
+
+
+def test_job_name():
+    assert mt._job_name("zen.2459855.25058.sum.uvh5.ACTION.out") == (
+        "zen.2459855.25058.sum.uvh5.ACTION"
+    )
+    assert mt._job_name(Path("/a/0000.b000.LSTBIN.out")) == "0000.b000.LSTBIN"
+    assert mt._job_name("not_an_outfile") == "not_an_outfile"
 
 
 def test_process_batch_options_htcondor():
@@ -822,6 +850,9 @@ mem = 3000
     for target, batch_options in rules[1:-1]:
         action = target.split(".")[-2]
         assert f"--mem {mems[action]}M" in batch_options
+    # each job is named after its rule's target, without the .out
+    for target, batch_options in rules:
+        assert batch_options.split()[-2:] == ["-J", target[: -len(".out")]]
 
 
 def test_setup_teardown_errors(config_options):
