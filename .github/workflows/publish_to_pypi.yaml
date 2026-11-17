@@ -7,14 +7,14 @@ jobs:
     name: Build and publish to PyPI and TestPyPI
     runs-on: ubuntu-latest
     env:
-      PYTHON: 3.9
+      PYTHON: "3.12"
     steps:
       - uses: actions/checkout@main
         with:
           fetch-depth: 0
 
       - name: Set up Python ${{ env.PYTHON }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON }}
 
